@@ -35,7 +35,7 @@ export default function PumpsPage() {
   const [filter, setFilter] = useState<FilterType>('all');
   const [searchQuery, setSearchQuery] = useState('');
 
-  const { pumps, pumpData, fetchPumps, startPump, stopPump, isLoading } = usePumpStore();
+  const { pumps, pumpData, fetchPumps, startPump, stopPump, startAllPumps, stopAllPumps, isLoading } = usePumpStore();
   const { isConnected } = usePumpWebSocket();
 
   useEffect(() => {
@@ -72,19 +72,11 @@ export default function PumpsPage() {
   };
 
   const handleStartAll = async () => {
-    for (const pump of pumps) {
-      if (!pumpData[pump.id]?.is_running && !pumpData[pump.id]?.is_faulted) {
-        await startPump(pump.id);
-      }
-    }
+    await startAllPumps();
   };
 
   const handleStopAll = async () => {
-    for (const pump of pumps) {
-      if (pumpData[pump.id]?.is_running) {
-        await stopPump(pump.id);
-      }
-    }
+    await stopAllPumps();
   };
 
   return (

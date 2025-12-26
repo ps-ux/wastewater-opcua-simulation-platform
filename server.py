@@ -351,6 +351,11 @@ async def main():
         import uvicorn
         from api.main import app, db as api_db
         from api.websocket import ws_manager
+        from api.engine_bridge import register_engine
+
+        # Register engine for API access (enables pump start/stop/speed control)
+        register_engine(engine)
+        _logger.info("Simulation engine registered for API control")
 
         # Wire up WebSocket broadcast callback
         async def ws_broadcast(all_states):

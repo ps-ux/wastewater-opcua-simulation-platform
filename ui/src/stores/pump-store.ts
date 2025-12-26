@@ -19,6 +19,9 @@ interface PumpStore {
   startPump: (pumpId: string) => Promise<void>;
   stopPump: (pumpId: string) => Promise<void>;
   setSpeed: (pumpId: string, rpm: number) => Promise<void>;
+  resetFault: (pumpId: string) => Promise<void>;
+  startAllPumps: () => Promise<void>;
+  stopAllPumps: () => Promise<void>;
   clearError: () => void;
 }
 
@@ -99,6 +102,57 @@ export const usePumpStore = create<PumpStore>((set, get) => ({
     } catch (error) {
       set({
         error: error instanceof Error ? error.message : 'Failed to set pump speed',
+        isLoading: false
+      });
+    }
+  },
+
+  resetFault: async (pumpId: string) => {
+    set({ isLoading: true, error: null });
+    try {
+      await pumpsApi.resetFault(pumpId);
+      // Update local state to reflect fault reset
+      const currentData = get().pumpData[pumpId];
+      if (currentData) {
+        set(state => ({
+          pumpData: {
+            ...state.pumpData,
+            [pumpId]: { ...currentData, is_faulted: false }
+          },
+          isLoading: false
+        }));
+      } else {
+        set({ isLoading: false });
+      }
+    } catch (error) {
+      set({
+        error: error instanceof Error ? error.message : 'Failed to reset pump fault',
+        isLoading: false
+      });
+    }
+  },
+
+  startAllPumps: async () => {
+    set({ isLoading: true, error: null });
+    try {
+      await pumpsApi.startAll();
+      set({ isLoading: false });
+    } catch (error) {
+      set({
+        error: error instanceof Error ? error.message : 'Failed to start all pumps',
+        isLoading: false
+      });
+    }
+  },
+
+  stopAllPumps: async () => {
+    set({ isLoading: true, error: null });
+    try {
+      await pumpsApi.stopAll();
+      set({ isLoading: false });
+    } catch (error) {
+      set({
+        error: error instanceof Error ? error.message : 'Failed to stop all pumps',
         isLoading: false
       });
     }

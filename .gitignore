@@ -39,5 +39,3 @@ ENV/
 
 # Project specific
 .claude/
-analysis.md
-SPECS.md

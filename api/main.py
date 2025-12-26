@@ -27,8 +27,12 @@ from .websocket import ws_manager
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from database.manager import DatabaseManager
+from config.loader import ConfigLoader
 
 _logger = logging.getLogger('api')
+
+# Configuration loader for types.yaml and assets.json
+config_loader: Optional[ConfigLoader] = None
 
 # Global references
 db: Optional[DatabaseManager] = None
@@ -144,9 +148,10 @@ class ConfigCreate(BaseModel):
 @app.on_event("startup")
 async def startup_event():
     """Initialize database on startup."""
-    global db
+    global db, config_loader
     db = DatabaseManager()
     db.initialize()
+    config_loader = ConfigLoader()
     _logger.info("API server started, database initialized")
 
 
@@ -316,6 +321,225 @@ async def get_type(name: str):
     if not type_def:
         raise HTTPException(status_code=404, detail="Type not found")
     return type_def
+
+
+# =============================================================================
+# CONFIGURATION FILE ENDPOINTS (types.yaml & assets.json visualization)
+# =============================================================================
+
+@app.get("/api/config/types-yaml", tags=["Configuration"])
+async def get_types_yaml():
+    """Get the full types.yaml configuration for visualization."""
+    try:
+        raw_config = config_loader.load_types()
+        type_defs = config_loader.get_type_definitions()
+        engineering_units = config_loader.get_engineering_units()
+        data_types = config_loader.get_data_types()
+        alarm_types = config_loader.get_alarm_types()
+
+        # Build inheritance hierarchy
+        inheritance = {}
+        for name, type_def in type_defs.items():
+            inheritance[name] = {
+                "name": name,
+                "base": type_def.base,
+                "isAbstract": type_def.is_abstract,
+                "description": type_def.description,
+                "propertyCount": len(type_def.properties),
+                "componentCount": len(type_def.components),
+                "methodCount": len(type_def.methods),
+            }
+
+        # Convert type definitions to serializable format
+        types_data = {}
+        for name, type_def in type_defs.items():
+            types_data[name] = {
+                "name": name,
+                "base": type_def.base,
+                "isAbstract": type_def.is_abstract,
+                "description": type_def.description,
+                "properties": {
+                    pname: {
+                        "name": pname,
+                        "type": prop.component_type,
+                        "dataType": prop.data_type,
+                        "description": prop.description,
+                        "modellingRule": prop.modelling_rule,
+                        "accessLevel": prop.access_level,
+                    }
+                    for pname, prop in type_def.properties.items()
+                },
+                "components": {
+                    cname: {
+                        "name": cname,
+                        "type": comp.component_type,
+                        "dataType": comp.data_type,
+                        "description": comp.description,
+                        "modellingRule": comp.modelling_rule,
+                        "accessLevel": comp.access_level,
+                        "engineeringUnits": comp.engineering_units,
+                        "euRange": {"low": comp.eu_range.low, "high": comp.eu_range.high} if comp.eu_range else None,
+                        "instrumentRange": {"low": comp.instrument_range.low, "high": comp.instrument_range.high} if comp.instrument_range else None,
+                        "trueState": comp.true_state,
+                        "falseState": comp.false_state,
+                        "nestedComponents": {
+                            ncname: {
+                                "name": ncname,
+                                "type": nc.component_type,
+                                "dataType": nc.data_type,
+                                "description": nc.description,
+                                "engineeringUnits": nc.engineering_units,
+                            }
+                            for ncname, nc in comp.components.items()
+                        } if comp.components else None,
+                    }
+                    for cname, comp in type_def.components.items()
+                },
+                "methods": {
+                    mname: {
+                        "name": mname,
+                        "description": method.description,
+                        "inputArguments": method.input_arguments,
+                        "outputArguments": method.output_arguments,
+                    }
+                    for mname, method in type_def.methods.items()
+                },
+            }
+
+        # Engineering units
+        units_data = {
+            name: {
+                "name": name,
+                "displayName": unit.display_name,
+                "description": unit.description,
+                "unitId": unit.unit_id,
+            }
+            for name, unit in engineering_units.items()
+        }
+
+        # Data types (enums and structures)
+        data_types_data = {}
+        for name, dt in data_types.items():
+            data_types_data[name] = {
+                "name": name,
+                "type": dt.get("type"),
+                "description": dt.get("description", ""),
+                "fields": dt.get("fields"),
+                "values": dt.get("values"),
+            }
+
+        # Alarm types
+        alarms_data = {
+            name: {
+                "name": name,
+                "type": alarm.alarm_type,
+                "description": alarm.description,
+                "severity": alarm.severity,
+                "inputNode": alarm.input_node,
+                "highHighLimit": alarm.high_high_limit,
+                "highLimit": alarm.high_limit,
+                "lowLimit": alarm.low_limit,
+                "lowLowLimit": alarm.low_low_limit,
+                "message": alarm.message,
+            }
+            for name, alarm in alarm_types.items()
+        }
+
+        return {
+            "namespaceUri": raw_config.get("namespaceUri"),
+            "namespace": raw_config.get("namespace"),
+            "inheritance": inheritance,
+            "types": types_data,
+            "engineeringUnits": units_data,
+            "dataTypes": data_types_data,
+            "alarmTypes": alarms_data,
+            "summary": raw_config.get("summary", {}),
+        }
+
+    except Exception as e:
+        _logger.error(f"Error loading types.yaml: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/config/assets-json", tags=["Configuration"])
+async def get_assets_json():
+    """Get the full assets.json configuration for visualization."""
+    try:
+        raw_config = config_loader.load_assets()
+        asset_defs = config_loader.get_asset_definitions()
+
+        # Build hierarchy tree
+        assets_by_parent: Dict[str, List[Dict]] = {}
+        assets_by_id: Dict[str, Dict] = {}
+
+        for asset in asset_defs:
+            asset_data = {
+                "id": asset.id,
+                "name": asset.name,
+                "displayName": asset.display_name,
+                "type": asset.asset_type,
+                "parent": asset.parent,
+                "description": asset.description,
+                "hierarchyLevel": asset.hierarchy_level,
+                "simulate": asset.simulate,
+                "properties": asset.properties,
+                "designSpecs": asset.design_specs,
+                "alarms": asset.alarms,
+            }
+            assets_by_id[asset.id] = asset_data
+
+            if asset.parent not in assets_by_parent:
+                assets_by_parent[asset.parent] = []
+            assets_by_parent[asset.parent].append(asset_data)
+
+        # Build tree structure recursively
+        def build_tree(parent_id: str) -> List[Dict]:
+            children = assets_by_parent.get(parent_id, [])
+            for child in children:
+                child["children"] = build_tree(child["id"])
+            return children
+
+        tree = build_tree("ObjectsFolder")
+
+        # Group assets by type
+        assets_by_type: Dict[str, List[Dict]] = {}
+        for asset in asset_defs:
+            if asset.asset_type not in assets_by_type:
+                assets_by_type[asset.asset_type] = []
+            assets_by_type[asset.asset_type].append({
+                "id": asset.id,
+                "name": asset.name,
+                "displayName": asset.display_name,
+                "parent": asset.parent,
+                "hierarchyLevel": asset.hierarchy_level,
+                "simulate": asset.simulate,
+            })
+
+        # Group assets by hierarchy level
+        assets_by_level: Dict[str, List[Dict]] = {}
+        for asset in asset_defs:
+            level = asset.hierarchy_level or "Other"
+            if level not in assets_by_level:
+                assets_by_level[level] = []
+            assets_by_level[level].append({
+                "id": asset.id,
+                "name": asset.name,
+                "type": asset.asset_type,
+            })
+
+        return {
+            "metadata": raw_config.get("metadata", {}),
+            "summary": raw_config.get("summary", {}),
+            "tree": tree,
+            "assets": [assets_by_id[a.id] for a in asset_defs],
+            "assetsByType": assets_by_type,
+            "assetsByLevel": assets_by_level,
+            "assetCount": len(asset_defs),
+        }
+
+    except Exception as e:
+        _logger.error(f"Error loading assets.json: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 # =============================================================================
@@ -501,20 +725,29 @@ async def get_simulation_history(limit: int = 100):
 # PUMP CONTROL ENDPOINTS
 # =============================================================================
 
+from .engine_bridge import get_engine, is_engine_available
+
+
 class PumpSpeedRequest(BaseModel):
     rpm: float = Field(..., ge=0, le=1800, description="Target RPM")
 
 
 @app.get("/api/pumps", tags=["Pumps"])
 async def get_pumps():
-    """Get all pump assets with hierarchy path."""
+    """Get all pump assets with hierarchy path and live status."""
     assets = db.get_assets()
     pumps = [a for a in assets if a.get('type_name') in ('PumpType', 'InfluentPumpType')]
 
     # Build asset lookup for hierarchy resolution
     asset_lookup = {a['asset_id']: a for a in assets}
 
-    # Add hierarchy path to each pump
+    # Get live pump data from simulation engine if available
+    engine = get_engine()
+    live_data = {}
+    if engine:
+        live_data = engine.get_all_pump_states()
+
+    # Add hierarchy path and live status to each pump
     for pump in pumps:
         path_parts = []
         current_id = pump.get('parent_id')
@@ -529,7 +762,35 @@ async def get_pumps():
         pump['hierarchy_path'] = '/'.join(path_parts)
         pump['browse_path'] = f"Objects/{'/'.join(path_parts)}"
 
+        # Add live status if available
+        pump_id = pump.get('asset_id')
+        if pump_id in live_data:
+            pump['live_data'] = live_data[pump_id]
+            pump['is_running'] = live_data[pump_id].get('is_running', False)
+            pump['is_faulted'] = live_data[pump_id].get('is_faulted', False)
+
     return pumps
+
+
+@app.get("/api/pumps/{pump_id}", tags=["Pumps"])
+async def get_pump(pump_id: str):
+    """Get a specific pump with live data."""
+    asset = db.get_asset(pump_id)
+    if not asset:
+        raise HTTPException(status_code=404, detail="Pump not found")
+    if asset.get('type_name') not in ('PumpType', 'InfluentPumpType'):
+        raise HTTPException(status_code=400, detail="Asset is not a pump")
+
+    # Get live data from simulation engine
+    engine = get_engine()
+    if engine:
+        pump_sim = engine.get_pump(pump_id)
+        if pump_sim:
+            asset['live_data'] = pump_sim.get_state()
+            asset['is_running'] = pump_sim.is_running
+            asset['is_faulted'] = pump_sim.is_faulted
+
+    return asset
 
 
 @app.post("/api/pumps/{pump_id}/start", tags=["Pumps"])
@@ -540,8 +801,34 @@ async def start_pump(pump_id: str):
         raise HTTPException(status_code=404, detail="Pump not found")
     if asset.get('type_name') not in ('PumpType', 'InfluentPumpType'):
         raise HTTPException(status_code=400, detail="Asset is not a pump")
-    # In a real implementation, this would call the OPC-UA method
-    return {"message": f"Start command sent to pump {pump_id}", "pump_id": pump_id}
+
+    # Get simulation engine and start pump
+    engine = get_engine()
+    if not engine:
+        raise HTTPException(
+            status_code=503,
+            detail="Simulation engine not available. Ensure server is running with --with-api flag."
+        )
+
+    pump_sim = engine.get_pump(pump_id)
+    if not pump_sim:
+        raise HTTPException(status_code=404, detail=f"Pump {pump_id} not found in simulation engine")
+
+    if pump_sim.is_faulted:
+        raise HTTPException(status_code=400, detail="Cannot start faulted pump. Reset fault first.")
+
+    if pump_sim.is_running:
+        return {"message": f"Pump {pump_id} is already running", "pump_id": pump_id, "success": True}
+
+    await pump_sim.start()
+    _logger.info(f"Pump {pump_id} started via API")
+
+    return {
+        "message": f"Pump {pump_id} started successfully",
+        "pump_id": pump_id,
+        "success": True,
+        "is_running": pump_sim.is_running
+    }
 
 
 @app.post("/api/pumps/{pump_id}/stop", tags=["Pumps"])
@@ -552,8 +839,31 @@ async def stop_pump(pump_id: str):
         raise HTTPException(status_code=404, detail="Pump not found")
     if asset.get('type_name') not in ('PumpType', 'InfluentPumpType'):
         raise HTTPException(status_code=400, detail="Asset is not a pump")
-    # In a real implementation, this would call the OPC-UA method
-    return {"message": f"Stop command sent to pump {pump_id}", "pump_id": pump_id}
+
+    # Get simulation engine and stop pump
+    engine = get_engine()
+    if not engine:
+        raise HTTPException(
+            status_code=503,
+            detail="Simulation engine not available. Ensure server is running with --with-api flag."
+        )
+
+    pump_sim = engine.get_pump(pump_id)
+    if not pump_sim:
+        raise HTTPException(status_code=404, detail=f"Pump {pump_id} not found in simulation engine")
+
+    if not pump_sim.is_running:
+        return {"message": f"Pump {pump_id} is already stopped", "pump_id": pump_id, "success": True}
+
+    await pump_sim.stop()
+    _logger.info(f"Pump {pump_id} stopped via API")
+
+    return {
+        "message": f"Pump {pump_id} stopped successfully",
+        "pump_id": pump_id,
+        "success": True,
+        "is_running": pump_sim.is_running
+    }
 
 
 @app.post("/api/pumps/{pump_id}/speed", tags=["Pumps"])
@@ -564,8 +874,139 @@ async def set_pump_speed(pump_id: str, request: PumpSpeedRequest):
         raise HTTPException(status_code=404, detail="Pump not found")
     if asset.get('type_name') not in ('PumpType', 'InfluentPumpType'):
         raise HTTPException(status_code=400, detail="Asset is not a pump")
-    # In a real implementation, this would call the OPC-UA method
-    return {"message": f"Speed set to {request.rpm} RPM for pump {pump_id}", "pump_id": pump_id, "rpm": request.rpm}
+
+    # Get simulation engine and set speed
+    engine = get_engine()
+    if not engine:
+        raise HTTPException(
+            status_code=503,
+            detail="Simulation engine not available. Ensure server is running with --with-api flag."
+        )
+
+    pump_sim = engine.get_pump(pump_id)
+    if not pump_sim:
+        raise HTTPException(status_code=404, detail=f"Pump {pump_id} not found in simulation engine")
+
+    if not pump_sim.is_running:
+        raise HTTPException(status_code=400, detail="Pump must be running to set speed")
+
+    # Validate RPM against design specs
+    min_rpm = pump_sim.design_specs.get('MinRPM', 0)
+    max_rpm = pump_sim.design_specs.get('MaxRPM', 1800)
+
+    if request.rpm < min_rpm or request.rpm > max_rpm:
+        raise HTTPException(
+            status_code=400,
+            detail=f"RPM must be between {min_rpm} and {max_rpm} for this pump"
+        )
+
+    success = pump_sim.set_speed(request.rpm)
+    if success:
+        _logger.info(f"Pump {pump_id} speed set to {request.rpm} RPM via API")
+        return {
+            "message": f"Speed set to {request.rpm} RPM for pump {pump_id}",
+            "pump_id": pump_id,
+            "rpm": request.rpm,
+            "success": True
+        }
+    else:
+        raise HTTPException(status_code=400, detail="Failed to set pump speed")
+
+
+@app.post("/api/pumps/{pump_id}/reset-fault", tags=["Pumps"])
+async def reset_pump_fault(pump_id: str):
+    """Reset pump fault status."""
+    asset = db.get_asset(pump_id)
+    if not asset:
+        raise HTTPException(status_code=404, detail="Pump not found")
+    if asset.get('type_name') not in ('PumpType', 'InfluentPumpType'):
+        raise HTTPException(status_code=400, detail="Asset is not a pump")
+
+    engine = get_engine()
+    if not engine:
+        raise HTTPException(
+            status_code=503,
+            detail="Simulation engine not available. Ensure server is running with --with-api flag."
+        )
+
+    pump_sim = engine.get_pump(pump_id)
+    if not pump_sim:
+        raise HTTPException(status_code=404, detail=f"Pump {pump_id} not found in simulation engine")
+
+    if not pump_sim.is_faulted:
+        return {"message": f"Pump {pump_id} is not faulted", "pump_id": pump_id, "success": True}
+
+    pump_sim.is_faulted = False
+    _logger.info(f"Pump {pump_id} fault reset via API")
+
+    return {
+        "message": f"Pump {pump_id} fault reset successfully",
+        "pump_id": pump_id,
+        "success": True,
+        "is_faulted": pump_sim.is_faulted
+    }
+
+
+@app.post("/api/pumps/start-all", tags=["Pumps"])
+async def start_all_pumps():
+    """Start all pumps."""
+    engine = get_engine()
+    if not engine:
+        raise HTTPException(
+            status_code=503,
+            detail="Simulation engine not available. Ensure server is running with --with-api flag."
+        )
+
+    started = []
+    skipped = []
+
+    for pump_id, pump_sim in engine.pumps.items():
+        if pump_sim.is_faulted:
+            skipped.append({"id": pump_id, "reason": "faulted"})
+        elif pump_sim.is_running:
+            skipped.append({"id": pump_id, "reason": "already_running"})
+        else:
+            await pump_sim.start()
+            started.append(pump_id)
+
+    _logger.info(f"Started {len(started)} pumps via API")
+
+    return {
+        "message": f"Started {len(started)} pumps",
+        "started": started,
+        "skipped": skipped,
+        "success": True
+    }
+
+
+@app.post("/api/pumps/stop-all", tags=["Pumps"])
+async def stop_all_pumps():
+    """Stop all pumps."""
+    engine = get_engine()
+    if not engine:
+        raise HTTPException(
+            status_code=503,
+            detail="Simulation engine not available. Ensure server is running with --with-api flag."
+        )
+
+    stopped = []
+    skipped = []
+
+    for pump_id, pump_sim in engine.pumps.items():
+        if not pump_sim.is_running:
+            skipped.append({"id": pump_id, "reason": "already_stopped"})
+        else:
+            await pump_sim.stop()
+            stopped.append(pump_id)
+
+    _logger.info(f"Stopped {len(stopped)} pumps via API")
+
+    return {
+        "message": f"Stopped {len(stopped)} pumps",
+        "stopped": stopped,
+        "skipped": skipped,
+        "success": True
+    }
 
 
 # =============================================================================

@@ -16,6 +16,10 @@ import {
   Zap,
   ChevronLeft,
   ChevronRight,
+  Box,
+  GitBranch,
+  FolderTree,
+  Presentation,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -24,6 +28,7 @@ interface NavItem {
   label: string;
   icon: React.ReactNode;
   description?: string;
+  openInNewTab?: boolean;
 }
 
 const navItems: NavItem[] = [
@@ -50,6 +55,25 @@ const navItems: NavItem[] = [
     label: 'Live Monitor',
     icon: <Activity className="h-5 w-5" />,
     description: 'Real-time',
+  },
+  {
+    href: '/types',
+    label: 'Type Definitions',
+    icon: <GitBranch className="h-5 w-5" />,
+    description: 'types.yaml',
+  },
+  {
+    href: '/assets',
+    label: 'Asset Instances',
+    icon: <FolderTree className="h-5 w-5" />,
+    description: 'assets.json',
+  },
+  {
+    href: '/architecture',
+    label: 'Architecture',
+    icon: <Presentation className="h-5 w-5" />,
+    description: 'OPC UA Guide',
+    openInNewTab: true,
   },
 ];
 
@@ -96,6 +120,8 @@ export function Sidebar({ collapsed = false, onToggle }: SidebarProps) {
             <Link
               key={item.href}
               href={item.href}
+              target={item.openInNewTab ? '_blank' : undefined}
+              rel={item.openInNewTab ? 'noopener noreferrer' : undefined}
               className={cn(
                 'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
                 isActive
