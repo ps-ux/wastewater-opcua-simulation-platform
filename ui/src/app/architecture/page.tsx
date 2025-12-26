@@ -3,12 +3,27 @@
 'use client';
 
 import * as React from 'react';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
+import { usePumpStore } from '@/stores/pump-store';
+import { usePumpWebSocket } from '@/hooks/use-pump-websocket';
+import { Server, Zap, Activity, Info, Play, RefreshCw, Layers, ShieldCheck, Database, LayoutGrid } from 'lucide-react';
 
-const TOTAL_SLIDES = 16;
+const TOTAL_SLIDES = 18;
 
 export default function ArchitecturePage() {
   const [currentSlide, setCurrentSlide] = useState(1);
+  const [activeLayer, setActiveLayer] = useState<number | null>(null);
+  const [isPacketWalking, setIsPacketWalking] = useState(false);
+  const [simStatus, setSimStatus] = useState<string>("");
+  const [commModel, setCommModel] = useState<string>("");
+  const { pumps, pumpData, fetchPumps } = usePumpStore();
+  const { isConnected } = usePumpWebSocket();
+
+  useEffect(() => {
+    fetchPumps();
+  }, [fetchPumps]);
+
+  const packetAnimRef = useRef<number>(0);
 
   const goToSlide = useCallback((n: number) => {
     let target = n;
@@ -42,6 +57,9 @@ export default function ArchitecturePage() {
       } else if (e.key === 'End') {
         goToSlide(TOTAL_SLIDES);
         e.preventDefault();
+      } else if (e.key === 'd') {
+        // 'd' for Dashboard
+        window.location.href = '/';
       }
     };
 
@@ -618,8 +636,95 @@ export default function ArchitecturePage() {
           align-items: center;
         }
 
+        /* New Interactive Styles */
+        .live-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.4rem;
+          padding: 0.2rem 0.6rem;
+          background: rgba(16, 185, 129, 0.1);
+          border: 1px solid var(--accent-green);
+          border-radius: 20px;
+          font-size: 0.7rem;
+          color: var(--accent-green);
+          font-weight: 600;
+        }
+
+        .pulse-dot {
+          width: 6px;
+          height: 6px;
+          background: var(--accent-green);
+          border-radius: 50%;
+          animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+          0% { transform: scale(1); opacity: 1; }
+          50% { transform: scale(1.5); opacity: 0.5; }
+          100% { transform: scale(1); opacity: 1; }
+        }
+
+        .layer-hover:hover {
+          filter: drop-shadow(0 0 8px var(--accent-cyan));
+          cursor: pointer;
+        }
+
+        .data-packet {
+          filter: drop-shadow(0 0 3px var(--accent-cyan));
+        }
+
+        .btn-action {
+          background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+          color: white;
+          border: none;
+          padding: 0.5rem 1rem;
+          border-radius: 5px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: transform 0.2s;
+          font-size: 0.8rem;
+          margin-top: 1rem;
+        }
+
+        .btn-action:hover {
+          transform: scale(1.05);
+          filter: brightness(1.1);
+        }
+
+        .float-dashboard {
+          position: fixed;
+          bottom: 2rem;
+          right: 2rem;
+          background: var(--bg-card);
+          border: 1px solid var(--accent-cyan);
+          border-radius: 12px;
+          padding: 1rem;
+          width: 280px;
+          z-index: 1001;
+          box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+        }
+
+        .float-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          border-bottom: 1px solid var(--border-color);
+          padding-bottom: 0.5rem;
+          margin-bottom: 0.5rem;
+        }
+
+        .float-title {
+          font-size: 0.75rem;
+          font-weight: 700;
+          color: var(--accent-cyan);
+          text-transform: uppercase;
+        }
+
         @media print {
-          .pres-nav {
+          .pres-nav, .float-dashboard {
             display: none;
           }
           .slide {
@@ -643,14 +748,27 @@ export default function ArchitecturePage() {
               OPC<span>::</span>UA<span>::</span>Presentation
             </div>
             <div className="pres-nav-controls">
+              <select
+                className="pres-nav-btn"
+                value={currentSlide}
+                onChange={(e) => goToSlide(parseInt(e.target.value))}
+                style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', outline: 'none' }}
+              >
+                {[...Array(TOTAL_SLIDES)].map((_, i) => (
+                  <option key={i + 1} value={i + 1}>Slide {i + 1}</option>
+                ))}
+              </select>
+              <a href="/" className="pres-nav-btn" style={{ textDecoration: 'none', background: 'rgba(0, 212, 255, 0.1)', borderColor: 'var(--accent-cyan)' }}>
+                Go to Dashboard
+              </a>
               <span className="slide-counter">
-                Slide {currentSlide} / {TOTAL_SLIDES}
+                {currentSlide} / {TOTAL_SLIDES}
               </span>
               <button className="pres-nav-btn" onClick={prevSlide}>
-                ← Prev
+                ←
               </button>
               <button className="pres-nav-btn" onClick={nextSlide}>
-                Next →
+                →
               </button>
             </div>
           </div>
@@ -658,6 +776,12 @@ export default function ArchitecturePage() {
 
         {/* Slide 1: Title */}
         <section className="slide title-slide" id="slide-1">
+          <div style={{ position: 'absolute', top: '100px', right: '50px' }}>
+            <div className="live-badge" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}>
+              <div className="pulse-dot" />
+              {isConnected ? 'OPC UA SERVER CONNECTED' : 'OFFLINE'}
+            </div>
+          </div>
           <h1>OPC UA Architecture</h1>
           <p className="subtitle">Complete Learning & Demonstration Guide</p>
           <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
@@ -669,8 +793,12 @@ export default function ArchitecturePage() {
               <div className="value">v1.05.06 (Oct 2025)</div>
             </div>
             <div className="meta-item">
-              <div className="label">Duration</div>
-              <div className="value">60 min</div>
+              <div className="label">Simulation</div>
+              <div className="value">{Object.keys(pumpData).length} Assets Live</div>
+            </div>
+            <div className="meta-item">
+              <div className="label">Discovery</div>
+              <div className="value">opc.tcp://localhost:4840</div>
             </div>
           </div>
           <div className="diagram-container" style={{ marginTop: '1.5rem' }}>
@@ -839,65 +967,217 @@ export default function ArchitecturePage() {
         <section className="slide" id="slide-5">
           <div className="section-header">
             <div className="section-number">SECTION 01 • ARCHITECTURE</div>
-            <h2 className="section-title">Where OPC UA Fits: Purdue Model</h2>
+            <h2 className="section-title flex items-center gap-3">
+              Where OPC UA Fits: Purdue Model
+              <span className="live-badge">
+                <div className="pulse-dot" />
+                Live Network Active
+              </span>
+            </h2>
           </div>
-          <div className="diagram-container">
-            <div className="diagram-title">Purdue Model with OPC UA Backbone</div>
-            <svg viewBox="0 0 800 280" xmlns="http://www.w3.org/2000/svg">
-              <defs>
-                <linearGradient id="backbone" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" style={{ stopColor: '#00d4ff', stopOpacity: 0.7 }} />
-                  <stop offset="100%" style={{ stopColor: '#10b981', stopOpacity: 0.7 }} />
-                </linearGradient>
-              </defs>
-              <rect x="720" y="15" width="35" height="240" rx="5" fill="url(#backbone)" opacity="0.3" />
-              <rect x="720" y="15" width="35" height="240" rx="5" fill="none" stroke="#00d4ff" strokeWidth="1.5" />
-              <text x="737" y="140" fill="#00d4ff" fontSize="7" textAnchor="middle" transform="rotate(-90,737,140)" fontWeight="600">OPC UA BACKBONE</text>
-              {/* Level 5 */}
-              <g transform="translate(40,15)">
-                <rect width="650" height="38" rx="5" fill="#111827" stroke="#8b5cf6" strokeWidth="1.5" />
-                <text x="12" y="15" fill="#8b5cf6" fontSize="8" fontWeight="600">LEVEL 5 — ENTERPRISE</text>
-                <text x="12" y="28" fill="#94a3b8" fontSize="7">ERP • Business Planning • Cloud</text>
-              </g>
-              {/* Level 4 */}
-              <g transform="translate(40,60)">
-                <rect width="650" height="38" rx="5" fill="#111827" stroke="#ec4899" strokeWidth="1.5" />
-                <text x="12" y="15" fill="#ec4899" fontSize="8" fontWeight="600">LEVEL 4 — SITE BUSINESS</text>
-                <text x="12" y="28" fill="#94a3b8" fontSize="7">MES • Scheduling • KPI</text>
-              </g>
-              {/* Level 3 */}
-              <g transform="translate(40,105)">
-                <rect width="650" height="38" rx="5" fill="#111827" stroke="#f59e0b" strokeWidth="1.5" />
-                <text x="12" y="15" fill="#f59e0b" fontSize="8" fontWeight="600">LEVEL 3 — SITE OPERATIONS</text>
-                <text x="12" y="28" fill="#94a3b8" fontSize="7">SCADA • HMI • Batch</text>
-              </g>
-              {/* Level 2 */}
-              <g transform="translate(40,150)">
-                <rect width="650" height="38" rx="5" fill="#111827" stroke="#10b981" strokeWidth="1.5" />
-                <text x="12" y="15" fill="#10b981" fontSize="8" fontWeight="600">LEVEL 2 — AREA CONTROL</text>
-                <text x="12" y="28" fill="#94a3b8" fontSize="7">PLCs • DCS • RTUs</text>
-              </g>
-              {/* Level 1 */}
-              <g transform="translate(40,195)">
-                <rect width="650" height="38" rx="5" fill="#111827" stroke="#00d4ff" strokeWidth="1.5" />
-                <text x="12" y="15" fill="#00d4ff" fontSize="8" fontWeight="600">LEVEL 1 — BASIC CONTROL</text>
-                <text x="12" y="28" fill="#94a3b8" fontSize="7">Sensors • Actuators • I/O</text>
-              </g>
-              {/* Level 0 */}
-              <g transform="translate(40,240)">
-                <rect width="650" height="22" rx="5" fill="#0a0e17" stroke="#64748b" />
-                <text x="325" y="15" fill="#64748b" fontSize="7" textAnchor="middle">LEVEL 0 — PHYSICAL PROCESS (Wastewater)</text>
-              </g>
-              {/* Connection lines */}
-              <line x1="690" y1="34" x2="720" y2="34" stroke="#8b5cf6" strokeWidth="1" strokeDasharray="3,3" />
-              <line x1="690" y1="79" x2="720" y2="79" stroke="#ec4899" strokeWidth="1" strokeDasharray="3,3" />
-              <line x1="690" y1="124" x2="720" y2="124" stroke="#f59e0b" strokeWidth="1.5" />
-              <line x1="690" y1="169" x2="720" y2="169" stroke="#10b981" strokeWidth="1.5" />
-              <line x1="690" y1="214" x2="720" y2="214" stroke="#00d4ff" strokeWidth="1.5" />
-              <circle r="3" fill="#00d4ff">
-                <animateMotion dur="2.5s" repeatCount="indefinite" path="M737 255 L737 15" />
-              </circle>
-            </svg>
+          <div className="two-column" style={{ gridTemplateColumns: 'minmax(0, 1.5fr) 1fr' }}>
+            <div className="diagram-container" style={{ position: 'relative' }}>
+              <div className="diagram-title">Purdue Model with OPC UA Backbone</div>
+              <svg viewBox="0 0 800 550" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <linearGradient id="backbone" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" style={{ stopColor: '#00d4ff', stopOpacity: 0.7 }} />
+                    <stop offset="100%" style={{ stopColor: '#10b981', stopOpacity: 0.7 }} />
+                  </linearGradient>
+                  <filter id="glow">
+                    <feGaussianBlur stdDeviation="3" result="blur" />
+                    <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                  </filter>
+                </defs>
+
+                {/* Vertical Backbone */}
+                <rect x="720" y="25" width="35" height="500" rx="5" fill="url(#backbone)" opacity="0.3" />
+                <rect x="720" y="25" width="35" height="500" rx="5" fill="none" stroke="#00d4ff" strokeWidth="1.5" />
+                <text x="737" y="275" fill="#00d4ff" fontSize="9" textAnchor="middle" transform="rotate(-90,737,275)" fontWeight="600">OPC UA BACKBONE</text>
+
+                {/* Levels - Each level is now interactive */}
+                {[
+                  { level: 5, name: 'ENTERPRISE', color: '#8b5cf6', sub: 'ERP • Business Planning • Cloud', y: 25 },
+                  { level: 4, name: 'SITE BUSINESS', color: '#ec4899', sub: 'MES • Scheduling • KPI', y: 115 },
+                  { level: 3, name: 'SITE OPERATIONS', color: '#f59e0b', sub: 'SCADA • HMI • Batch', y: 205 },
+                  { level: 2, name: 'AREA CONTROL', color: '#10b981', sub: 'PLCs • DCS • RTUs', y: 295 },
+                  { level: 1, name: 'BASIC CONTROL', color: '#00d4ff', sub: 'Sensors • Actuators • I/O', y: 385 },
+                ].map((l) => (
+                  <g key={l.level}
+                    className="layer-hover"
+                    onClick={() => setActiveLayer(l.level)}
+                    transform={`translate(40,${l.y})`}>
+                    <rect width="650" height="60" rx="8"
+                      fill={activeLayer === l.level ? 'rgba(0, 212, 255, 0.1)' : '#111827'}
+                      stroke={activeLayer === l.level ? l.color : '#1e293b'}
+                      strokeWidth={activeLayer === l.level ? 2.5 : 1}
+                      style={{ transition: 'all 0.3s' }} />
+                    <text x="16" y="24" fill={l.color} fontSize="14" fontWeight="800">LEVEL {l.level} — {l.name}</text>
+                    <text x="16" y="46" fill="#94a3b8" fontSize="11" fontWeight="500">{l.sub}</text>
+
+                    {/* Connection to backbone */}
+                    <line x1="650" y1="30" x2="680" y2="30" stroke={l.color} strokeWidth="1" strokeDasharray="3,3" />
+
+                    {/* Active indicators */}
+                    {activeLayer === l.level && (
+                      <circle cx="640" cy="30" r="4" fill={l.color} filter="url(#glow)">
+                        <animate attributeName="r" values="4;6;4" dur="1s" repeatCount="indefinite" />
+                      </circle>
+                    )}
+                  </g>
+                ))}
+
+                {/* Level 0 */}
+                <g transform="translate(40,485)">
+                  <rect width="650" height="40" rx="8" fill="#0a0e17" stroke="#334155" />
+                  <text x="325" y="25" fill="#64748b" fontSize="12" textAnchor="middle" fontWeight="700">LEVEL 0 — PHYSICAL PROCESS (Wastewater Simulation)</text>
+                </g>
+
+                {/* Animated Data Packet */}
+                {isPacketWalking && (
+                  <g className="data-packet">
+                    <circle r="9" fill="#00d4ff" filter="url(#glow)">
+                      <animateMotion
+                        dur="15s"
+                        path="M70 505 L70 415 L737 415 L737 325 L737 235 L737 145 L737 55 L680 55"
+                        keyPoints="0;0;0.1;0.1;0.2;0.4;0.4;0.6;0.6;0.8;0.8;1;1"
+                        keyTimes="0;0.13;0.17;0.3;0.33;0.47;0.5;0.63;0.67;0.8;0.83;0.97;1"
+                        calcMode="linear"
+                        fill="freeze"
+                      />
+                    </circle>
+                    <text fontSize="10" fill="white" fontWeight="900" textAnchor="middle" dy="-14">
+                      <animateMotion
+                        dur="15s"
+                        path="M70 505 L70 415 L737 415 L737 325 L737 235 L737 145 L737 55 L680 55"
+                        keyPoints="0;0;0.1;0.1;0.2;0.4;0.4;0.6;0.6;0.8;0.8;1;1"
+                        keyTimes="0;0.13;0.17;0.3;0.33;0.47;0.5;0.63;0.67;0.8;0.83;0.97;1"
+                        calcMode="linear"
+                        fill="freeze"
+                      />
+                      DATA_PACKET
+                    </text>
+                  </g>
+                )}
+              </svg>
+
+              <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }}>
+                <button
+                  className="btn-action"
+                  onClick={() => {
+                    setIsPacketWalking(true);
+                    setSimStatus("Dwell: Level 0 (Process)...");
+                    setCommModel("NA");
+                    setActiveLayer(0);
+
+                    const steps = [
+                      { t: 2500, l: 1, s: "Dwell: Level 1 (I/O)...", m: "CLIENT-SERVER" },
+                      { t: 5000, l: 2, s: "Dwell: Level 2 (PLC)...", m: "CLIENT-SERVER" },
+                      { t: 7500, l: 3, s: "Dwell: Level 3 (SCADA)...", m: "CLIENT-SERVER" },
+                      { t: 10000, l: 4, s: "Dwell: Level 4 (Business)...", m: "PUB-SUB" },
+                      { t: 12500, l: 5, s: "Dwell: Level 5 (Cloud)...", m: "PUB-SUB" },
+                    ];
+
+                    steps.forEach(step => {
+                      setTimeout(() => {
+                        setActiveLayer(step.l);
+                        setSimStatus(step.s);
+                        setCommModel(step.m);
+                      }, step.t);
+                    });
+
+                    setTimeout(() => {
+                      setIsPacketWalking(false);
+                      setSimStatus("");
+                      setCommModel("");
+                    }, 15500);
+                  }}
+                  disabled={isPacketWalking}
+                >
+                  <Play size={14} style={{ display: 'inline', marginRight: '4px' }} />
+                  Simulate Data Flow (L0 → L5)
+                </button>
+                {activeLayer && (
+                  <button
+                    className="btn-action"
+                    style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
+                    onClick={() => setActiveLayer(null)}
+                  >
+                    Clear Filter
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <div className="content-card">
+              <h3>
+                <Info size={16} />
+                {isPacketWalking ? "LIVE STREAMING LOG" : (activeLayer ? `Level ${activeLayer} Context` : 'Select a Layer')}
+              </h3>
+              {isPacketWalking ? (
+                <div style={{ background: 'rgba(0,0,0,0.3)', padding: '1rem', borderRadius: '8px', border: '1px solid var(--accent-cyan)', animation: 'pulse 2s infinite' }}>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <div className="pulse-dot" />
+                      <span className="text-[10px] font-black tracking-widest text-cyan-400">STATUS: {simStatus}</span>
+                    </div>
+                    {commModel !== "NA" && commModel !== "" && (
+                      <div className={`px-2 py-0.5 rounded text-[8px] font-bold border ${commModel === "PUB-SUB" ? 'bg-amber-500/20 border-amber-500/40 text-amber-400' : 'bg-cyan-500/20 border-cyan-500/40 text-cyan-400'}`}>
+                        {commModel}
+                      </div>
+                    )}
+                  </div>
+                  <div className="font-mono text-[11px] text-slate-400 space-y-1">
+                    <div>&gt; RAW_FLOW: {(Math.random() * 5000).toFixed(0)} m3/h</div>
+                    <div>&gt; PROTOCOL: OPC_UA_BINARY</div>
+                    <div>&gt; ENCRYPTION: AES_256_SHA256</div>
+                    <div>&gt; TARGET_NS: namespace=1;s=IPS_PMP_001.Flow</div>
+                  </div>
+                </div>
+              ) : !activeLayer ? (
+                <p style={{ fontSize: '1.2rem', color: 'var(--text-secondary)', lineHeight: '1.6' }}>
+                  Click on a layer in the Purdue model to see how OPC UA functions at that level and how it interacts with the wastewater simulation.
+                </p>
+              ) : (
+                <div style={{ animation: 'fadeIn 0.3s ease-out' }}>
+                  {activeLayer === 5 && (
+                    <ul style={{ fontSize: '1rem', lineHeight: '1.8' }}>
+                      <li><strong>Role:</strong> Enterprise Strategy</li>
+                      <li><strong>OPC UA Use:</strong> PubSub to Azure/AWS IoT Hubs for plant-wide analytics.</li>
+                      <li><strong>Demo Link:</strong> View enterprise KPIs in Dashboard.</li>
+                    </ul>
+                  )}
+                  {activeLayer === 4 && (
+                    <ul style={{ fontSize: '1rem', lineHeight: '1.8' }}>
+                      <li><strong>Role:</strong> Site Management</li>
+                      <li><strong>OPC UA Use:</strong> Aggregating multiple servers into a Unified Namespace (UNS).</li>
+                      <li><strong>Data:</strong> Historical Access (HA) for compliance reporting.</li>
+                    </ul>
+                  )}
+                  {activeLayer === 3 && (
+                    <ul style={{ fontSize: '1rem', lineHeight: '1.8' }}>
+                      <li><strong>Role:</strong> Control Room</li>
+                      <li><strong>OPC UA Use:</strong> Client-Server for the SCADA/HMI dashboard you use.</li>
+                      <li><strong>Real-time:</strong> High-frequency subscriptions (100ms) for pump monitoring.</li>
+                    </ul>
+                  )}
+                  {activeLayer === 2 && (
+                    <ul style={{ fontSize: '1rem', lineHeight: '1.8' }}>
+                      <li><strong>Role:</strong> Area Control</li>
+                      <li><strong>OPC UA Use:</strong> PLC-to-PLC communication using OPC UA FX.</li>
+                      <li><strong>Security:</strong> X.509 Certificate-based trust between controllers.</li>
+                    </ul>
+                  )}
+                  {activeLayer === 1 && (
+                    <ul style={{ fontSize: '1rem', lineHeight: '1.8' }}>
+                      <li><strong>Role:</strong> Field Devices</li>
+                      <li><strong>OPC UA Use:</strong> OPC UA Nano/Micro profiles in smart pumps.</li>
+                      <li><strong>Impact:</strong> Semantic data (e.g., "Pump_1.BearingTemp") at the source.</li>
+                    </ul>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         </section>
 
@@ -981,28 +1261,50 @@ export default function ArchitecturePage() {
               <h3 style={{ color: '#ef4444' }}>
                 <span className="icon" style={{ background: 'rgba(239,68,68,0.1)' }}>❌</span> NOT Flat Tags
               </h3>
-              <div className="code-block">
-                <span className="comment">// Traditional approach</span><br />
-                Tag_001 = <span className="number">1450</span><br />
-                Tag_002 = <span className="number">75.3</span><br />
-                <span className="comment">// No context</span>
+              <div className="code-block" style={{ height: '140px' }}>
+                <span className="comment">// Traditional Modbus/S7 approach</span><br />
+                HR_40001 = <span className="number">1450</span><br />
+                HR_40002 = <span className="number">75.3</span><br />
+                <span className="comment">// If documentation is lost, meaning is lost.</span>
               </div>
             </div>
             <div className="content-card" style={{ borderColor: '#10b981' }}>
               <h3 style={{ color: '#10b981' }}>
                 <span className="icon" style={{ background: 'rgba(16,185,129,0.1)' }}>✓</span> Graph of Nodes
               </h3>
-              <div className="code-block">
-                <span className="comment">// OPC UA approach</span><br />
-                Pump_01<br />
-                &nbsp;├─ Speed = <span className="number">1450</span> <span className="keyword">RPM</span><br />
-                &nbsp;├─ Status = <span className="string">Running</span><br />
-                &nbsp;└─ Power = <span className="number">12.4</span> <span className="keyword">kW</span>
+              <div className="code-block" style={{ height: '140px', position: 'relative' }}>
+                <div style={{ position: 'absolute', top: '10px', right: '10px' }}>
+                  <span className="live-badge" style={{ fontSize: '0.6rem' }}>Live Graph</span>
+                </div>
+                <span className="comment">// OPC UA Information Model</span><br />
+                Pump_01 <span className="comment">(Instance of PumpType)</span><br />
+                &nbsp;├─ Speed = <span className="number">{(Object.values(pumpData)[0]?.rpm || 1450).toFixed(0)}</span> <span className="keyword">RPM</span><br />
+                &nbsp;├─ Status = <span className="string">{Object.values(pumpData)[0]?.is_running ? 'Running' : 'Stopped'}</span><br />
+                &nbsp;└─ Power = <span className="number">{(Object.values(pumpData)[0]?.power_consumption || 12.4).toFixed(1)}</span> <span className="keyword">kW</span>
               </div>
             </div>
           </div>
+          <div className="diagram-container" style={{ textAlign: 'center' }}>
+            <div className="diagram-title">Hierarchical Reference Model</div>
+            <svg viewBox="0 0 600 120" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="300" cy="30" r="20" fill="none" stroke="var(--accent-cyan)" strokeWidth="2" />
+              <text x="300" y="34" fill="var(--accent-cyan)" fontSize="8" textAnchor="middle">Objects</text>
+
+              <line x1="300" y1="50" x2="200" y2="90" stroke="var(--text-muted)" strokeWidth="1" strokeDasharray="4" />
+              <line x1="300" y1="50" x2="400" y2="90" stroke="var(--text-muted)" strokeWidth="1" strokeDasharray="4" />
+
+              <rect x="170" y="90" width="60" height="20" rx="3" fill="var(--bg-elevated)" stroke="var(--accent-green)" />
+              <text x="200" y="103" fill="var(--accent-green)" fontSize="7" textAnchor="middle">Pump_1</text>
+
+              <rect x="370" y="90" width="60" height="20" rx="3" fill="var(--bg-elevated)" stroke="var(--accent-green)" />
+              <text x="400" y="103" fill="var(--accent-green)" fontSize="7" textAnchor="middle">Pump_2</text>
+
+              <text x="250" y="70" fill="var(--text-muted)" fontSize="6" transform="rotate(-22,250,70)">Organizes</text>
+              <text x="350" y="70" fill="var(--text-muted)" fontSize="6" transform="rotate(22,350,70)">Organizes</text>
+            </svg>
+          </div>
           <div className="highlight-box">
-            <p><strong>Address Space</strong> is a graph-based model with nodes and references, preserving meaning through object-oriented design</p>
+            <p><strong>Address Space</strong> is a graph-based model where nodes represent assets and references represent their relationships (e.g., <em>HasComponent, Organizes, HasTypeDefinition</em>).</p>
           </div>
         </section>
 
@@ -1041,20 +1343,33 @@ export default function ArchitecturePage() {
             <h2 className="section-title">Services & Data Access</h2>
             <p className="section-goal">Goal: Show how data flows correctly</p>
           </div>
-          <div className="content-grid">
+          <div className="content-grid" style={{ gridTemplateColumns: '1fr 1fr' }}>
             <div className="content-card">
               <h3><span className="icon">📋</span> Core Services</h3>
-              <ul>
-                <li><strong style={{ color: '#8b5cf6' }}>Browse</strong> — Discover structure</li>
-                <li><strong style={{ color: '#00d4ff' }}>Read / Write</strong> — Data access</li>
-                <li><strong style={{ color: '#10b981' }}>Subscribe / Publish</strong> — Event-driven</li>
-                <li><strong style={{ color: '#f59e0b' }}>Call</strong> — Execute methods</li>
-                <li><strong style={{ color: '#ec4899' }}>HistoryRead</strong> — Historical data</li>
+              <ul style={{ marginBottom: '1rem' }}>
+                <li><strong style={{ color: '#8b5cf6' }}>Browse</strong> — Discover nodes</li>
+                <li><strong style={{ color: '#00d4ff' }}>Read / Write</strong> — Discrete access</li>
+                <li><strong style={{ color: '#10b981' }}>Subscribe</strong> — Change notifications</li>
+                <li><strong style={{ color: '#f59e0b' }}>Call</strong> — Execute logic</li>
+                <li><strong style={{ color: '#ec4899' }}>HistoryRead</strong> — Aggregates</li>
               </ul>
+
+              <div style={{ background: 'var(--bg-elevated)', padding: '0.8rem', borderRadius: '6px', border: '1px solid var(--border-color)' }}>
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginBottom: '0.4rem', textTransform: 'uppercase' }}>Browse Simulation</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', fontSize: '0.8rem' }}>
+                  <div style={{ color: 'var(--accent-cyan)' }}>▾ Root</div>
+                  <div style={{ marginLeft: '12px', color: 'var(--accent-cyan)' }}>▾ Objects</div>
+                  <div style={{ marginLeft: '24px', color: 'var(--accent-green)' }}>▸ {Object.values(pumpData)[0]?.name || 'Pump_01'}</div>
+                  <div style={{ marginLeft: '24px', color: 'var(--accent-green)' }}>▸ {Object.values(pumpData)[1]?.name || 'Pump_02'}</div>
+                </div>
+                <p style={{ fontSize: '0.65rem', marginTop: '0.6rem', color: 'var(--text-muted)' }}>
+                  "Browsing" allows clients to learn the server's structure without prior knowledge.
+                </p>
+              </div>
             </div>
             <div className="content-card" style={{ borderColor: '#10b981' }}>
               <h3 style={{ color: '#10b981' }}>
-                <span className="icon" style={{ background: 'rgba(16,185,129,0.1)' }}>⚡</span> Three Rules
+                <span className="icon" style={{ background: 'rgba(16,185,129,0.1)' }}>⚡</span> Three Operating Rules
               </h3>
               <div style={{ marginTop: '0.6rem' }}>
                 <div style={{ padding: '0.5rem', background: 'rgba(16,185,129,0.1)', borderRadius: '5px', marginBottom: '0.4rem' }}>
@@ -1082,7 +1397,26 @@ export default function ArchitecturePage() {
             <p className="section-goal">Goal: Make security concrete and auditable</p>
           </div>
           <div className="diagram-container">
-            <div className="diagram-title">UA TCP Message Flow</div>
+            <div className="diagram-title">UA TCP Message Flow (Handshake)</div>
+            <div style={{ height: '120px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <svg viewBox="0 0 400 100" style={{ maxWidth: '400px' }}>
+                <rect x="20" y="20" width="60" height="60" rx="5" fill="var(--bg-elevated)" stroke="var(--accent-cyan)" />
+                <text x="50" y="55" fill="var(--accent-cyan)" fontSize="8" textAnchor="middle">Client</text>
+
+                <rect x="320" y="20" width="60" height="60" rx="5" fill="var(--bg-elevated)" stroke="var(--accent-green)" />
+                <text x="350" y="55" fill="var(--accent-green)" fontSize="8" textAnchor="middle">Server</text>
+
+                <line x1="85" y1="40" x2="315" y2="40" stroke="var(--text-muted)" strokeWidth="1" strokeDasharray="4" />
+                <line x1="85" y1="60" x2="315" y2="60" stroke="var(--text-muted)" strokeWidth="1" strokeDasharray="4" />
+
+                <circle r="4" fill="var(--accent-cyan)">
+                  <animateMotion dur="2s" repeatCount="indefinite" path="M85 40 L315 40" />
+                </circle>
+                <circle r="4" fill="var(--accent-green)">
+                  <animateMotion dur="2s" repeatCount="indefinite" path="M315 60 L85 60" />
+                </circle>
+              </svg>
+            </div>
           </div>
           <div className="packet-display">
             <div className="packet hel"><div className="type">HEL</div><div className="desc">Hello</div></div>
@@ -1096,7 +1430,12 @@ export default function ArchitecturePage() {
             <div className="packet clo"><div className="type">CLO</div><div className="desc">Close</div></div>
           </div>
           <div className="highlight-box">
-            <p><strong>HEL</strong> Transport negotiation → <strong>ACK</strong> Server acceptance → <strong>OPN</strong> Crypto handshake → <strong>MSG</strong> Encrypted services → <strong>CLO</strong> Clean shutdown</p>
+            <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
+              <span className="live-badge" style={{ background: 'rgba(0,212,255,0.1)' }}>Binary Protocol</span>
+              <span className="live-badge" style={{ background: 'rgba(139,92,246,0.1)' }}>TLS/TCP</span>
+              <span className="live-badge" style={{ background: 'rgba(16,185,129,0.1)' }}>Port 4840</span>
+            </div>
+            <p style={{ marginTop: '0.6rem' }}><strong>UA TCP</strong> is a high-performance binary protocol designed for industrial networks, supporting chunking, security, and multiplexing over a single TCP connection.</p>
           </div>
         </section>
 
@@ -1255,10 +1594,122 @@ export default function ArchitecturePage() {
           </div>
         </section>
 
-        {/* Slide 15: Future Directions */}
+        {/* Slide 15: Information Modeling Mechanics */}
         <section className="slide" id="slide-15">
           <div className="section-header">
-            <div className="section-number">SECTION 08 • 55–60 MINUTES</div>
+            <div className="section-number">SECTION 08 • INFORMATION MODELING</div>
+            <h2 className="section-title">From Blueprint to Reality</h2>
+            <p className="section-goal">Goal: Show how YAML/JSON becomes live objects</p>
+          </div>
+          <div className="two-column" style={{ gridTemplateColumns: '1fr 1fr' }}>
+            <div className="content-card">
+              <h3><Database size={16} /> 1. The Blueprint (YAML)</h3>
+              <div className="code-block" style={{ fontSize: '0.65rem', maxHeight: '250px', overflowY: 'auto' }}>
+                <span className="keyword">PumpType</span>:<br />
+                &nbsp;&nbsp;type: <span className="string">ObjectType</span><br />
+                &nbsp;&nbsp;base: <span className="string">AssetType</span><br />
+                &nbsp;&nbsp;components:<br />
+                &nbsp;&nbsp;&nbsp;&nbsp;<span className="keyword">FlowRate</span>:<br />
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;type: <span className="string">AnalogItemType</span><br />
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dataType: <span className="string">Double</span><br />
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;engineeringUnits: <span className="string">m³/h</span><br />
+                &nbsp;&nbsp;&nbsp;&nbsp;<span className="keyword">RPM</span>:<br />
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;type: <span className="string">AnalogItemType</span>
+              </div>
+              <p style={{ fontSize: '0.75rem', marginTop: '0.5rem', color: 'var(--text-muted)' }}>
+                Defined in <code>types.yaml</code> and <code>assets.json</code>
+              </p>
+            </div>
+            <div className="content-card">
+              <h3><RefreshCw size={16} /> 2. Live Instance (OPC UA)</h3>
+              <div style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-color)', borderRadius: '6px', padding: '1rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                  <div style={{ width: '8px', height: '8px', background: 'var(--accent-green)', borderRadius: '50%' }} />
+                  <span style={{ fontSize: '0.8rem', fontWeight: 600 }}>Pump_01 : PumpType</span>
+                </div>
+                <div style={{ paddingLeft: '1rem', borderLeft: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                  <div style={{ fontSize: '0.75rem' }}>
+                    <span style={{ color: 'var(--text-muted)' }}>FlowRate:</span> <span style={{ color: 'var(--accent-cyan)' }}>{(Object.values(pumpData)[0]?.flow_rate || 0).toFixed(1)} m³/h</span>
+                  </div>
+                  <div style={{ fontSize: '0.75rem' }}>
+                    <span style={{ color: 'var(--text-muted)' }}>RPM:</span> <span style={{ color: 'var(--accent-cyan)' }}>{(Object.values(pumpData)[0]?.rpm || 0).toFixed(0)}</span>
+                  </div>
+                </div>
+              </div>
+              <div style={{ marginTop: '1rem' }}>
+                <button className="btn-action" onClick={() => fetchPumps()}>
+                  <RefreshCw size={12} style={{ marginRight: '4px', verticalAlign: 'middle' }} />
+                  Refresh Server Cache
+                </button>
+              </div>
+            </div>
+          </div>
+          <div className="highlight-box">
+            <p><strong>Strong Typing:</strong> By defining a <code>PumpType</code>, every pump instance in the facility inherits the same sensors, methods, and metadata automatically, ensuring consistency across thousands of assets.</p>
+          </div>
+        </section>
+
+        {/* Slide 16: Interoperability */}
+        <section className="slide" id="slide-16">
+          <div className="section-header" style={{ paddingTop: '2rem' }}>
+            <div className="section-number">SECTION 08 • INTEROPERABILITY</div>
+            <h2 className="section-title">Cross-Platform Interoperability</h2>
+          </div>
+          <div className="diagram-container" style={{ padding: '2rem', height: '300px' }}>
+            <svg viewBox="0 0 800 250" xmlns="http://www.w3.org/2000/svg">
+              {/* OPC UA Server */}
+              <rect x="300" y="80" width="200" height="80" rx="8" fill="var(--bg-elevated)" stroke="var(--accent-green)" strokeWidth="3" />
+              <text x="400" y="115" fill="white" fontSize="14" textAnchor="middle" fontWeight="bold">OPC UA SERVER</text>
+              <text x="400" y="140" fill="var(--accent-green)" fontSize="10" textAnchor="middle">Physics Simulation Engine</text>
+
+              {/* OPC UA Client */}
+              <g transform="translate(50,80)">
+                <rect width="180" height="80" rx="8" fill="var(--bg-elevated)" stroke="var(--accent-cyan)" strokeWidth="3" />
+                <text x="90" y="115" fill="white" fontSize="14" textAnchor="middle" fontWeight="bold">OPC UA CLIENT</text>
+                <text x="90" y="140" fill="var(--accent-cyan)" fontSize="10" textAnchor="middle">Python / .NET / C++</text>
+              </g>
+
+              {/* Web Console */}
+              <g transform="translate(570,80)">
+                <rect width="180" height="80" rx="8" fill="var(--bg-elevated)" stroke="var(--accent-pink)" strokeWidth="3" />
+                <text x="90" y="115" fill="white" fontSize="14" textAnchor="middle" fontWeight="bold">WEB INTERFACE</text>
+                <text x="90" y="140" fill="var(--accent-pink)" fontSize="10" textAnchor="middle">React Dashboard</text>
+              </g>
+
+              {/* Data Flow Arrows */}
+              <path d="M230 120 L300 120" stroke="var(--accent-cyan)" strokeWidth="2" strokeDasharray="5,5">
+                <animate attributeName="stroke-dashoffset" from="50" to="0" dur="2s" repeatCount="indefinite" />
+              </path>
+              <path d="M500 120 L570 120" stroke="var(--accent-pink)" strokeWidth="2" strokeDasharray="5,5">
+                <animate attributeName="stroke-dashoffset" from="0" to="50" dur="2s" repeatCount="indefinite" />
+              </path>
+            </svg>
+          </div>
+          <div className="content-grid" style={{ gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)' }}>
+            <div className="content-card">
+              <h3 style={{ color: 'var(--accent-cyan)' }}>Hardware Independence</h3>
+              <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+                OPC UA abstracts the hardware. Whether it's a simulated Python engine or a physical PLC, the Client sees the same semantic objects.
+              </p>
+            </div>
+            <div className="content-card">
+              <h3 style={{ color: 'var(--accent-green)' }}>Physics Integration</h3>
+              <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+                Our server runs real-time hydraulic equations (Head vs Flow), presenting calculated physics as safe, readable OPC UA variables.
+              </p>
+            </div>
+          </div>
+          <div style={{ marginTop: '1.5rem', textAlign: 'center' }}>
+            <button className="btn-action" onClick={() => goToSlide(17)}>
+              Continue to Future Trends →
+            </button>
+          </div>
+        </section>
+
+        {/* Slide 17: Future Directions */}
+        <section className="slide" id="slide-17">
+          <div className="section-header">
+            <div className="section-number">SECTION 08 • FUTURE READY</div>
             <h2 className="section-title">Future Directions</h2>
           </div>
           <div className="content-grid" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
@@ -1297,13 +1748,18 @@ export default function ArchitecturePage() {
             </div>
           </div>
           <div className="quote" style={{ marginTop: '1.5rem' }}>
-            <strong>OPC UA is not about moving numbers.</strong><br />
+            <strong>OPC UA is a Unified Language.</strong><br />
             It preserves <strong>meaning, trust, and quality</strong> across decades of industrial systems.
+          </div>
+          <div style={{ marginTop: '1.5rem', textAlign: 'center' }}>
+            <button className="btn-action" onClick={() => goToSlide(18)}>
+              Final Conclusion →
+            </button>
           </div>
         </section>
 
-        {/* Slide 16: Conclusion */}
-        <section className="slide title-slide" id="slide-16">
+        {/* Slide 18: Conclusion */}
+        <section className="slide title-slide" id="slide-18">
           <div className="quote" style={{ fontSize: '1.3rem', border: 'none', background: 'none' }}>
             <strong style={{ fontSize: '1.5rem' }}>OPC UA is not about moving numbers.</strong><br /><br />
             It is about preserving <strong>meaning</strong>, <strong>trust</strong>, and <strong>quality</strong><br />
@@ -1311,24 +1767,74 @@ export default function ArchitecturePage() {
           </div>
           <div className="content-grid" style={{ gridTemplateColumns: 'repeat(5, 1fr)', marginTop: '2rem' }}>
             {[
-              { icon: '🎯', title: 'Semantic Clarity', desc: 'First-class objects', color: 'var(--accent-cyan)' },
-              { icon: '🔐', title: 'Security by Design', desc: 'Built-in protection', color: 'var(--accent-green)' },
-              { icon: '🔗', title: 'Interoperability', desc: 'Vendor-neutral', color: 'var(--accent-orange)' },
-              { icon: '📈', title: 'Scalability', desc: 'Plant to enterprise', color: 'var(--accent-purple)' },
-              { icon: '🚀', title: 'Future-Ready', desc: 'TSN, 5G, Cloud', color: 'var(--accent-pink)' },
+              { icon: <Database size={20} />, title: 'Semantic Clarity', desc: 'First-class objects', color: 'var(--accent-cyan)' },
+              { icon: <ShieldCheck size={20} />, title: 'Security by Design', desc: 'Built-in protection', color: 'var(--accent-green)' },
+              { icon: <RefreshCw size={20} />, title: 'Interoperability', desc: 'Vendor-neutral', color: 'var(--accent-orange)' },
+              { icon: <Layers size={20} />, title: 'Scalability', desc: 'Plant to enterprise', color: 'var(--accent-purple)' },
+              { icon: <LayoutGrid size={20} />, title: 'Future-Ready', desc: 'TSN, 5G, Cloud', color: 'var(--accent-pink)' },
             ].map((item, i) => (
               <div key={i} className="content-card" style={{ textAlign: 'center', padding: '0.8rem' }}>
-                <div style={{ fontSize: '1.3rem', marginBottom: '0.4rem' }}>{item.icon}</div>
+                <div style={{ color: item.color, marginBottom: '0.4rem', display: 'flex', justifyContent: 'center' }}>{item.icon}</div>
                 <div style={{ fontSize: '0.75rem', color: item.color, fontWeight: 600 }}>{item.title}</div>
                 <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>{item.desc}</div>
               </div>
             ))}
           </div>
-          <div style={{ marginTop: '1.5rem', textAlign: 'center' }}>
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>Based on OPC UA Specification v1.05.06 (October 2025)</p>
-            <p style={{ color: 'var(--accent-cyan)', fontSize: '0.9rem', marginTop: '0.5rem' }}>Questions & Discussion</p>
+          <div style={{ marginTop: '2rem', textAlign: 'center' }}>
+            <button className="btn-action" onClick={() => window.location.href = '/'}>
+              Launch Live Dashboard →
+            </button>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', marginTop: '1rem' }}>Based on OPC UA Specification v1.05.06 (October 2025)</p>
           </div>
         </section>
+
+        {/* Floating Live Data Overlay */}
+        <div className="float-dashboard">
+          <div className="float-header">
+            <div className="float-title">
+              Live Server Node: {Object.values(pumpData)[0]?.name || 'Discovery'}
+            </div>
+            <div className="live-badge" style={{ transform: 'scale(0.8)' }}>
+              {isConnected ? 'ON' : 'OFF'}
+            </div>
+          </div>
+          {Object.values(pumpData).length > 0 ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
+                <span style={{ color: 'var(--text-muted)' }}>Flow Rate:</span>
+                <span style={{ color: 'var(--accent-cyan)', fontFamily: 'monospace' }}>
+                  {Object.values(pumpData)[0]?.flow_rate.toFixed(1)} m³/h
+                </span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
+                <span style={{ color: 'var(--text-muted)' }}>Power:</span>
+                <span style={{ color: 'var(--accent-green)', fontFamily: 'monospace' }}>
+                  {Object.values(pumpData)[0]?.power_consumption.toFixed(2)} kW
+                </span>
+              </div>
+              <div style={{ height: '4px', background: 'var(--bg-elevated)', borderRadius: '2px', marginTop: '0.2rem', overflow: 'hidden' }}>
+                <div style={{
+                  height: '100%',
+                  width: `${Math.min(100, (Object.values(pumpData)[0]?.flow_rate || 0) / 2)}%`,
+                  background: 'var(--accent-cyan)',
+                  transition: 'width 0.5s ease-out'
+                }} />
+              </div>
+            </div>
+          ) : (
+            <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Searching for live assets...</p>
+          )}
+          <button
+            onClick={() => {
+              const searchParams = new URLSearchParams();
+              searchParams.set('open', 'true');
+              window.open('/monitoring?' + searchParams.toString(), '_blank');
+            }}
+            style={{ background: 'none', border: '1px solid var(--border-color)', color: 'var(--accent-cyan)', fontSize: '0.65rem', padding: '0.3rem', borderRadius: '4px', marginTop: '0.4rem', cursor: 'pointer' }}
+          >
+            View in Full Monitor
+          </button>
+        </div>
       </div>
     </>
   );

@@ -19,12 +19,14 @@ import {
   StopCircle,
   Gauge,
   Zap,
+  Box,
   Thermometer,
   FolderTree,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 import { usePumpStore } from '@/stores/pump-store';
 import { usePumpWebSocket } from '@/hooks/use-pump-websocket';
 import type { PumpData } from '@/lib/types';
@@ -246,9 +248,8 @@ function StatCard({ label, value, icon, color, onClick, active }: StatCardProps)
 
   return (
     <Card
-      className={`cursor-pointer transition-all hover:shadow-md ${
-        active ? 'ring-2 ring-blue-500' : ''
-      }`}
+      className={`cursor-pointer transition-all hover:shadow-md ${active ? 'ring-2 ring-blue-500' : ''
+        }`}
       onClick={onClick}
     >
       <CardContent className="flex items-center justify-between py-4">
@@ -353,6 +354,11 @@ function PumpControlCard({ pump, browsePath, displayName, onStart, onStop, isLoa
             <StopCircle className="mr-2 h-4 w-4" />
             Stop
           </Button>
+          <Link href={`/pumps/${pump.id}/3d`} className="contents">
+            <Button variant="outline" className="px-3" title="View 3D Digital Twin">
+              <Box className="h-4 w-4" />
+            </Button>
+          </Link>
         </div>
 
         {/* Runtime Info */}
