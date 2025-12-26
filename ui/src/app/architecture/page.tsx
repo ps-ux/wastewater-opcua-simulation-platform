@@ -6,7 +6,7 @@ import * as React from 'react';
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { usePumpStore } from '@/stores/pump-store';
 import { usePumpWebSocket } from '@/hooks/use-pump-websocket';
-import { Server, Zap, Activity, Info, Play, RefreshCw, Layers, ShieldCheck, Database, LayoutGrid } from 'lucide-react';
+import { Server, Zap, Activity, Info, Play, RefreshCw, Layers, ShieldCheck, Database, LayoutGrid, Monitor, Smartphone, Globe, Laptop, Cloud, Radio, ArrowLeftRight, Wifi, Cable, MessageSquare } from 'lucide-react';
 
 const TOTAL_SLIDES = 18;
 
@@ -450,6 +450,36 @@ export default function ArchitecturePage() {
           .two-column {
             grid-template-columns: 1fr;
           }
+
+          .comm-model-card {
+            padding: 1rem;
+          }
+
+          .client-icon-box {
+            padding: 0.6rem;
+            min-width: 60px;
+          }
+
+          .client-icon-box .icon-wrapper {
+            width: 36px;
+            height: 36px;
+          }
+        }
+
+        @media (max-width: 1000px) {
+          #slide-16 > div:nth-child(2) {
+            grid-template-columns: 1fr !important;
+            gap: 1rem;
+          }
+
+          #slide-16 .server-core {
+            order: -1;
+            margin-bottom: 1rem;
+          }
+
+          #slide-2 > div:nth-child(2) {
+            grid-template-columns: 1fr !important;
+          }
         }
 
         .node-grid {
@@ -664,6 +694,191 @@ export default function ArchitecturePage() {
           100% { transform: scale(1); opacity: 1; }
         }
 
+        @keyframes dataFlow {
+          0% { stroke-dashoffset: 20; }
+          100% { stroke-dashoffset: 0; }
+        }
+
+        @keyframes fadeInUp {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes glow {
+          0%, 100% { box-shadow: 0 0 5px var(--accent-cyan), 0 0 10px rgba(0, 212, 255, 0.3); }
+          50% { box-shadow: 0 0 15px var(--accent-cyan), 0 0 30px rgba(0, 212, 255, 0.5); }
+        }
+
+        @keyframes rotate {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+
+        @keyframes shimmer {
+          0% { background-position: -200% 0; }
+          100% { background-position: 200% 0; }
+        }
+
+        @keyframes bounce {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-5px); }
+        }
+
+        @keyframes ripple {
+          0% { transform: scale(1); opacity: 1; }
+          100% { transform: scale(2); opacity: 0; }
+        }
+
+        .animate-fade-in {
+          animation: fadeInUp 0.6s ease-out forwards;
+        }
+
+        .animate-glow {
+          animation: glow 2s ease-in-out infinite;
+        }
+
+        .animate-bounce {
+          animation: bounce 2s ease-in-out infinite;
+        }
+
+        .comm-model-card {
+          background: var(--bg-card);
+          border: 2px solid var(--border-color);
+          border-radius: 16px;
+          padding: 1.5rem;
+          position: relative;
+          overflow: hidden;
+          transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .comm-model-card:hover {
+          transform: translateY(-5px);
+          border-color: var(--accent-cyan);
+        }
+
+        .comm-model-card::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 3px;
+          background: linear-gradient(90deg, var(--accent-cyan), var(--accent-green));
+        }
+
+        .client-icon-box {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          padding: 1rem;
+          background: var(--bg-elevated);
+          border: 1px solid var(--border-color);
+          border-radius: 12px;
+          transition: all 0.3s ease;
+          cursor: pointer;
+          min-width: 80px;
+        }
+
+        .client-icon-box:hover {
+          border-color: var(--accent-cyan);
+          transform: scale(1.05);
+          box-shadow: 0 0 20px rgba(0, 212, 255, 0.2);
+        }
+
+        .client-icon-box .icon-wrapper {
+          width: 48px;
+          height: 48px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 12px;
+          margin-bottom: 0.5rem;
+          transition: all 0.3s ease;
+        }
+
+        .client-icon-box:hover .icon-wrapper {
+          transform: scale(1.1);
+        }
+
+        .protocol-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.3rem;
+          padding: 0.25rem 0.6rem;
+          border-radius: 6px;
+          font-size: 0.65rem;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          border: 1px solid;
+        }
+
+        .protocol-tcp {
+          background: rgba(0, 212, 255, 0.1);
+          border-color: var(--accent-cyan);
+          color: var(--accent-cyan);
+        }
+
+        .protocol-ws {
+          background: rgba(139, 92, 246, 0.1);
+          border-color: var(--accent-purple);
+          color: var(--accent-purple);
+        }
+
+        .protocol-mqtt {
+          background: rgba(245, 158, 11, 0.1);
+          border-color: var(--accent-orange);
+          color: var(--accent-orange);
+        }
+
+        .topic-display {
+          font-family: 'JetBrains Mono', monospace;
+          background: var(--bg-dark);
+          border: 1px solid var(--border-color);
+          border-radius: 6px;
+          padding: 0.5rem 0.8rem;
+          font-size: 0.75rem;
+          color: var(--accent-green);
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+        }
+
+        .topic-display::before {
+          content: '📬';
+          font-size: 0.9rem;
+        }
+
+        .connection-line {
+          stroke-dasharray: 8 4;
+          animation: dataFlow 1s linear infinite;
+        }
+
+        .server-core {
+          background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(0, 212, 255, 0.15));
+          border: 2px solid var(--accent-green);
+          border-radius: 16px;
+          padding: 1.5rem;
+          text-align: center;
+          position: relative;
+        }
+
+        .server-core::after {
+          content: '';
+          position: absolute;
+          inset: -2px;
+          border-radius: 18px;
+          background: linear-gradient(45deg, var(--accent-cyan), var(--accent-green));
+          z-index: -1;
+          opacity: 0;
+          transition: opacity 0.3s;
+        }
+
+        .server-core:hover::after {
+          opacity: 0.3;
+        }
+
         .layer-hover:hover {
           filter: drop-shadow(0 0 8px var(--accent-cyan));
           cursor: pointer;
@@ -868,25 +1083,110 @@ export default function ArchitecturePage() {
 
         {/* Slide 2: Agenda */}
         <section className="slide" id="slide-2">
-          <div className="section-header">
-            <div className="section-number">AGENDA</div>
+          <div className="section-header" style={{ textAlign: 'center', marginBottom: '2rem' }}>
+            <div className="section-number" style={{ fontSize: '0.8rem', marginBottom: '0.8rem' }}>PRESENTATION OVERVIEW</div>
+            <h2 className="section-title" style={{
+              background: 'linear-gradient(135deg, var(--accent-cyan), var(--accent-green))',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text'
+            }}>Agenda</h2>
           </div>
-          <div className="agenda-grid">
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(2, 1fr)',
+            gap: '1rem',
+            maxWidth: '1000px',
+            margin: '0 auto'
+          }}>
             {[
-              'Introduction: Why OPC UA Exists',
-              'Core Concepts: Client–Server & PubSub',
-              'Address Space & Information Modeling',
-              'Services, Data Access & Historical Aggregates',
-              'Network, Transport & Security Architecture',
-              'Discovery, Scalability & Edge Deployments',
-              'PubSub Deep Dive & Tooling',
-              'Demo',
-            ].map((topic, i) => (
-              <div key={i} className="agenda-item">
-                <span className="agenda-time">{i + 1}.</span>
-                <span className="agenda-topic">{topic}</span>
+              { num: '01', title: 'Introduction', desc: 'Why OPC UA Exists & Industrial Reality', icon: <Info size={18} />, color: 'var(--accent-cyan)' },
+              { num: '02', title: 'Core Concepts', desc: 'Client–Server & PubSub Models', icon: <ArrowLeftRight size={18} />, color: 'var(--accent-green)' },
+              { num: '03', title: 'Address Space', desc: 'Information Modeling & NodeClasses', icon: <Database size={18} />, color: 'var(--accent-purple)' },
+              { num: '04', title: 'Services & Data Access', desc: 'Browse, Read, Subscribe, Call, History', icon: <Activity size={18} />, color: 'var(--accent-orange)' },
+              { num: '05', title: 'Network & Security', desc: 'Transport Protocols & Authentication', icon: <ShieldCheck size={18} />, color: 'var(--accent-pink)' },
+              { num: '06', title: 'Communication Architecture', desc: 'Cross-Platform Interoperability', icon: <Globe size={18} />, color: 'var(--accent-cyan)' },
+              { num: '07', title: 'PubSub Deep Dive', desc: 'Broker-less & Broker-based Patterns', icon: <Radio size={18} />, color: 'var(--accent-green)' },
+              { num: '08', title: 'Live Demonstration', desc: 'Interactive Dashboard & Real-time Data', icon: <Play size={18} />, color: 'var(--accent-orange)' },
+            ].map((item, i) => (
+              <div
+                key={i}
+                className="animate-fade-in"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '1.2rem',
+                  padding: '1rem 1.5rem',
+                  background: 'var(--bg-card)',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: '12px',
+                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                  cursor: 'pointer',
+                  animationDelay: `${i * 0.08}s`,
+                  opacity: 0,
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = item.color;
+                  e.currentTarget.style.transform = 'translateX(8px)';
+                  e.currentTarget.style.boxShadow = `0 4px 20px ${item.color}20`;
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = 'var(--border-color)';
+                  e.currentTarget.style.transform = 'translateX(0)';
+                  e.currentTarget.style.boxShadow = 'none';
+                }}
+                onClick={() => goToSlide(i + 3)}
+              >
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '48px',
+                  height: '48px',
+                  background: `${item.color}15`,
+                  borderRadius: '12px',
+                  color: item.color,
+                  flexShrink: 0
+                }}>
+                  {item.icon}
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', marginBottom: '0.3rem' }}>
+                    <span style={{
+                      fontFamily: 'JetBrains Mono, monospace',
+                      fontSize: '0.75rem',
+                      fontWeight: 700,
+                      color: item.color,
+                      opacity: 0.8
+                    }}>{item.num}</span>
+                    <span style={{
+                      fontSize: '1rem',
+                      fontWeight: 600,
+                      color: 'var(--text-primary)'
+                    }}>{item.title}</span>
+                  </div>
+                  <p style={{
+                    fontSize: '0.8rem',
+                    color: 'var(--text-muted)',
+                    margin: 0
+                  }}>{item.desc}</p>
+                </div>
+                <div style={{ color: 'var(--text-muted)', opacity: 0.5 }}>→</div>
               </div>
             ))}
+          </div>
+          <div style={{
+            textAlign: 'center',
+            marginTop: '2rem',
+            padding: '1rem',
+            background: 'linear-gradient(135deg, rgba(0, 212, 255, 0.05), rgba(16, 185, 129, 0.05))',
+            borderRadius: '12px',
+            border: '1px dashed var(--border-color)'
+          }}>
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: 0 }}>
+              <span style={{ color: 'var(--accent-cyan)' }}>Click any topic</span> to navigate directly •
+              Use <span style={{ fontFamily: 'JetBrains Mono', background: 'var(--bg-elevated)', padding: '0.1rem 0.4rem', borderRadius: '4px' }}>← →</span> keys to navigate
+            </p>
           </div>
         </section>
 
@@ -1649,60 +1949,241 @@ export default function ArchitecturePage() {
           </div>
         </section>
 
-        {/* Slide 16: Interoperability */}
-        <section className="slide" id="slide-16">
-          <div className="section-header" style={{ paddingTop: '2rem' }}>
-            <div className="section-number">SECTION 08 • INTEROPERABILITY</div>
-            <h2 className="section-title">Cross-Platform Interoperability</h2>
+        {/* Slide 16: Interoperability - Complete OPC-UA Architecture */}
+        <section className="slide" id="slide-16" style={{ paddingTop: '60px' }}>
+          <div className="section-header" style={{ marginBottom: '1rem' }}>
+            <div className="section-number">SECTION 08 • COMMUNICATION ARCHITECTURE</div>
+            <h2 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              Cross-Platform Interoperability
+              <span className="live-badge animate-glow" style={{ fontSize: '0.7rem' }}>
+                <div className="pulse-dot" />
+                DUAL MODEL
+              </span>
+            </h2>
           </div>
-          <div className="diagram-container" style={{ padding: '2rem', height: '300px' }}>
-            <svg viewBox="0 0 800 250" xmlns="http://www.w3.org/2000/svg">
-              {/* OPC UA Server */}
-              <rect x="300" y="80" width="200" height="80" rx="8" fill="var(--bg-elevated)" stroke="var(--accent-green)" strokeWidth="3" />
-              <text x="400" y="115" fill="white" fontSize="14" textAnchor="middle" fontWeight="bold">OPC UA SERVER</text>
-              <text x="400" y="140" fill="var(--accent-green)" fontSize="10" textAnchor="middle">Physics Simulation Engine</text>
 
-              {/* OPC UA Client */}
-              <g transform="translate(50,80)">
-                <rect width="180" height="80" rx="8" fill="var(--bg-elevated)" stroke="var(--accent-cyan)" strokeWidth="3" />
-                <text x="90" y="115" fill="white" fontSize="14" textAnchor="middle" fontWeight="bold">OPC UA CLIENT</text>
-                <text x="90" y="140" fill="var(--accent-cyan)" fontSize="10" textAnchor="middle">Python / .NET / C++</text>
-              </g>
-
-              {/* Web Console */}
-              <g transform="translate(570,80)">
-                <rect width="180" height="80" rx="8" fill="var(--bg-elevated)" stroke="var(--accent-pink)" strokeWidth="3" />
-                <text x="90" y="115" fill="white" fontSize="14" textAnchor="middle" fontWeight="bold">WEB INTERFACE</text>
-                <text x="90" y="140" fill="var(--accent-pink)" fontSize="10" textAnchor="middle">React Dashboard</text>
-              </g>
-
-              {/* Data Flow Arrows */}
-              <path d="M230 120 L300 120" stroke="var(--accent-cyan)" strokeWidth="2" strokeDasharray="5,5">
-                <animate attributeName="stroke-dashoffset" from="50" to="0" dur="2s" repeatCount="indefinite" />
-              </path>
-              <path d="M500 120 L570 120" stroke="var(--accent-pink)" strokeWidth="2" strokeDasharray="5,5">
-                <animate attributeName="stroke-dashoffset" from="0" to="50" dur="2s" repeatCount="indefinite" />
-              </path>
-            </svg>
-          </div>
-          <div className="content-grid" style={{ gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)' }}>
-            <div className="content-card">
-              <h3 style={{ color: 'var(--accent-cyan)' }}>Hardware Independence</h3>
-              <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-                OPC UA abstracts the hardware. Whether it's a simulated Python engine or a physical PLC, the Client sees the same semantic objects.
+          {/* Main Architecture Diagram */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr auto 1fr',
+            gap: '1.5rem',
+            alignItems: 'stretch',
+            marginBottom: '1.5rem'
+          }}>
+            {/* Left: Client-Server Model */}
+            <div className="comm-model-card" style={{ borderColor: 'var(--accent-cyan)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
+                <ArrowLeftRight size={20} style={{ color: 'var(--accent-cyan)' }} />
+                <h3 style={{ margin: 0, fontSize: '1rem', color: 'var(--accent-cyan)' }}>Client–Server Model</h3>
+              </div>
+              <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
+                Bidirectional • Stateful Sessions • Interactive Control
               </p>
+
+              {/* Protocol Badges */}
+              <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
+                <span className="protocol-badge protocol-tcp">
+                  <Cable size={12} /> TCP/IP :4840
+                </span>
+                <span className="protocol-badge protocol-ws">
+                  <Wifi size={12} /> WebSocket
+                </span>
+              </div>
+
+              {/* Client Icons */}
+              <div style={{ display: 'flex', gap: '0.8rem', justifyContent: 'center', marginTop: '1rem' }}>
+                <div className="client-icon-box">
+                  <div className="icon-wrapper" style={{ background: 'rgba(0, 212, 255, 0.1)' }}>
+                    <Monitor size={24} style={{ color: 'var(--accent-cyan)' }} />
+                  </div>
+                  <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>Desktop</span>
+                  <span className="protocol-badge protocol-tcp" style={{ marginTop: '0.3rem', fontSize: '0.55rem' }}>TCP/IP</span>
+                </div>
+                <div className="client-icon-box">
+                  <div className="icon-wrapper" style={{ background: 'rgba(139, 92, 246, 0.1)' }}>
+                    <Globe size={24} style={{ color: 'var(--accent-purple)' }} />
+                  </div>
+                  <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>Web Client</span>
+                  <span className="protocol-badge protocol-ws" style={{ marginTop: '0.3rem', fontSize: '0.55rem' }}>WebSocket</span>
+                </div>
+                <div className="client-icon-box">
+                  <div className="icon-wrapper" style={{ background: 'rgba(236, 72, 153, 0.1)' }}>
+                    <Smartphone size={24} style={{ color: 'var(--accent-pink)' }} />
+                  </div>
+                  <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>Mobile</span>
+                  <span className="protocol-badge protocol-ws" style={{ marginTop: '0.3rem', fontSize: '0.55rem' }}>WebSocket</span>
+                </div>
+              </div>
+
+              {/* Connection Animation */}
+              <div style={{ position: 'relative', height: '40px', marginTop: '1rem' }}>
+                <svg width="100%" height="40" viewBox="0 0 300 40">
+                  <defs>
+                    <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" stopColor="var(--accent-cyan)" />
+                      <stop offset="100%" stopColor="var(--accent-green)" />
+                    </linearGradient>
+                  </defs>
+                  <path d="M50 20 L250 20" stroke="url(#lineGradient)" strokeWidth="2" className="connection-line" fill="none" />
+                  <circle cx="150" cy="20" r="4" fill="var(--accent-cyan)">
+                    <animate attributeName="cx" values="50;250;50" dur="3s" repeatCount="indefinite" />
+                  </circle>
+                  <text x="150" y="35" textAnchor="middle" fill="var(--text-muted)" fontSize="8">Request/Response</text>
+                </svg>
+              </div>
             </div>
-            <div className="content-card">
-              <h3 style={{ color: 'var(--accent-green)' }}>Physics Integration</h3>
-              <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-                Our server runs real-time hydraulic equations (Head vs Flow), presenting calculated physics as safe, readable OPC UA variables.
+
+            {/* Center: OPC UA Server */}
+            <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+              <div className="server-core animate-glow" style={{ width: '200px' }}>
+                <div style={{
+                  width: '60px',
+                  height: '60px',
+                  margin: '0 auto 0.8rem',
+                  background: 'linear-gradient(135deg, var(--accent-green), var(--accent-cyan))',
+                  borderRadius: '16px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <Server size={32} style={{ color: 'white' }} />
+                </div>
+                <h3 style={{ margin: '0 0 0.3rem', fontSize: '1rem', color: 'white' }}>OPC UA Server</h3>
+                <p style={{ margin: 0, fontSize: '0.7rem', color: 'var(--accent-green)' }}>Simulation Engine</p>
+                <div style={{
+                  marginTop: '0.8rem',
+                  padding: '0.4rem',
+                  background: 'var(--bg-dark)',
+                  borderRadius: '6px',
+                  fontFamily: 'JetBrains Mono',
+                  fontSize: '0.6rem',
+                  color: 'var(--accent-cyan)'
+                }}>
+                  opc.tcp://localhost:4840
+                </div>
+              </div>
+
+              {/* Dual arrows */}
+              <svg width="200" height="80" style={{ marginTop: '-10px' }}>
+                <defs>
+                  <marker id="arrowLeft" markerWidth="8" markerHeight="8" refX="0" refY="3" orient="auto">
+                    <path d="M8,0 L8,6 L0,3 z" fill="var(--accent-cyan)" />
+                  </marker>
+                  <marker id="arrowRight" markerWidth="8" markerHeight="8" refX="8" refY="3" orient="auto">
+                    <path d="M0,0 L0,6 L8,3 z" fill="var(--accent-orange)" />
+                  </marker>
+                </defs>
+                <path d="M20 30 L80 30" stroke="var(--accent-cyan)" strokeWidth="2" markerStart="url(#arrowLeft)" className="connection-line" />
+                <path d="M120 30 L180 30" stroke="var(--accent-orange)" strokeWidth="2" markerEnd="url(#arrowRight)" className="connection-line" />
+                <text x="50" y="50" textAnchor="middle" fill="var(--accent-cyan)" fontSize="8" fontWeight="600">C/S</text>
+                <text x="150" y="50" textAnchor="middle" fill="var(--accent-orange)" fontSize="8" fontWeight="600">PubSub</text>
+              </svg>
+            </div>
+
+            {/* Right: PubSub Model */}
+            <div className="comm-model-card" style={{ borderColor: 'var(--accent-orange)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
+                <Radio size={20} style={{ color: 'var(--accent-orange)' }} />
+                <h3 style={{ margin: 0, fontSize: '1rem', color: 'var(--accent-orange)' }}>Pub/Sub Model</h3>
+              </div>
+              <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
+                Scalable • Stateless • Decoupled Distribution
               </p>
+
+              {/* Protocol Badge */}
+              <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
+                <span className="protocol-badge protocol-mqtt">
+                  <MessageSquare size={12} /> MQTT Broker
+                </span>
+              </div>
+
+              {/* Broker Icon */}
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                margin: '0.8rem 0',
+                padding: '1rem',
+                background: 'rgba(245, 158, 11, 0.1)',
+                borderRadius: '12px',
+                border: '1px dashed var(--accent-orange)'
+              }}>
+                <Cloud size={32} style={{ color: 'var(--accent-orange)', marginBottom: '0.5rem' }} />
+                <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--accent-orange)' }}>Message Broker</span>
+                <span style={{ fontSize: '0.6rem', color: 'var(--text-muted)' }}>MQTT / AMQP</span>
+              </div>
+
+              {/* Topic Display */}
+              <div className="topic-display" style={{ marginBottom: '0.8rem' }}>
+                plant/pumps/Pump_01/telemetry
+              </div>
+
+              {/* Subscribers */}
+              <div style={{ display: 'flex', gap: '0.6rem', justifyContent: 'center' }}>
+                <div className="client-icon-box" style={{ padding: '0.6rem' }}>
+                  <Globe size={20} style={{ color: 'var(--accent-pink)' }} />
+                  <span style={{ fontSize: '0.55rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>Dashboard</span>
+                </div>
+                <div className="client-icon-box" style={{ padding: '0.6rem' }}>
+                  <Database size={20} style={{ color: 'var(--accent-purple)' }} />
+                  <span style={{ fontSize: '0.55rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>Historian</span>
+                </div>
+                <div className="client-icon-box" style={{ padding: '0.6rem' }}>
+                  <Activity size={20} style={{ color: 'var(--accent-green)' }} />
+                  <span style={{ fontSize: '0.55rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>Analytics</span>
+                </div>
+              </div>
+
+              {/* Subscription Flow */}
+              <div style={{ position: 'relative', height: '30px', marginTop: '0.8rem' }}>
+                <svg width="100%" height="30" viewBox="0 0 300 30">
+                  <circle r="3" fill="var(--accent-orange)">
+                    <animate attributeName="cx" values="50;150;250" dur="2s" repeatCount="indefinite" />
+                    <animate attributeName="cy" values="15;15;15" dur="2s" repeatCount="indefinite" />
+                  </circle>
+                  <circle r="3" fill="var(--accent-orange)" opacity="0.5">
+                    <animate attributeName="cx" values="50;150;250" dur="2s" begin="0.3s" repeatCount="indefinite" />
+                  </circle>
+                  <circle r="3" fill="var(--accent-orange)" opacity="0.3">
+                    <animate attributeName="cx" values="50;150;250" dur="2s" begin="0.6s" repeatCount="indefinite" />
+                  </circle>
+                  <text x="150" y="28" textAnchor="middle" fill="var(--text-muted)" fontSize="7">Broadcast to Subscribers</text>
+                </svg>
+              </div>
             </div>
           </div>
-          <div style={{ marginTop: '1.5rem', textAlign: 'center' }}>
-            <button className="btn-action" onClick={() => goToSlide(17)}>
-              Continue to Future Trends →
-            </button>
+
+          {/* Bottom Summary */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(4, 1fr)',
+            gap: '1rem'
+          }}>
+            {[
+              { icon: <Cable size={18} />, title: 'TCP/IP', desc: 'Desktop OPC UA Clients', color: 'var(--accent-cyan)' },
+              { icon: <Wifi size={18} />, title: 'WebSocket', desc: 'Browser-based Clients', color: 'var(--accent-purple)' },
+              { icon: <Cloud size={18} />, title: 'MQTT Broker', desc: 'Scalable Distribution', color: 'var(--accent-orange)' },
+              { icon: <Radio size={18} />, title: 'Topics', desc: 'Semantic Namespaces', color: 'var(--accent-green)' },
+            ].map((item, i) => (
+              <div key={i} className="content-card animate-fade-in" style={{
+                textAlign: 'center',
+                padding: '0.8rem',
+                animationDelay: `${i * 0.1}s`
+              }}>
+                <div style={{ color: item.color, marginBottom: '0.3rem', display: 'flex', justifyContent: 'center' }}>
+                  {item.icon}
+                </div>
+                <div style={{ fontSize: '0.8rem', fontWeight: 600, color: item.color }}>{item.title}</div>
+                <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>{item.desc}</div>
+              </div>
+            ))}
+          </div>
+
+          <div className="highlight-box" style={{ marginTop: '1rem' }}>
+            <p style={{ margin: 0 }}>
+              <strong style={{ color: 'var(--accent-cyan)' }}>Client–Server</strong> for interactive control & real-time monitoring •
+              <strong style={{ color: 'var(--accent-orange)' }}> PubSub</strong> for massive scale telemetry to cloud, historians & analytics
+            </p>
           </div>
         </section>
 
