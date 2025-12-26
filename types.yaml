@@ -1,0 +1,1079 @@
+# =============================================================================
+# OPC-UA Type Definitions
+# Wastewater Treatment Facility - Pump Simulation
+# =============================================================================
+# This file defines REUSABLE OPC-UA types that can be instantiated across
+# multiple sites/facilities. Asset instances are defined in assets.json.
+#
+# Usage:
+#   1. Server loads types.yaml to create OPC-UA ObjectTypes
+#   2. Server loads assets.json to instantiate objects from these types
+#   3. Simulation binds to instantiated pump/chamber objects
+# =============================================================================
+
+namespace: 1
+namespaceUri: "http://cleanwaterservices.org/opcua"
+
+# =============================================================================
+# ENGINEERING UNITS (UNECE Codes)
+# Reference: OPC UA Part 8 - Annex A
+# =============================================================================
+engineeringUnits:
+  cubicMetersPerHour:
+    displayName: "m³/h"
+    description: "Cubic meters per hour"
+    unitId: 4403510
+
+  revolutionsPerMinute:
+    displayName: "rpm"
+    description: "Revolutions per minute"
+    unitId: 4403766
+
+  bar:
+    displayName: "bar"
+    description: "Bar (pressure)"
+    unitId: 4342098
+
+  ampere:
+    displayName: "A"
+    description: "Ampere"
+    unitId: 4279632
+
+  volt:
+    displayName: "V"
+    description: "Volt"
+    unitId: 5765716
+
+  kilowatt:
+    displayName: "kW"
+    description: "Kilowatt"
+    unitId: 4932695
+
+  hertz:
+    displayName: "Hz"
+    description: "Hertz"
+    unitId: 4408138
+
+  degreesCelsius:
+    displayName: "°C"
+    description: "Degrees Celsius"
+    unitId: 4408652
+
+  millimetersPerSecond:
+    displayName: "mm/s"
+    description: "Millimeters per second (velocity)"
+    unitId: 4403001
+
+  hours:
+    displayName: "h"
+    description: "Hours"
+    unitId: 4404536
+
+  meters:
+    displayName: "m"
+    description: "Meters"
+    unitId: 4403766
+
+  millimeters:
+    displayName: "mm"
+    description: "Millimeters"
+    unitId: 4403505
+
+# =============================================================================
+# CUSTOM DATA TYPES
+# =============================================================================
+dataTypes:
+  # Status structure for complex asset status
+  AssetStatusDataType:
+    type: Structure
+    description: "Complex status information for an asset"
+    fields:
+      StatusCode:
+        dataType: UInt32
+        description: "Numeric status code"
+      StatusText:
+        dataType: String
+        description: "Human-readable status message"
+      Timestamp:
+        dataType: DateTime
+        description: "Time of status change"
+      Severity:
+        dataType: UInt16
+        description: "Severity level (0-1000)"
+
+  # Pump operating point for curve data
+  OperatingPointDataType:
+    type: Structure
+    description: "Single point on pump curve"
+    fields:
+      Flow:
+        dataType: Double
+        description: "Flow rate in m³/h"
+      Head:
+        dataType: Double
+        description: "Total head in meters"
+      Power:
+        dataType: Double
+        description: "Power consumption in kW"
+      Efficiency:
+        dataType: Double
+        description: "Efficiency percentage"
+
+  # Simulation mode enumeration
+  SimulationModeEnumeration:
+    type: Enumeration
+    description: "Pump simulation operating modes"
+    values:
+      OPTIMAL: 0
+      AGED: 1
+      DEGRADED: 2
+      FAILURE: 3
+
+  # Failure type enumeration
+  FailureTypeEnumeration:
+    type: Enumeration
+    description: "Types of pump failures that can be simulated"
+    values:
+      NONE: 0
+      BEARING: 1
+      SEAL: 2
+      CAVITATION: 3
+      IMPELLER: 4
+      MOTOR: 5
+
+# =============================================================================
+# OBJECT TYPES
+# =============================================================================
+# Inheritance Hierarchy:
+#   BaseObjectType (OPC UA Standard)
+#     └── AssetType (abstract - base for all plant assets)
+#           ├── PumpType (centrifugal pump with full instrumentation)
+#           │     └── InfluentPumpType (adds wet well level)
+#           └── ChamberType (tanks, channels, clarifiers)
+#
+#   BaseObjectType
+#     └── SimulationConfigType (simulation control)
+# =============================================================================
+
+types:
+  # ---------------------------------------------------------------------------
+  # AssetType - Abstract base type for all physical assets
+  # ---------------------------------------------------------------------------
+  AssetType:
+    type: ObjectType
+    isAbstract: true
+    base: BaseObjectType
+    description: "Abstract base type for all physical assets in the facility"
+
+    properties:
+      AssetId:
+        type: Property
+        dataType: String
+        modellingRule: Mandatory
+        description: "Unique asset identifier"
+
+      AssetName:
+        type: Property
+        dataType: String
+        modellingRule: Mandatory
+        description: "Human-readable asset name"
+
+      Location:
+        type: Property
+        dataType: String
+        modellingRule: Optional
+        description: "Physical location description"
+
+      InstallationDate:
+        type: Property
+        dataType: DateTime
+        modellingRule: Optional
+        description: "Date asset was installed"
+
+      Manufacturer:
+        type: Property
+        dataType: String
+        modellingRule: Optional
+        description: "Equipment manufacturer"
+
+      Model:
+        type: Property
+        dataType: String
+        modellingRule: Optional
+        description: "Equipment model number"
+
+      SerialNumber:
+        type: Property
+        dataType: String
+        modellingRule: Optional
+        description: "Equipment serial number"
+
+  # ---------------------------------------------------------------------------
+  # PumpType - Centrifugal pump with full instrumentation
+  # ---------------------------------------------------------------------------
+  PumpType:
+    type: ObjectType
+    base: AssetType
+    description: "Centrifugal pump with standard instrumentation for flow, pressure, and motor monitoring"
+
+    components:
+      # === FLOW MEASUREMENT ===
+      FlowRate:
+        type: AnalogItemType
+        dataType: Double
+        modellingRule: Mandatory
+        description: "Discharge flow rate from magnetic flow meter"
+        accessLevel: Read
+        engineeringUnits: cubicMetersPerHour
+        euRange:
+          low: 0.0
+          high: 5000.0
+        instrumentRange:
+          low: 0.0
+          high: 6000.0
+
+      # === PRESSURE MEASUREMENTS ===
+      SuctionPressure:
+        type: AnalogItemType
+        dataType: Double
+        modellingRule: Mandatory
+        description: "Suction pressure at pump inlet flange"
+        accessLevel: Read
+        engineeringUnits: bar
+        euRange:
+          low: -0.5
+          high: 1.0
+        instrumentRange:
+          low: -1.0
+          high: 2.0
+
+      DischargePressure:
+        type: AnalogItemType
+        dataType: Double
+        modellingRule: Mandatory
+        description: "Discharge pressure at pump outlet flange"
+        accessLevel: Read
+        engineeringUnits: bar
+        euRange:
+          low: 0.0
+          high: 3.0
+        instrumentRange:
+          low: 0.0
+          high: 5.0
+
+      # === VFD / MOTOR ELECTRICAL DATA ===
+      RPM:
+        type: AnalogItemType
+        dataType: Double
+        modellingRule: Mandatory
+        description: "Motor speed from VFD feedback"
+        accessLevel: Read
+        engineeringUnits: revolutionsPerMinute
+        euRange:
+          low: 0.0
+          high: 1800.0
+        instrumentRange:
+          low: 0.0
+          high: 2000.0
+
+      MotorCurrent:
+        type: AnalogItemType
+        dataType: Double
+        modellingRule: Mandatory
+        description: "Motor current from VFD"
+        accessLevel: Read
+        engineeringUnits: ampere
+        euRange:
+          low: 0.0
+          high: 300.0
+        instrumentRange:
+          low: 0.0
+          high: 400.0
+
+      Voltage:
+        type: AnalogItemType
+        dataType: Double
+        modellingRule: Mandatory
+        description: "Supply voltage to motor"
+        accessLevel: Read
+        engineeringUnits: volt
+        euRange:
+          low: 0.0
+          high: 520.0
+        instrumentRange:
+          low: 0.0
+          high: 600.0
+
+      PowerConsumption:
+        type: AnalogItemType
+        dataType: Double
+        modellingRule: Mandatory
+        description: "Electrical power consumption from VFD"
+        accessLevel: Read
+        engineeringUnits: kilowatt
+        euRange:
+          low: 0.0
+          high: 200.0
+        instrumentRange:
+          low: 0.0
+          high: 250.0
+
+      PowerFactor:
+        type: AnalogItemType
+        dataType: Double
+        modellingRule: Mandatory
+        description: "Electrical power factor"
+        accessLevel: Read
+        euRange:
+          low: 0.0
+          high: 1.0
+        instrumentRange:
+          low: 0.0
+          high: 1.0
+
+      VFDFrequency:
+        type: AnalogItemType
+        dataType: Double
+        modellingRule: Mandatory
+        description: "VFD output frequency"
+        accessLevel: Read
+        engineeringUnits: hertz
+        euRange:
+          low: 0.0
+          high: 60.0
+        instrumentRange:
+          low: 0.0
+          high: 65.0
+
+      # === TEMPERATURE MEASUREMENTS ===
+      MotorWindingTemp:
+        type: AnalogItemType
+        dataType: Double
+        modellingRule: Mandatory
+        description: "Motor stator winding temperature from embedded RTD"
+        accessLevel: Read
+        engineeringUnits: degreesCelsius
+        euRange:
+          low: 0.0
+          high: 180.0
+        instrumentRange:
+          low: -20.0
+          high: 200.0
+
+      BearingTemp_DE:
+        type: AnalogItemType
+        dataType: Double
+        modellingRule: Mandatory
+        description: "Drive end bearing housing temperature"
+        accessLevel: Read
+        engineeringUnits: degreesCelsius
+        euRange:
+          low: 0.0
+          high: 120.0
+        instrumentRange:
+          low: -20.0
+          high: 150.0
+
+      BearingTemp_NDE:
+        type: AnalogItemType
+        dataType: Double
+        modellingRule: Mandatory
+        description: "Non-drive end bearing housing temperature"
+        accessLevel: Read
+        engineeringUnits: degreesCelsius
+        euRange:
+          low: 0.0
+          high: 120.0
+        instrumentRange:
+          low: -20.0
+          high: 150.0
+
+      SealChamberTemp:
+        type: AnalogItemType
+        dataType: Double
+        modellingRule: Mandatory
+        description: "Mechanical seal chamber temperature"
+        accessLevel: Read
+        engineeringUnits: degreesCelsius
+        euRange:
+          low: 0.0
+          high: 100.0
+        instrumentRange:
+          low: -20.0
+          high: 120.0
+
+      AmbientTemp:
+        type: AnalogItemType
+        dataType: Double
+        modellingRule: Optional
+        description: "Pump room ambient temperature"
+        accessLevel: Read
+        engineeringUnits: degreesCelsius
+        euRange:
+          low: -10.0
+          high: 50.0
+        instrumentRange:
+          low: -40.0
+          high: 80.0
+
+      # === VIBRATION MEASUREMENTS ===
+      Vibration_DE_H:
+        type: AnalogItemType
+        dataType: Double
+        modellingRule: Mandatory
+        description: "Drive end bearing vibration - Horizontal axis"
+        accessLevel: Read
+        engineeringUnits: millimetersPerSecond
+        euRange:
+          low: 0.0
+          high: 30.0
+        instrumentRange:
+          low: 0.0
+          high: 50.0
+
+      Vibration_DE_V:
+        type: AnalogItemType
+        dataType: Double
+        modellingRule: Mandatory
+        description: "Drive end bearing vibration - Vertical axis"
+        accessLevel: Read
+        engineeringUnits: millimetersPerSecond
+        euRange:
+          low: 0.0
+          high: 30.0
+        instrumentRange:
+          low: 0.0
+          high: 50.0
+
+      Vibration_DE_A:
+        type: AnalogItemType
+        dataType: Double
+        modellingRule: Mandatory
+        description: "Drive end bearing vibration - Axial"
+        accessLevel: Read
+        engineeringUnits: millimetersPerSecond
+        euRange:
+          low: 0.0
+          high: 30.0
+        instrumentRange:
+          low: 0.0
+          high: 50.0
+
+      Vibration_NDE_H:
+        type: AnalogItemType
+        dataType: Double
+        modellingRule: Mandatory
+        description: "Non-drive end bearing vibration - Horizontal axis"
+        accessLevel: Read
+        engineeringUnits: millimetersPerSecond
+        euRange:
+          low: 0.0
+          high: 30.0
+        instrumentRange:
+          low: 0.0
+          high: 50.0
+
+      Vibration_NDE_V:
+        type: AnalogItemType
+        dataType: Double
+        modellingRule: Mandatory
+        description: "Non-drive end bearing vibration - Vertical axis"
+        accessLevel: Read
+        engineeringUnits: millimetersPerSecond
+        euRange:
+          low: 0.0
+          high: 30.0
+        instrumentRange:
+          low: 0.0
+          high: 50.0
+
+      Vibration_NDE_A:
+        type: AnalogItemType
+        dataType: Double
+        modellingRule: Mandatory
+        description: "Non-drive end bearing vibration - Axial"
+        accessLevel: Read
+        engineeringUnits: millimetersPerSecond
+        euRange:
+          low: 0.0
+          high: 30.0
+        instrumentRange:
+          low: 0.0
+          high: 50.0
+
+      # === RUNTIME COUNTERS ===
+      RuntimeHours:
+        type: AnalogItemType
+        dataType: Double
+        modellingRule: Mandatory
+        description: "Total accumulated runtime hours"
+        accessLevel: Read
+        engineeringUnits: hours
+        euRange:
+          low: 0.0
+          high: 200000.0
+
+      StartCount:
+        type: DataItemType
+        dataType: UInt32
+        modellingRule: Mandatory
+        description: "Total number of pump starts"
+        accessLevel: Read
+
+      # === DISCRETE STATUS ===
+      RunCommand:
+        type: TwoStateDiscreteType
+        modellingRule: Mandatory
+        description: "Run command to pump"
+        accessLevel: ReadWrite
+        trueState: "Run"
+        falseState: "Stop"
+
+      RunFeedback:
+        type: TwoStateDiscreteType
+        modellingRule: Mandatory
+        description: "Running status feedback from motor contactor"
+        accessLevel: Read
+        trueState: "Running"
+        falseState: "Stopped"
+
+      FaultStatus:
+        type: TwoStateDiscreteType
+        modellingRule: Mandatory
+        description: "Fault status from VFD or protection relay"
+        accessLevel: Read
+        trueState: "Faulted"
+        falseState: "Normal"
+
+      ReadyStatus:
+        type: TwoStateDiscreteType
+        modellingRule: Mandatory
+        description: "Ready for start (no faults, interlocks satisfied)"
+        accessLevel: Read
+        trueState: "Ready"
+        falseState: "Not Ready"
+
+      LocalRemote:
+        type: TwoStateDiscreteType
+        modellingRule: Mandatory
+        description: "Control mode selector position"
+        accessLevel: Read
+        trueState: "Remote"
+        falseState: "Local"
+
+      # === DESIGN SPECIFICATIONS ===
+      DesignSpecs:
+        type: Object
+        modellingRule: Mandatory
+        typeDefinition: BaseObjectType
+        description: "Manufacturer design specifications and nameplate data"
+        components:
+          DesignFlow:
+            type: Property
+            dataType: Double
+            modellingRule: Mandatory
+            description: "Design flow rate at BEP"
+            engineeringUnits: cubicMetersPerHour
+
+          DesignHead:
+            type: Property
+            dataType: Double
+            modellingRule: Mandatory
+            description: "Design total dynamic head"
+            engineeringUnits: meters
+
+          DesignPower:
+            type: Property
+            dataType: Double
+            modellingRule: Mandatory
+            description: "Motor rated power"
+            engineeringUnits: kilowatt
+
+          MaxRPM:
+            type: Property
+            dataType: UInt32
+            modellingRule: Mandatory
+            description: "Maximum motor speed"
+            engineeringUnits: revolutionsPerMinute
+
+          MinRPM:
+            type: Property
+            dataType: UInt32
+            modellingRule: Mandatory
+            description: "Minimum continuous speed"
+            engineeringUnits: revolutionsPerMinute
+
+          FullLoadAmps:
+            type: Property
+            dataType: Double
+            modellingRule: Mandatory
+            description: "Motor full load amperage"
+            engineeringUnits: ampere
+
+          RatedVoltage:
+            type: Property
+            dataType: UInt32
+            modellingRule: Mandatory
+            description: "Motor rated voltage"
+            engineeringUnits: volt
+
+          ImpellerDiameter:
+            type: Property
+            dataType: Double
+            modellingRule: Mandatory
+            description: "Impeller diameter"
+            engineeringUnits: millimeters
+
+          NPSHRequired:
+            type: Property
+            dataType: Double
+            modellingRule: Mandatory
+            description: "Net Positive Suction Head required"
+            engineeringUnits: meters
+
+          ManufacturerBEP_Efficiency:
+            type: Property
+            dataType: Double
+            modellingRule: Mandatory
+            description: "Efficiency at BEP per manufacturer"
+
+          MotorEfficiency:
+            type: Property
+            dataType: Double
+            modellingRule: Mandatory
+            description: "Motor efficiency at full load"
+
+    # Methods
+    methods:
+      StartPump:
+        description: "Issue start command to pump"
+        executable: true
+        inputArguments: []
+        outputArguments:
+          - name: "Success"
+            dataType: Boolean
+            description: "True if start command accepted"
+          - name: "Message"
+            dataType: String
+            description: "Status message"
+
+      StopPump:
+        description: "Issue stop command to pump"
+        executable: true
+        inputArguments: []
+        outputArguments:
+          - name: "Success"
+            dataType: Boolean
+            description: "True if stop command accepted"
+          - name: "Message"
+            dataType: String
+            description: "Status message"
+
+      SetSpeed:
+        description: "Set VFD speed setpoint"
+        executable: true
+        inputArguments:
+          - name: "TargetRPM"
+            dataType: Double
+            description: "Target speed in RPM (must be within MinRPM-MaxRPM)"
+        outputArguments:
+          - name: "Success"
+            dataType: Boolean
+            description: "True if speed setpoint accepted"
+          - name: "Message"
+            dataType: String
+            description: "Status message"
+
+      ResetFault:
+        description: "Reset VFD fault"
+        executable: true
+        inputArguments: []
+        outputArguments:
+          - name: "Success"
+            dataType: Boolean
+            description: "True if fault reset successful"
+
+  # ---------------------------------------------------------------------------
+  # InfluentPumpType - Extends PumpType with wet well level
+  # ---------------------------------------------------------------------------
+  InfluentPumpType:
+    type: ObjectType
+    base: PumpType
+    description: "Influent pump for wastewater lift station with wet well integration"
+
+    components:
+      WetWellLevel:
+        type: AnalogItemType
+        dataType: Double
+        modellingRule: Mandatory
+        description: "Wet well level from ultrasonic or pressure transmitter"
+        accessLevel: Read
+        engineeringUnits: meters
+        euRange:
+          low: 0.0
+          high: 8.0
+        instrumentRange:
+          low: 0.0
+          high: 10.0
+
+  # ---------------------------------------------------------------------------
+  # ChamberType - Tanks, channels, clarifiers
+  # ---------------------------------------------------------------------------
+  ChamberType:
+    type: ObjectType
+    base: AssetType
+    description: "Tanks, channels, clarifiers - containment with level/temperature monitoring"
+
+    components:
+      Level:
+        type: AnalogItemType
+        dataType: Double
+        modellingRule: Mandatory
+        description: "Liquid level"
+        accessLevel: Read
+        engineeringUnits: meters
+        euRange:
+          low: 0.0
+          high: 10.0
+        instrumentRange:
+          low: 0.0
+          high: 12.0
+
+      Temperature:
+        type: AnalogItemType
+        dataType: Double
+        modellingRule: Optional
+        description: "Liquid temperature"
+        accessLevel: Read
+        engineeringUnits: degreesCelsius
+        euRange:
+          low: 0.0
+          high: 50.0
+        instrumentRange:
+          low: -10.0
+          high: 60.0
+
+    methods:
+      TriggerHighLevelAlarm:
+        description: "Manually trigger high level alarm for testing"
+        executable: true
+        inputArguments: []
+        outputArguments: []
+
+  # ---------------------------------------------------------------------------
+  # SimulationConfigType - Simulation control object
+  # ---------------------------------------------------------------------------
+  SimulationConfigType:
+    type: ObjectType
+    base: BaseObjectType
+    description: "Configuration object for controlling pump simulation behavior"
+
+    properties:
+      Mode:
+        type: Property
+        dataType: SimulationModeEnumeration
+        modellingRule: Mandatory
+        description: "Current simulation mode"
+        accessLevel: ReadWrite
+        value: 0  # OPTIMAL
+
+      SimulationInterval:
+        type: Property
+        dataType: Double
+        modellingRule: Mandatory
+        description: "Simulation update interval in milliseconds"
+        accessLevel: ReadWrite
+        value: 1000.0
+
+      TimeAcceleration:
+        type: Property
+        dataType: Double
+        modellingRule: Mandatory
+        description: "Time acceleration factor (1.0 = real-time)"
+        accessLevel: ReadWrite
+        value: 1.0
+
+    components:
+      AgedConfig:
+        type: Object
+        modellingRule: Mandatory
+        typeDefinition: BaseObjectType
+        description: "Configuration for AGED simulation mode"
+        components:
+          YearsOfOperation:
+            type: Property
+            dataType: Double
+            modellingRule: Mandatory
+            description: "Simulated years of operation"
+            accessLevel: ReadWrite
+            value: 5.0
+
+          AverageRunHoursPerYear:
+            type: Property
+            dataType: Double
+            modellingRule: Mandatory
+            description: "Average runtime hours per year"
+            accessLevel: ReadWrite
+            value: 6000.0
+
+          StartCyclesPerYear:
+            type: Property
+            dataType: UInt32
+            modellingRule: Mandatory
+            description: "Average start cycles per year"
+            accessLevel: ReadWrite
+            value: 500
+
+      DegradedConfig:
+        type: Object
+        modellingRule: Mandatory
+        typeDefinition: BaseObjectType
+        description: "Configuration for DEGRADED simulation mode"
+        components:
+          ImpellerWear:
+            type: Property
+            dataType: Double
+            modellingRule: Mandatory
+            description: "Impeller wear percentage (0-50)"
+            accessLevel: ReadWrite
+            value: 15.0
+
+          BearingWear:
+            type: Property
+            dataType: Double
+            modellingRule: Mandatory
+            description: "Bearing damage percentage (0-100)"
+            accessLevel: ReadWrite
+            value: 20.0
+
+          SealWear:
+            type: Property
+            dataType: Double
+            modellingRule: Mandatory
+            description: "Seal degradation percentage (0-100)"
+            accessLevel: ReadWrite
+            value: 25.0
+
+      FailureConfig:
+        type: Object
+        modellingRule: Mandatory
+        typeDefinition: BaseObjectType
+        description: "Configuration for FAILURE simulation mode"
+        components:
+          FailureType:
+            type: Property
+            dataType: FailureTypeEnumeration
+            modellingRule: Mandatory
+            description: "Type of failure to simulate"
+            accessLevel: ReadWrite
+            value: 0  # NONE
+
+          FailureProgression:
+            type: Property
+            dataType: Double
+            modellingRule: Mandatory
+            description: "Failure progression percentage (0-100)"
+            accessLevel: ReadWrite
+            value: 0.0
+
+          TimeToFailure:
+            type: Property
+            dataType: Double
+            modellingRule: Mandatory
+            description: "Simulated hours until complete failure"
+            accessLevel: ReadWrite
+            value: 100.0
+
+      FlowProfile:
+        type: Object
+        modellingRule: Mandatory
+        typeDefinition: BaseObjectType
+        description: "Diurnal flow profile configuration"
+        components:
+          DiurnalEnabled:
+            type: Property
+            dataType: Boolean
+            modellingRule: Mandatory
+            description: "Enable daily flow pattern variation"
+            accessLevel: ReadWrite
+            value: true
+
+          BaseFlow:
+            type: Property
+            dataType: Double
+            modellingRule: Mandatory
+            description: "Minimum demand flow rate"
+            accessLevel: ReadWrite
+            value: 1600.0
+            engineeringUnits: cubicMetersPerHour
+
+          PeakFlow:
+            type: Property
+            dataType: Double
+            modellingRule: Mandatory
+            description: "Maximum demand flow rate"
+            accessLevel: ReadWrite
+            value: 4000.0
+            engineeringUnits: cubicMetersPerHour
+
+          PeakHour1:
+            type: Property
+            dataType: UInt32
+            modellingRule: Mandatory
+            description: "Morning peak hour (0-23)"
+            accessLevel: ReadWrite
+            value: 7
+
+          PeakHour2:
+            type: Property
+            dataType: UInt32
+            modellingRule: Mandatory
+            description: "Evening peak hour (0-23)"
+            accessLevel: ReadWrite
+            value: 19
+
+    methods:
+      SetMode:
+        description: "Change simulation mode"
+        executable: true
+        inputArguments:
+          - name: "NewMode"
+            dataType: SimulationModeEnumeration
+            description: "Target simulation mode"
+        outputArguments:
+          - name: "Success"
+            dataType: Boolean
+            description: "True if mode change successful"
+
+      TriggerFailure:
+        description: "Initiate failure sequence"
+        executable: true
+        inputArguments:
+          - name: "FailureType"
+            dataType: FailureTypeEnumeration
+            description: "Type of failure to trigger"
+        outputArguments:
+          - name: "Success"
+            dataType: Boolean
+            description: "True if failure initiated"
+
+      ResetSimulation:
+        description: "Reset to OPTIMAL mode with zero runtime"
+        executable: true
+        inputArguments: []
+        outputArguments:
+          - name: "Success"
+            dataType: Boolean
+            description: "True if reset successful"
+
+      ApplyAging:
+        description: "Instantly apply specified years of wear"
+        executable: true
+        inputArguments:
+          - name: "Years"
+            dataType: Double
+            description: "Years of operation to simulate"
+        outputArguments:
+          - name: "Success"
+            dataType: Boolean
+            description: "True if aging applied"
+
+# =============================================================================
+# ALARM DEFINITIONS
+# =============================================================================
+alarmTypes:
+  HighVibrationAlarm:
+    type: LimitAlarmType
+    description: "High vibration alarm - indicates mechanical issue"
+    severity: 800
+    conditionClassId: ProcessConditionClassType
+    inputNode: Vibration_DE_H
+    highHighLimit: 11.2  # mm/s - Danger zone per ISO 10816
+    highLimit: 7.1       # mm/s - Alert zone
+    message: "High vibration detected on pump bearing"
+
+  HighBearingTempAlarm:
+    type: LimitAlarmType
+    description: "High bearing temperature alarm"
+    severity: 850
+    conditionClassId: ProcessConditionClassType
+    inputNode: BearingTemp_DE
+    highHighLimit: 95.0  # °C - Critical
+    highLimit: 80.0      # °C - Warning
+    message: "High bearing temperature detected"
+
+  OverloadAlarm:
+    type: LimitAlarmType
+    description: "Motor current overload alarm"
+    severity: 900
+    conditionClassId: ProcessConditionClassType
+    inputNode: MotorCurrent
+    highHighLimit: 248.0  # 110% of FLA (225A)
+    highLimit: 236.0      # 105% of FLA
+    message: "Motor overload condition detected"
+
+  CavitationAlarm:
+    type: LimitAlarmType
+    description: "Low suction pressure cavitation warning"
+    severity: 750
+    conditionClassId: ProcessConditionClassType
+    inputNode: SuctionPressure
+    lowLimit: 0.1         # bar - Warning
+    lowLowLimit: -0.2     # bar - Critical
+    message: "Low suction pressure - possible cavitation"
+
+  HighLevelAlarm_WetWell:
+    type: LimitAlarmType
+    description: "Wet well high level alarm"
+    severity: 850
+    conditionClassId: ProcessConditionClassType
+    inputNode: Level
+    highHighLimit: 7.5    # m - Overflow imminent
+    highLimit: 6.5        # m - High level warning
+    message: "Wet well high level"
+
+  LowLevelAlarm_WetWell:
+    type: LimitAlarmType
+    description: "Wet well low level alarm - pump protection"
+    severity: 800
+    conditionClassId: ProcessConditionClassType
+    inputNode: Level
+    lowLimit: 1.5         # m - Low level warning
+    lowLowLimit: 1.0      # m - Pump shutoff level
+    message: "Wet well low level - pump protection"
+
+# =============================================================================
+# SUMMARY
+# =============================================================================
+summary:
+  objectTypes:
+    - AssetType (abstract base)
+    - PumpType (26 sensor data points)
+    - InfluentPumpType (extends PumpType + WetWellLevel)
+    - ChamberType (Level, Temperature)
+    - SimulationConfigType (simulation control)
+
+  dataTypes:
+    - AssetStatusDataType (Structure)
+    - OperatingPointDataType (Structure)
+    - SimulationModeEnumeration (Enum)
+    - FailureTypeEnumeration (Enum)
+
+  pumpDataPoints: 27
+    # Flow: 1
+    # Pressure: 2
+    # VFD/Electrical: 6
+    # Temperature: 5
+    # Vibration: 6
+    # Counters: 2
+    # Discrete: 5
+    # (InfluentPumpType adds WetWellLevel)
+
+  methods: 9
+    # Pump: StartPump, StopPump, SetSpeed, ResetFault
+    # Simulation: SetMode, TriggerFailure, ResetSimulation, ApplyAging
+    # Chamber: TriggerHighLevelAlarm
+
+  alarms: 6
+    # HighVibrationAlarm, HighBearingTempAlarm, OverloadAlarm
+    # CavitationAlarm, HighLevelAlarm_WetWell, LowLevelAlarm_WetWell

@@ -1,0 +1,1745 @@
+# =============================================================================
+# OPC-UA Address Space Definition - DOCUMENTATION / REFERENCE ONLY
+# Wastewater Treatment Facility - Influent Pump Station
+# =============================================================================
+#
+# NOTE: This file is for DOCUMENTATION and REFERENCE purposes only.
+# The actual implementation uses:
+#   - types.yaml:  Reusable OPC-UA type definitions (ObjectTypes, DataTypes, etc.)
+#   - assets.json: Site-specific asset instances and hierarchy
+#
+# This file serves as a comprehensive example showing how types and assets
+# combine to form a complete OPC-UA information model. It is useful for:
+#   - Understanding the full address space structure
+#   - Documenting OPC-UA patterns and best practices
+#   - Training and onboarding new developers
+#   - Generating documentation or diagrams
+#
+# DO NOT use this file for runtime configuration.
+# =============================================================================
+#
+# OPC-UA Features Demonstrated:
+# - Custom ObjectTypes with inheritance hierarchy
+# - AnalogItemType variables with EURange and EngineeringUnits
+# - TwoStateDiscreteType for digital I/O
+# - Methods with input/output arguments
+# - Alarms and Conditions (LimitAlarmType)
+# - Custom Structures and Enumerations
+# - Proper OPC-UA References and ModellingRules
+# =============================================================================
+
+namespace: 1
+namespaceUri: "http://cleanwaterservices.org/rockcreek/opcua"
+
+# =============================================================================
+# ENGINEERING UNITS (UNECE Codes)
+# Reference: OPC UA Part 8 - Annex A (Engineering Units)
+# =============================================================================
+engineeringUnits:
+  cubicMetersPerHour:
+    displayName: "m³/h"
+    description: "Cubic meters per hour"
+    unitId: 4403510  # UNECE code
+
+  revolutionsPerMinute:
+    displayName: "rpm"
+    description: "Revolutions per minute"
+    unitId: 4403766
+
+  bar:
+    displayName: "bar"
+    description: "Bar (pressure)"
+    unitId: 4342098
+
+  ampere:
+    displayName: "A"
+    description: "Ampere"
+    unitId: 4279632
+
+  volt:
+    displayName: "V"
+    description: "Volt"
+    unitId: 5765716
+
+  kilowatt:
+    displayName: "kW"
+    description: "Kilowatt"
+    unitId: 4932695
+
+  hertz:
+    displayName: "Hz"
+    description: "Hertz"
+    unitId: 4408138
+
+  degreesCelsius:
+    displayName: "°C"
+    description: "Degrees Celsius"
+    unitId: 4408652
+
+  millimetersPerSecond:
+    displayName: "mm/s"
+    description: "Millimeters per second (velocity)"
+    unitId: 4403001
+
+  hours:
+    displayName: "h"
+    description: "Hours"
+    unitId: 4404536
+
+  meters:
+    displayName: "m"
+    description: "Meters"
+    unitId: 4403766
+
+  millimeters:
+    displayName: "mm"
+    description: "Millimeters"
+    unitId: 4403505
+
+# =============================================================================
+# CUSTOM DATA TYPES (Structures)
+# =============================================================================
+dataTypes:
+  # Status structure for complex asset status reporting
+  AssetStatusDataType:
+    type: Structure
+    description: "Complex status information for an asset"
+    fields:
+      StatusCode:
+        dataType: UInt32
+        description: "Numeric status code"
+      StatusText:
+        dataType: String
+        description: "Human-readable status message"
+      Timestamp:
+        dataType: DateTime
+        description: "Time of status change"
+      Severity:
+        dataType: UInt16
+        description: "Severity level (0-1000)"
+
+  # Pump operating point for curve data
+  OperatingPointDataType:
+    type: Structure
+    description: "Single point on pump curve"
+    fields:
+      Flow:
+        dataType: Double
+        description: "Flow rate in m³/h"
+      Head:
+        dataType: Double
+        description: "Total head in meters"
+      Power:
+        dataType: Double
+        description: "Power consumption in kW"
+      Efficiency:
+        dataType: Double
+        description: "Efficiency percentage"
+
+  # Simulation mode enumeration
+  SimulationModeEnumeration:
+    type: Enumeration
+    description: "Pump simulation operating modes"
+    values:
+      OPTIMAL: 0
+      AGED: 1
+      DEGRADED: 2
+      FAILURE: 3
+
+  # Failure type enumeration
+  FailureTypeEnumeration:
+    type: Enumeration
+    description: "Types of pump failures that can be simulated"
+    values:
+      NONE: 0
+      BEARING: 1
+      SEAL: 2
+      CAVITATION: 3
+      IMPELLER: 4
+      MOTOR: 5
+
+# =============================================================================
+# OBJECT TYPES - Inheritance Hierarchy
+# =============================================================================
+# BaseObjectType (OPC UA Standard)
+#   └── AssetType (Custom - base for all plant assets)
+#         ├── PumpType (Custom - centrifugal pump)
+#         │     └── InfluentPumpType (Custom - specific to influent application)
+#         └── ChamberType (Custom - tanks, channels, clarifiers)
+# =============================================================================
+
+types:
+  # ---------------------------------------------------------------------------
+  # AssetType - Abstract base type for all physical assets
+  # ---------------------------------------------------------------------------
+  AssetType:
+    type: ObjectType
+    isAbstract: true
+    base: BaseObjectType
+    description: "Abstract base type for all physical assets in the wastewater treatment plant"
+
+    properties:
+      # Asset identification
+      AssetId:
+        type: Property
+        dataType: String
+        modellingRule: Mandatory
+        description: "Unique asset identifier"
+
+      AssetName:
+        type: Property
+        dataType: String
+        modellingRule: Mandatory
+        description: "Human-readable asset name"
+
+      Location:
+        type: Property
+        dataType: String
+        modellingRule: Optional
+        description: "Physical location description"
+
+      InstallationDate:
+        type: Property
+        dataType: DateTime
+        modellingRule: Optional
+        description: "Date asset was installed"
+
+      Manufacturer:
+        type: Property
+        dataType: String
+        modellingRule: Optional
+        description: "Equipment manufacturer"
+
+      Model:
+        type: Property
+        dataType: String
+        modellingRule: Optional
+        description: "Equipment model number"
+
+      SerialNumber:
+        type: Property
+        dataType: String
+        modellingRule: Optional
+        description: "Equipment serial number"
+
+  # ---------------------------------------------------------------------------
+  # PumpType - Base pump type with common pump instrumentation
+  # ---------------------------------------------------------------------------
+  PumpType:
+    type: ObjectType
+    base: AssetType
+    description: "Centrifugal pump with standard instrumentation for flow, pressure, and motor monitoring"
+
+    # -------------------------------------------------------------------------
+    # Process Variables (Sensors)
+    # -------------------------------------------------------------------------
+    components:
+      # === FLOW MEASUREMENT ===
+      FlowRate:
+        type: AnalogItemType
+        dataType: Double
+        modellingRule: Mandatory
+        description: "Discharge flow rate from magnetic flow meter"
+        accessLevel: Read
+        engineeringUnits: cubicMetersPerHour
+        euRange:
+          low: 0.0
+          high: 5000.0
+        instrumentRange:
+          low: 0.0
+          high: 6000.0
+
+      # === PRESSURE MEASUREMENTS ===
+      SuctionPressure:
+        type: AnalogItemType
+        dataType: Double
+        modellingRule: Mandatory
+        description: "Suction pressure at pump inlet flange"
+        accessLevel: Read
+        engineeringUnits: bar
+        euRange:
+          low: -0.5
+          high: 1.0
+        instrumentRange:
+          low: -1.0
+          high: 2.0
+
+      DischargePressure:
+        type: AnalogItemType
+        dataType: Double
+        modellingRule: Mandatory
+        description: "Discharge pressure at pump outlet flange"
+        accessLevel: Read
+        engineeringUnits: bar
+        euRange:
+          low: 0.0
+          high: 3.0
+        instrumentRange:
+          low: 0.0
+          high: 5.0
+
+      # === VFD / MOTOR ELECTRICAL DATA ===
+      RPM:
+        type: AnalogItemType
+        dataType: Double
+        modellingRule: Mandatory
+        description: "Motor speed from VFD feedback"
+        accessLevel: Read
+        engineeringUnits: revolutionsPerMinute
+        euRange:
+          low: 0.0
+          high: 1200.0
+        instrumentRange:
+          low: 0.0
+          high: 1500.0
+
+      MotorCurrent:
+        type: AnalogItemType
+        dataType: Double
+        modellingRule: Mandatory
+        description: "Motor current from VFD"
+        accessLevel: Read
+        engineeringUnits: ampere
+        euRange:
+          low: 0.0
+          high: 300.0
+        instrumentRange:
+          low: 0.0
+          high: 400.0
+
+      Voltage:
+        type: AnalogItemType
+        dataType: Double
+        modellingRule: Mandatory
+        description: "Supply voltage to motor"
+        accessLevel: Read
+        engineeringUnits: volt
+        euRange:
+          low: 0.0
+          high: 520.0
+        instrumentRange:
+          low: 0.0
+          high: 600.0
+
+      PowerConsumption:
+        type: AnalogItemType
+        dataType: Double
+        modellingRule: Mandatory
+        description: "Electrical power consumption from VFD"
+        accessLevel: Read
+        engineeringUnits: kilowatt
+        euRange:
+          low: 0.0
+          high: 180.0
+        instrumentRange:
+          low: 0.0
+          high: 200.0
+
+      PowerFactor:
+        type: AnalogItemType
+        dataType: Double
+        modellingRule: Mandatory
+        description: "Electrical power factor"
+        accessLevel: Read
+        engineeringUnits: null  # Dimensionless
+        euRange:
+          low: 0.0
+          high: 1.0
+        instrumentRange:
+          low: 0.0
+          high: 1.0
+
+      VFDFrequency:
+        type: AnalogItemType
+        dataType: Double
+        modellingRule: Mandatory
+        description: "VFD output frequency"
+        accessLevel: Read
+        engineeringUnits: hertz
+        euRange:
+          low: 0.0
+          high: 60.0
+        instrumentRange:
+          low: 0.0
+          high: 65.0
+
+      # === TEMPERATURE MEASUREMENTS ===
+      MotorWindingTemp:
+        type: AnalogItemType
+        dataType: Double
+        modellingRule: Mandatory
+        description: "Motor stator winding temperature from embedded RTD"
+        accessLevel: Read
+        engineeringUnits: degreesCelsius
+        euRange:
+          low: 0.0
+          high: 180.0
+        instrumentRange:
+          low: -20.0
+          high: 200.0
+
+      BearingTemp_DE:
+        type: AnalogItemType
+        dataType: Double
+        modellingRule: Mandatory
+        description: "Drive end bearing housing temperature"
+        accessLevel: Read
+        engineeringUnits: degreesCelsius
+        euRange:
+          low: 0.0
+          high: 120.0
+        instrumentRange:
+          low: -20.0
+          high: 150.0
+
+      BearingTemp_NDE:
+        type: AnalogItemType
+        dataType: Double
+        modellingRule: Mandatory
+        description: "Non-drive end bearing housing temperature"
+        accessLevel: Read
+        engineeringUnits: degreesCelsius
+        euRange:
+          low: 0.0
+          high: 120.0
+        instrumentRange:
+          low: -20.0
+          high: 150.0
+
+      SealChamberTemp:
+        type: AnalogItemType
+        dataType: Double
+        modellingRule: Mandatory
+        description: "Mechanical seal chamber temperature"
+        accessLevel: Read
+        engineeringUnits: degreesCelsius
+        euRange:
+          low: 0.0
+          high: 100.0
+        instrumentRange:
+          low: -20.0
+          high: 120.0
+
+      AmbientTemp:
+        type: AnalogItemType
+        dataType: Double
+        modellingRule: Optional
+        description: "Pump room ambient temperature"
+        accessLevel: Read
+        engineeringUnits: degreesCelsius
+        euRange:
+          low: -10.0
+          high: 50.0
+        instrumentRange:
+          low: -40.0
+          high: 80.0
+
+      # === VIBRATION MEASUREMENTS ===
+      # Drive End Bearing Vibration (3-axis)
+      Vibration_DE_H:
+        type: AnalogItemType
+        dataType: Double
+        modellingRule: Mandatory
+        description: "Drive end bearing vibration - Horizontal axis"
+        accessLevel: Read
+        engineeringUnits: millimetersPerSecond
+        euRange:
+          low: 0.0
+          high: 30.0
+        instrumentRange:
+          low: 0.0
+          high: 50.0
+
+      Vibration_DE_V:
+        type: AnalogItemType
+        dataType: Double
+        modellingRule: Mandatory
+        description: "Drive end bearing vibration - Vertical axis"
+        accessLevel: Read
+        engineeringUnits: millimetersPerSecond
+        euRange:
+          low: 0.0
+          high: 30.0
+        instrumentRange:
+          low: 0.0
+          high: 50.0
+
+      Vibration_DE_A:
+        type: AnalogItemType
+        dataType: Double
+        modellingRule: Mandatory
+        description: "Drive end bearing vibration - Axial"
+        accessLevel: Read
+        engineeringUnits: millimetersPerSecond
+        euRange:
+          low: 0.0
+          high: 30.0
+        instrumentRange:
+          low: 0.0
+          high: 50.0
+
+      # Non-Drive End Bearing Vibration (3-axis)
+      Vibration_NDE_H:
+        type: AnalogItemType
+        dataType: Double
+        modellingRule: Mandatory
+        description: "Non-drive end bearing vibration - Horizontal axis"
+        accessLevel: Read
+        engineeringUnits: millimetersPerSecond
+        euRange:
+          low: 0.0
+          high: 30.0
+        instrumentRange:
+          low: 0.0
+          high: 50.0
+
+      Vibration_NDE_V:
+        type: AnalogItemType
+        dataType: Double
+        modellingRule: Mandatory
+        description: "Non-drive end bearing vibration - Vertical axis"
+        accessLevel: Read
+        engineeringUnits: millimetersPerSecond
+        euRange:
+          low: 0.0
+          high: 30.0
+        instrumentRange:
+          low: 0.0
+          high: 50.0
+
+      Vibration_NDE_A:
+        type: AnalogItemType
+        dataType: Double
+        modellingRule: Mandatory
+        description: "Non-drive end bearing vibration - Axial"
+        accessLevel: Read
+        engineeringUnits: millimetersPerSecond
+        euRange:
+          low: 0.0
+          high: 30.0
+        instrumentRange:
+          low: 0.0
+          high: 50.0
+
+      # === RUNTIME COUNTERS ===
+      RuntimeHours:
+        type: AnalogItemType
+        dataType: Double
+        modellingRule: Mandatory
+        description: "Total accumulated runtime hours"
+        accessLevel: Read
+        engineeringUnits: hours
+        euRange:
+          low: 0.0
+          high: 200000.0
+
+      StartCount:
+        type: DataItemType
+        dataType: UInt32
+        modellingRule: Mandatory
+        description: "Total number of pump starts"
+        accessLevel: Read
+
+      # === DISCRETE STATUS (Digital I/O) ===
+      RunCommand:
+        type: TwoStateDiscreteType
+        modellingRule: Mandatory
+        description: "Run command to pump (true=Run, false=Stop)"
+        accessLevel: ReadWrite
+        trueState: "Run"
+        falseState: "Stop"
+
+      RunFeedback:
+        type: TwoStateDiscreteType
+        modellingRule: Mandatory
+        description: "Running status feedback from motor contactor"
+        accessLevel: Read
+        trueState: "Running"
+        falseState: "Stopped"
+
+      FaultStatus:
+        type: TwoStateDiscreteType
+        modellingRule: Mandatory
+        description: "Fault status from VFD or protection relay"
+        accessLevel: Read
+        trueState: "Faulted"
+        falseState: "Normal"
+
+      ReadyStatus:
+        type: TwoStateDiscreteType
+        modellingRule: Mandatory
+        description: "Ready for start (no faults, interlocks satisfied)"
+        accessLevel: Read
+        trueState: "Ready"
+        falseState: "Not Ready"
+
+      LocalRemote:
+        type: TwoStateDiscreteType
+        modellingRule: Mandatory
+        description: "Control mode selector position"
+        accessLevel: Read
+        trueState: "Remote"
+        falseState: "Local"
+
+      # === DESIGN SPECIFICATIONS (Static Reference Data) ===
+      DesignSpecs:
+        type: Object
+        modellingRule: Mandatory
+        typeDefinition: BaseObjectType
+        description: "Manufacturer design specifications and nameplate data"
+        components:
+          DesignFlow:
+            type: Property
+            dataType: Double
+            modellingRule: Mandatory
+            description: "Design flow rate at BEP"
+            value: 2500.0
+            engineeringUnits: cubicMetersPerHour
+
+          DesignHead:
+            type: Property
+            dataType: Double
+            modellingRule: Mandatory
+            description: "Design total dynamic head"
+            value: 15.0
+            engineeringUnits: meters
+
+          DesignPower:
+            type: Property
+            dataType: Double
+            modellingRule: Mandatory
+            description: "Motor rated power"
+            value: 150.0
+            engineeringUnits: kilowatt
+
+          MaxRPM:
+            type: Property
+            dataType: UInt32
+            modellingRule: Mandatory
+            description: "Maximum motor speed"
+            value: 1180
+            engineeringUnits: revolutionsPerMinute
+
+          MinRPM:
+            type: Property
+            dataType: UInt32
+            modellingRule: Mandatory
+            description: "Minimum continuous speed"
+            value: 600
+            engineeringUnits: revolutionsPerMinute
+
+          FullLoadAmps:
+            type: Property
+            dataType: Double
+            modellingRule: Mandatory
+            description: "Motor full load amperage"
+            value: 225.0
+            engineeringUnits: ampere
+
+          RatedVoltage:
+            type: Property
+            dataType: UInt32
+            modellingRule: Mandatory
+            description: "Motor rated voltage"
+            value: 480
+            engineeringUnits: volt
+
+          ImpellerDiameter:
+            type: Property
+            dataType: Double
+            modellingRule: Mandatory
+            description: "Impeller diameter"
+            value: 450.0
+            engineeringUnits: millimeters
+
+          NPSHRequired:
+            type: Property
+            dataType: Double
+            modellingRule: Mandatory
+            description: "Net Positive Suction Head required"
+            value: 4.5
+            engineeringUnits: meters
+
+          ManufacturerBEP_Efficiency:
+            type: Property
+            dataType: Double
+            modellingRule: Mandatory
+            description: "Efficiency at Best Efficiency Point per manufacturer"
+            value: 84.0
+            # Percentage - dimensionless
+
+          MotorEfficiency:
+            type: Property
+            dataType: Double
+            modellingRule: Mandatory
+            description: "Motor efficiency at full load"
+            value: 95.4
+            # Percentage - dimensionless
+
+    # -------------------------------------------------------------------------
+    # Methods
+    # -------------------------------------------------------------------------
+    methods:
+      StartPump:
+        description: "Issue start command to pump"
+        executable: true
+        inputArguments: []
+        outputArguments:
+          - name: "Success"
+            dataType: Boolean
+            description: "True if start command accepted"
+          - name: "Message"
+            dataType: String
+            description: "Status message"
+
+      StopPump:
+        description: "Issue stop command to pump"
+        executable: true
+        inputArguments: []
+        outputArguments:
+          - name: "Success"
+            dataType: Boolean
+            description: "True if stop command accepted"
+          - name: "Message"
+            dataType: String
+            description: "Status message"
+
+      SetSpeed:
+        description: "Set VFD speed setpoint"
+        executable: true
+        inputArguments:
+          - name: "TargetRPM"
+            dataType: Double
+            description: "Target speed in RPM (must be within MinRPM-MaxRPM)"
+            valueRank: -1  # Scalar
+        outputArguments:
+          - name: "Success"
+            dataType: Boolean
+            description: "True if speed setpoint accepted"
+          - name: "Message"
+            dataType: String
+            description: "Status message"
+
+      ResetFault:
+        description: "Reset VFD fault"
+        executable: true
+        inputArguments: []
+        outputArguments:
+          - name: "Success"
+            dataType: Boolean
+            description: "True if fault reset successful"
+
+  # ---------------------------------------------------------------------------
+  # InfluentPumpType - Specialized type for influent pumping application
+  # Inherits all from PumpType, adds wet well context
+  # ---------------------------------------------------------------------------
+  InfluentPumpType:
+    type: ObjectType
+    base: PumpType
+    description: "Influent pump for wastewater lift station with wet well integration"
+
+    components:
+      # Additional sensor specific to influent application
+      WetWellLevel:
+        type: AnalogItemType
+        dataType: Double
+        modellingRule: Mandatory
+        description: "Wet well level from ultrasonic or pressure transmitter"
+        accessLevel: Read
+        engineeringUnits: meters
+        euRange:
+          low: 0.0
+          high: 8.0
+        instrumentRange:
+          low: 0.0
+          high: 10.0
+
+  # ---------------------------------------------------------------------------
+  # ChamberType - Tanks, channels, clarifiers
+  # ---------------------------------------------------------------------------
+  ChamberType:
+    type: ObjectType
+    base: AssetType
+    description: "Tanks, channels, clarifiers - any containment with level/temperature monitoring"
+
+    components:
+      Level:
+        type: AnalogItemType
+        dataType: Double
+        modellingRule: Mandatory
+        description: "Liquid level"
+        accessLevel: Read
+        engineeringUnits: meters
+        euRange:
+          low: 0.0
+          high: 10.0
+        instrumentRange:
+          low: 0.0
+          high: 12.0
+
+      Temperature:
+        type: AnalogItemType
+        dataType: Double
+        modellingRule: Optional
+        description: "Liquid temperature"
+        accessLevel: Read
+        engineeringUnits: degreesCelsius
+        euRange:
+          low: 0.0
+          high: 50.0
+        instrumentRange:
+          low: -10.0
+          high: 60.0
+
+    methods:
+      TriggerHighLevelAlarm:
+        description: "Manually trigger high level alarm for testing"
+        executable: true
+        inputArguments: []
+        outputArguments: []
+
+  # ---------------------------------------------------------------------------
+  # SimulationConfigType - Configuration for simulation behavior
+  # ---------------------------------------------------------------------------
+  SimulationConfigType:
+    type: ObjectType
+    base: BaseObjectType
+    description: "Configuration object for controlling pump simulation behavior"
+
+    properties:
+      Mode:
+        type: Property
+        dataType: SimulationModeEnumeration
+        modellingRule: Mandatory
+        description: "Current simulation mode"
+        accessLevel: ReadWrite
+        value: 0  # OPTIMAL
+
+      SimulationInterval:
+        type: Property
+        dataType: Double
+        modellingRule: Mandatory
+        description: "Simulation update interval in milliseconds"
+        accessLevel: ReadWrite
+        value: 1000.0
+
+      TimeAcceleration:
+        type: Property
+        dataType: Double
+        modellingRule: Mandatory
+        description: "Time acceleration factor (1.0 = real-time)"
+        accessLevel: ReadWrite
+        value: 1.0
+
+    components:
+      # Aged Configuration
+      AgedConfig:
+        type: Object
+        modellingRule: Mandatory
+        typeDefinition: BaseObjectType
+        description: "Configuration for AGED simulation mode"
+        components:
+          YearsOfOperation:
+            type: Property
+            dataType: Double
+            modellingRule: Mandatory
+            description: "Simulated years of operation"
+            accessLevel: ReadWrite
+            value: 5.0
+
+          AverageRunHoursPerYear:
+            type: Property
+            dataType: Double
+            modellingRule: Mandatory
+            description: "Average runtime hours per year"
+            accessLevel: ReadWrite
+            value: 6000.0
+
+          StartCyclesPerYear:
+            type: Property
+            dataType: UInt32
+            modellingRule: Mandatory
+            description: "Average start cycles per year"
+            accessLevel: ReadWrite
+            value: 500
+
+      # Degraded Configuration
+      DegradedConfig:
+        type: Object
+        modellingRule: Mandatory
+        typeDefinition: BaseObjectType
+        description: "Configuration for DEGRADED simulation mode"
+        components:
+          ImpellerWear:
+            type: Property
+            dataType: Double
+            modellingRule: Mandatory
+            description: "Impeller wear percentage (0-50)"
+            accessLevel: ReadWrite
+            value: 15.0
+
+          BearingWear:
+            type: Property
+            dataType: Double
+            modellingRule: Mandatory
+            description: "Bearing damage percentage (0-100)"
+            accessLevel: ReadWrite
+            value: 20.0
+
+          SealWear:
+            type: Property
+            dataType: Double
+            modellingRule: Mandatory
+            description: "Seal degradation percentage (0-100)"
+            accessLevel: ReadWrite
+            value: 25.0
+
+      # Failure Configuration
+      FailureConfig:
+        type: Object
+        modellingRule: Mandatory
+        typeDefinition: BaseObjectType
+        description: "Configuration for FAILURE simulation mode"
+        components:
+          FailureType:
+            type: Property
+            dataType: FailureTypeEnumeration
+            modellingRule: Mandatory
+            description: "Type of failure to simulate"
+            accessLevel: ReadWrite
+            value: 0  # NONE
+
+          FailureProgression:
+            type: Property
+            dataType: Double
+            modellingRule: Mandatory
+            description: "Failure progression percentage (0-100)"
+            accessLevel: ReadWrite
+            value: 0.0
+
+          TimeToFailure:
+            type: Property
+            dataType: Double
+            modellingRule: Mandatory
+            description: "Simulated hours until complete failure"
+            accessLevel: ReadWrite
+            value: 100.0
+
+      # Flow Profile Configuration
+      FlowProfile:
+        type: Object
+        modellingRule: Mandatory
+        typeDefinition: BaseObjectType
+        description: "Diurnal flow profile configuration"
+        components:
+          DiurnalEnabled:
+            type: Property
+            dataType: Boolean
+            modellingRule: Mandatory
+            description: "Enable daily flow pattern variation"
+            accessLevel: ReadWrite
+            value: true
+
+          BaseFlow:
+            type: Property
+            dataType: Double
+            modellingRule: Mandatory
+            description: "Minimum demand flow rate"
+            accessLevel: ReadWrite
+            value: 1600.0
+            engineeringUnits: cubicMetersPerHour
+
+          PeakFlow:
+            type: Property
+            dataType: Double
+            modellingRule: Mandatory
+            description: "Maximum demand flow rate"
+            accessLevel: ReadWrite
+            value: 4000.0
+            engineeringUnits: cubicMetersPerHour
+
+          PeakHour1:
+            type: Property
+            dataType: UInt32
+            modellingRule: Mandatory
+            description: "Morning peak hour (0-23)"
+            accessLevel: ReadWrite
+            value: 7
+
+          PeakHour2:
+            type: Property
+            dataType: UInt32
+            modellingRule: Mandatory
+            description: "Evening peak hour (0-23)"
+            accessLevel: ReadWrite
+            value: 19
+
+    methods:
+      SetMode:
+        description: "Change simulation mode"
+        executable: true
+        inputArguments:
+          - name: "NewMode"
+            dataType: SimulationModeEnumeration
+            description: "Target simulation mode"
+        outputArguments:
+          - name: "Success"
+            dataType: Boolean
+            description: "True if mode change successful"
+
+      TriggerFailure:
+        description: "Initiate failure sequence"
+        executable: true
+        inputArguments:
+          - name: "FailureType"
+            dataType: FailureTypeEnumeration
+            description: "Type of failure to trigger"
+        outputArguments:
+          - name: "Success"
+            dataType: Boolean
+            description: "True if failure initiated"
+
+      ResetSimulation:
+        description: "Reset to OPTIMAL mode with zero runtime"
+        executable: true
+        inputArguments: []
+        outputArguments:
+          - name: "Success"
+            dataType: Boolean
+            description: "True if reset successful"
+
+      ApplyAging:
+        description: "Instantly apply specified years of wear"
+        executable: true
+        inputArguments:
+          - name: "Years"
+            dataType: Double
+            description: "Years of operation to simulate"
+        outputArguments:
+          - name: "Success"
+            dataType: Boolean
+            description: "True if aging applied"
+
+# =============================================================================
+# ADDRESS SPACE - Object Instances
+# =============================================================================
+# This section demonstrates TWO hierarchy patterns:
+#
+# PATTERN 1: Full Plant Hierarchy (Wastewater Treatment Facility)
+#   Plant → Process → System → Asset
+#   Example: RC_RockCreek → P0041_Preliminary → S00630_InfluentPumping → IPS_PMP_001
+#
+# PATTERN 2: Standalone Pump Station (Simple/Flat)
+#   PumpStation → Assets
+#   Example: Riverside_PS → RPS_PMP_001
+#
+# =============================================================================
+
+addressSpace:
+
+  # ===========================================================================
+  # PATTERN 1: FULL PLANT HIERARCHY
+  # ===========================================================================
+  # Hierarchy: Plant → Process → System → Asset
+  #
+  # This pattern is typical for large facilities like:
+  # - Wastewater Treatment Plants
+  # - Water Treatment Plants
+  # - Industrial Facilities
+  #
+  # Naming Convention:
+  #   Plant:   XX_PlantName (e.g., RC_RockCreek)
+  #   Process: P00XX_ProcessName (e.g., P0041_Preliminary)
+  #   System:  S00XXX_SystemName (e.g., S00630_InfluentPumping)
+  #   Asset:   XXX_YYY_NNN (e.g., IPS_PMP_001)
+  # ===========================================================================
+
+  RC_RockCreek:
+    type: FolderType
+    browseName: "RC_RockCreek"
+    displayName: "RC - Rock Creek AWWTF"
+    description: "Rock Creek Advanced Wastewater Treatment Facility"
+    hierarchyLevel: Plant
+    references:
+      - type: Organizes
+        target: ObjectsFolder
+        isForward: false  # ObjectsFolder Organizes RC_RockCreek
+
+    children:
+      # -----------------------------------------------------------------------
+      # PROCESS: Preliminary Treatment
+      # -----------------------------------------------------------------------
+      P0041_Preliminary:
+        type: FolderType
+        browseName: "P0041_Preliminary"
+        displayName: "P0041 - Preliminary Treatment"
+        description: "Preliminary treatment including screening and influent pumping"
+        hierarchyLevel: Process
+
+        children:
+          # --- SYSTEM: Influent Pump Station ---
+          S00630_InfluentPumping:
+            type: FolderType
+            browseName: "S00630_InfluentPumping"
+            displayName: "S00630 - Influent Pump Station"
+            description: "Main influent pumping system - 10-30 MGD capacity"
+            hierarchyLevel: System
+
+            children:
+              # ASSET: Primary Influent Pump (Main simulation target)
+              IPS_PMP_001:
+                type: InfluentPumpType
+                browseName: "IPS_PMP_001"
+                displayName: "Influent Pump 1"
+                description: "Primary influent pump - 10-30 MGD capacity"
+                hierarchyLevel: Asset
+
+                propertyValues:
+                  AssetId: "IPS-PMP-001"
+                  AssetName: "Influent Pump 1"
+                  Location: "Influent Pump Station - Bay 1"
+                  Manufacturer: "Flygt"
+                  Model: "CP3300.900"
+                  SerialNumber: "FLY-2019-78432"
+                  InstallationDate: "2019-06-15T00:00:00Z"
+
+                designSpecValues:
+                  DesignFlow: 2500.0
+                  DesignHead: 15.0
+                  DesignPower: 150.0
+                  MaxRPM: 1180
+                  MinRPM: 600
+                  FullLoadAmps: 225.0
+                  RatedVoltage: 480
+                  ImpellerDiameter: 450.0
+                  NPSHRequired: 4.5
+                  ManufacturerBEP_Efficiency: 84.0
+                  MotorEfficiency: 95.4
+
+                hasCondition:
+                  - HighVibrationAlarm
+                  - HighBearingTempAlarm
+                  - OverloadAlarm
+                  - CavitationAlarm
+
+              # ASSET: Backup Influent Pump
+              IPS_PMP_002:
+                type: InfluentPumpType
+                browseName: "IPS_PMP_002"
+                displayName: "Influent Pump 2"
+                description: "Backup influent pump - 10-30 MGD capacity"
+                hierarchyLevel: Asset
+                propertyValues:
+                  AssetId: "IPS-PMP-002"
+                  AssetName: "Influent Pump 2"
+                  Location: "Influent Pump Station - Bay 2"
+                  Manufacturer: "Flygt"
+                  Model: "CP3300.900"
+                  SerialNumber: "FLY-2019-78433"
+                  InstallationDate: "2019-06-15T00:00:00Z"
+
+              # ASSET: Standby Influent Pump
+              IPS_PMP_003:
+                type: InfluentPumpType
+                browseName: "IPS_PMP_003"
+                displayName: "Influent Pump 3"
+                description: "Standby influent pump - 10-30 MGD capacity"
+                hierarchyLevel: Asset
+                propertyValues:
+                  AssetId: "IPS-PMP-003"
+                  AssetName: "Influent Pump 3"
+                  Location: "Influent Pump Station - Bay 3"
+                  Manufacturer: "Flygt"
+                  Model: "CP3300.900"
+                  SerialNumber: "FLY-2019-78434"
+                  InstallationDate: "2019-06-15T00:00:00Z"
+
+              # ASSET: Wet Well
+              IPS_WW_001:
+                type: ChamberType
+                browseName: "IPS_WW_001"
+                displayName: "Influent Wet Well"
+                description: "Influent pump station wet well"
+                hierarchyLevel: Asset
+                propertyValues:
+                  AssetId: "IPS-WW-001"
+                  AssetName: "Influent Wet Well"
+                  Location: "Influent Pump Station"
+                hasCondition:
+                  - HighLevelAlarm_WetWell
+                  - LowLevelAlarm_WetWell
+
+          # --- SYSTEM: Screening ---
+          S00631_Screening:
+            type: FolderType
+            browseName: "S00631_Screening"
+            displayName: "S00631 - Screening System"
+            description: "Mechanical bar screens and screenings handling"
+            hierarchyLevel: System
+
+            children:
+              SCR_CHN_001:
+                type: ChamberType
+                browseName: "SCR_CHN_001"
+                displayName: "Screening Channel"
+                description: "Mechanical bar screen channel"
+                hierarchyLevel: Asset
+                propertyValues:
+                  AssetId: "SCR-CHN-001"
+                  AssetName: "Screening Channel"
+
+          # --- SYSTEM: Conveyance ---
+          S00629_Conveyance:
+            type: FolderType
+            browseName: "S00629_Conveyance"
+            displayName: "S00629 - Conveyance System"
+            description: "Gravity conveyance to headworks"
+            hierarchyLevel: System
+
+            children:
+              CNV_CHN_001:
+                type: ChamberType
+                browseName: "CNV_CHN_001"
+                displayName: "Conveyance Channel"
+                description: "Gravity conveyance channel"
+                hierarchyLevel: Asset
+                propertyValues:
+                  AssetId: "CNV-CHN-001"
+                  AssetName: "Conveyance Channel"
+
+      # -----------------------------------------------------------------------
+      # PROCESS: Primary Treatment
+      # -----------------------------------------------------------------------
+      P0042_Primary:
+        type: FolderType
+        browseName: "P0042_Primary"
+        displayName: "P0042 - Primary Treatment"
+        description: "Primary treatment including clarification and sludge handling"
+        hierarchyLevel: Process
+
+        children:
+          # --- SYSTEM: Grit Removal ---
+          S00632_Degritting:
+            type: FolderType
+            browseName: "S00632_Degritting"
+            displayName: "S00632 - Grit Removal System"
+            description: "Grit removal and handling"
+            hierarchyLevel: System
+
+            children:
+              GRT_TNK_001:
+                type: ChamberType
+                browseName: "GRT_TNK_001"
+                displayName: "Grit Chamber 1"
+                description: "Aerated grit chamber"
+                hierarchyLevel: Asset
+                propertyValues:
+                  AssetId: "GRT-TNK-001"
+                  AssetName: "Grit Chamber 1"
+
+          # --- SYSTEM: Primary Sludge Pumping ---
+          S00634_SludgePumping:
+            type: FolderType
+            browseName: "S00634_SludgePumping"
+            displayName: "S00634 - Primary Sludge Pumping"
+            description: "Primary sludge transfer system"
+            hierarchyLevel: System
+
+            children:
+              PSP_PMP_001:
+                type: PumpType
+                browseName: "PSP_PMP_001"
+                displayName: "Primary Sludge Pump 1"
+                description: "Primary sludge transfer pump"
+                hierarchyLevel: Asset
+                propertyValues:
+                  AssetId: "PSP-PMP-001"
+                  AssetName: "Primary Sludge Pump 1"
+                  Manufacturer: "Moyno"
+                  Model: "2000 G1"
+
+              PSP_PMP_002:
+                type: PumpType
+                browseName: "PSP_PMP_002"
+                displayName: "Primary Sludge Pump 2"
+                description: "Primary sludge transfer pump (standby)"
+                hierarchyLevel: Asset
+                propertyValues:
+                  AssetId: "PSP-PMP-002"
+                  AssetName: "Primary Sludge Pump 2"
+                  Manufacturer: "Moyno"
+                  Model: "2000 G1"
+
+      # -----------------------------------------------------------------------
+      # PROCESS: Secondary Treatment
+      # -----------------------------------------------------------------------
+      P0043_Secondary:
+        type: FolderType
+        browseName: "P0043_Secondary"
+        displayName: "P0043 - Secondary Treatment"
+        description: "Biological treatment and secondary clarification"
+        hierarchyLevel: Process
+
+        children:
+          # --- SYSTEM: Aeration ---
+          S00640_Aeration:
+            type: FolderType
+            browseName: "S00640_Aeration"
+            displayName: "S00640 - Aeration System"
+            description: "Activated sludge aeration basins"
+            hierarchyLevel: System
+
+            children:
+              AER_BLW_001:
+                type: PumpType  # Blowers use similar instrumentation
+                browseName: "AER_BLW_001"
+                displayName: "Aeration Blower 1"
+                description: "Centrifugal blower for aeration"
+                hierarchyLevel: Asset
+                propertyValues:
+                  AssetId: "AER-BLW-001"
+                  AssetName: "Aeration Blower 1"
+                  Manufacturer: "Hoffman"
+                  Model: "65108B"
+
+          # --- SYSTEM: RAS Pumping ---
+          S00645_RASPumping:
+            type: FolderType
+            browseName: "S00645_RASPumping"
+            displayName: "S00645 - RAS Pumping"
+            description: "Return Activated Sludge pumping"
+            hierarchyLevel: System
+
+            children:
+              RAS_PMP_001:
+                type: PumpType
+                browseName: "RAS_PMP_001"
+                displayName: "RAS Pump 1"
+                description: "Return activated sludge pump"
+                hierarchyLevel: Asset
+                propertyValues:
+                  AssetId: "RAS-PMP-001"
+                  AssetName: "RAS Pump 1"
+                  Manufacturer: "Flygt"
+                  Model: "CP3201"
+
+  # ===========================================================================
+  # PATTERN 2: STANDALONE PUMP STATION (Simple/Flat Hierarchy)
+  # ===========================================================================
+  # Hierarchy: PumpStation → Assets
+  #
+  # This pattern is typical for:
+  # - Remote lift stations
+  # - Booster stations
+  # - Stormwater pump stations
+  # - Small collection system stations
+  #
+  # No intermediate Process/System folders - assets directly under station
+  # ===========================================================================
+
+  Riverside_PS:
+    type: FolderType
+    browseName: "Riverside_PS"
+    displayName: "Riverside Pump Station"
+    description: "Remote wastewater lift station - Riverside neighborhood"
+    hierarchyLevel: PumpStation
+    references:
+      - type: Organizes
+        target: ObjectsFolder
+        isForward: false
+
+    # Station-level properties
+    properties:
+      StationId:
+        type: Property
+        dataType: String
+        value: "RPS-001"
+      StationAddress:
+        type: Property
+        dataType: String
+        value: "1250 Riverside Drive"
+      ServiceArea:
+        type: Property
+        dataType: String
+        value: "Riverside Neighborhood - 2,500 connections"
+      DesignCapacity:
+        type: Property
+        dataType: Double
+        value: 2.5  # MGD
+      CommissionDate:
+        type: Property
+        dataType: DateTime
+        value: "2015-03-20T00:00:00Z"
+
+    children:
+      # Primary Pump
+      RPS_PMP_001:
+        type: InfluentPumpType
+        browseName: "RPS_PMP_001"
+        displayName: "Pump 1 (Lead)"
+        description: "Lead pump - duty/standby configuration"
+        hierarchyLevel: Asset
+
+        propertyValues:
+          AssetId: "RPS-PMP-001"
+          AssetName: "Riverside PS Pump 1"
+          Location: "Riverside Pump Station - Wet Well"
+          Manufacturer: "Flygt"
+          Model: "NP3127.185"
+          SerialNumber: "FLY-2015-45231"
+          InstallationDate: "2015-03-20T00:00:00Z"
+
+        designSpecValues:
+          DesignFlow: 800.0       # m³/h (~5 MGD peak)
+          DesignHead: 12.0        # m
+          DesignPower: 37.0       # kW (50 HP)
+          MaxRPM: 1750
+          MinRPM: 875
+          FullLoadAmps: 52.0
+          RatedVoltage: 480
+          ImpellerDiameter: 267.0
+          NPSHRequired: 3.0
+          ManufacturerBEP_Efficiency: 78.0
+          MotorEfficiency: 93.0
+
+        hasCondition:
+          - HighVibrationAlarm
+          - HighBearingTempAlarm
+          - OverloadAlarm
+
+      # Standby Pump
+      RPS_PMP_002:
+        type: InfluentPumpType
+        browseName: "RPS_PMP_002"
+        displayName: "Pump 2 (Lag)"
+        description: "Lag pump - duty/standby configuration"
+        hierarchyLevel: Asset
+
+        propertyValues:
+          AssetId: "RPS-PMP-002"
+          AssetName: "Riverside PS Pump 2"
+          Location: "Riverside Pump Station - Wet Well"
+          Manufacturer: "Flygt"
+          Model: "NP3127.185"
+          SerialNumber: "FLY-2015-45232"
+          InstallationDate: "2015-03-20T00:00:00Z"
+
+        designSpecValues:
+          DesignFlow: 800.0
+          DesignHead: 12.0
+          DesignPower: 37.0
+          MaxRPM: 1750
+          MinRPM: 875
+          FullLoadAmps: 52.0
+          RatedVoltage: 480
+          ImpellerDiameter: 267.0
+          NPSHRequired: 3.0
+          ManufacturerBEP_Efficiency: 78.0
+          MotorEfficiency: 93.0
+
+      # Wet Well
+      RPS_WW_001:
+        type: ChamberType
+        browseName: "RPS_WW_001"
+        displayName: "Wet Well"
+        description: "Pump station wet well with level control"
+        hierarchyLevel: Asset
+
+        propertyValues:
+          AssetId: "RPS-WW-001"
+          AssetName: "Riverside Wet Well"
+          Location: "Riverside Pump Station"
+
+        hasCondition:
+          - HighLevelAlarm_WetWell
+          - LowLevelAlarm_WetWell
+
+  # ===========================================================================
+  # PATTERN 2B: ANOTHER STANDALONE PUMP STATION (Even Simpler)
+  # ===========================================================================
+  # Single pump station with minimal assets
+
+  Oakdale_PS:
+    type: FolderType
+    browseName: "Oakdale_PS"
+    displayName: "Oakdale Pump Station"
+    description: "Small remote lift station - Oakdale area"
+    hierarchyLevel: PumpStation
+    references:
+      - type: Organizes
+        target: ObjectsFolder
+        isForward: false
+
+    properties:
+      StationId:
+        type: Property
+        dataType: String
+        value: "OPS-001"
+      DesignCapacity:
+        type: Property
+        dataType: Double
+        value: 0.5  # MGD
+
+    children:
+      OPS_PMP_001:
+        type: InfluentPumpType
+        browseName: "OPS_PMP_001"
+        displayName: "Pump 1"
+        description: "Duplex station - Pump 1"
+        hierarchyLevel: Asset
+        propertyValues:
+          AssetId: "OPS-PMP-001"
+          AssetName: "Oakdale PS Pump 1"
+          Manufacturer: "Flygt"
+          Model: "NP3102"
+
+      OPS_PMP_002:
+        type: InfluentPumpType
+        browseName: "OPS_PMP_002"
+        displayName: "Pump 2"
+        description: "Duplex station - Pump 2"
+        hierarchyLevel: Asset
+        propertyValues:
+          AssetId: "OPS-PMP-002"
+          AssetName: "Oakdale PS Pump 2"
+          Manufacturer: "Flygt"
+          Model: "NP3102"
+
+      OPS_WW_001:
+        type: ChamberType
+        browseName: "OPS_WW_001"
+        displayName: "Wet Well"
+        hierarchyLevel: Asset
+        propertyValues:
+          AssetId: "OPS-WW-001"
+          AssetName: "Oakdale Wet Well"
+
+  # ===========================================================================
+  # SIMULATION CONFIGURATION (Global Singleton)
+  # ===========================================================================
+  # This is independent of hierarchy - applies to all simulated assets
+
+  SimulationConfig:
+    type: SimulationConfigType
+    browseName: "SimulationConfig"
+    displayName: "Simulation Configuration"
+    description: "Global simulation configuration and control for all pump stations"
+    references:
+      - type: Organizes
+        target: ObjectsFolder
+        isForward: false
+
+# =============================================================================
+# ALARMS AND CONDITIONS
+# =============================================================================
+alarmsAndConditions:
+  # High Vibration Alarm
+  HighVibrationAlarm:
+    type: LimitAlarmType
+    description: "High vibration alarm - indicates mechanical issue"
+    severity: 800
+    conditionClassId: ProcessConditionClassType
+    inputNode: Vibration_DE_H  # Monitor drive end horizontal
+    highHighLimit: 11.2  # mm/s - Danger zone per ISO 10816
+    highLimit: 7.1       # mm/s - Alert zone per ISO 10816
+    message: "High vibration detected on pump bearing"
+
+  # High Bearing Temperature Alarm
+  HighBearingTempAlarm:
+    type: LimitAlarmType
+    description: "High bearing temperature alarm"
+    severity: 850
+    conditionClassId: ProcessConditionClassType
+    inputNode: BearingTemp_DE
+    highHighLimit: 95.0  # °C - Critical
+    highLimit: 80.0      # °C - Warning
+    message: "High bearing temperature detected"
+
+  # Motor Overload Alarm
+  OverloadAlarm:
+    type: LimitAlarmType
+    description: "Motor current overload alarm"
+    severity: 900
+    conditionClassId: ProcessConditionClassType
+    inputNode: MotorCurrent
+    highHighLimit: 248.0  # 110% of FLA
+    highLimit: 236.0      # 105% of FLA
+    message: "Motor overload condition detected"
+
+  # Cavitation Alarm (Low suction pressure at high flow)
+  CavitationAlarm:
+    type: LimitAlarmType
+    description: "Low suction pressure cavitation warning"
+    severity: 750
+    conditionClassId: ProcessConditionClassType
+    inputNode: SuctionPressure
+    lowLimit: 0.1        # bar - Warning
+    lowLowLimit: -0.2    # bar - Critical (vacuum)
+    message: "Low suction pressure - possible cavitation"
+
+  # Wet Well High Level
+  HighLevelAlarm_WetWell:
+    type: LimitAlarmType
+    description: "Wet well high level alarm"
+    severity: 850
+    conditionClassId: ProcessConditionClassType
+    inputNode: Level
+    highHighLimit: 7.5   # m - Overflow imminent
+    highLimit: 6.5       # m - High level warning
+    message: "Wet well high level"
+
+  # Wet Well Low Level
+  LowLevelAlarm_WetWell:
+    type: LimitAlarmType
+    description: "Wet well low level alarm - pump protection"
+    severity: 800
+    conditionClassId: ProcessConditionClassType
+    inputNode: Level
+    lowLimit: 1.5        # m - Low level warning
+    lowLowLimit: 1.0     # m - Pump shutoff level
+    message: "Wet well low level - pump protection"
+
+# =============================================================================
+# REFERENCES USED IN THIS MODEL
+# =============================================================================
+# This model demonstrates the following OPC-UA reference types:
+#
+# Hierarchical References:
+#   - Organizes: Folder structure (FolderType -> children)
+#   - HasComponent: Type to its components (PumpType -> FlowRate)
+#   - HasProperty: Object to its properties (Asset -> AssetId)
+#   - HasSubtype: Type inheritance (PumpType -> InfluentPumpType)
+#
+# Non-Hierarchical References:
+#   - HasTypeDefinition: Instance to its type (IPS_PMP_001 -> InfluentPumpType)
+#   - HasCondition: Asset to its alarm conditions
+#   - HasModellingRule: Component to its modelling rule (Mandatory/Optional)
+#
+# =============================================================================
+
+# =============================================================================
+# SUMMARY
+# =============================================================================
+summary:
+  # ---------------------------------------------------------------------------
+  # Hierarchy Patterns Demonstrated
+  # ---------------------------------------------------------------------------
+  hierarchyPatterns:
+    pattern1_FullPlant:
+      description: "Plant → Process → System → Asset"
+      example: "RC_RockCreek → P0041_Preliminary → S00630_InfluentPumping → IPS_PMP_001"
+      useCase: "Large treatment facilities, industrial plants"
+      levels:
+        - Plant (RC_RockCreek)
+        - Process (P0041_Preliminary, P0042_Primary, P0043_Secondary)
+        - System (S00630_InfluentPumping, S00631_Screening, etc.)
+        - Asset (IPS_PMP_001, IPS_WW_001, etc.)
+
+    pattern2_StandalonePumpStation:
+      description: "PumpStation → Assets (flat)"
+      example: "Riverside_PS → RPS_PMP_001"
+      useCase: "Remote lift stations, booster stations, small facilities"
+      levels:
+        - PumpStation (Riverside_PS, Oakdale_PS)
+        - Asset (RPS_PMP_001, RPS_WW_001, etc.)
+
+  # ---------------------------------------------------------------------------
+  # Asset Inventory
+  # ---------------------------------------------------------------------------
+  assetInventory:
+    fullPlantHierarchy:
+      plant: 1  # RC_RockCreek
+      processes: 3  # Preliminary, Primary, Secondary
+      systems: 7  # InfluentPumping, Screening, Conveyance, Degritting, SludgePumping, Aeration, RAS
+      pumps: 7  # IPS_PMP_001-003, PSP_PMP_001-002, AER_BLW_001, RAS_PMP_001
+      chambers: 4  # IPS_WW_001, SCR_CHN_001, CNV_CHN_001, GRT_TNK_001
+
+    standalonePumpStations:
+      stations: 2  # Riverside_PS, Oakdale_PS
+      pumps: 4  # RPS_PMP_001-002, OPS_PMP_001-002
+      chambers: 2  # RPS_WW_001, OPS_WW_001
+
+    totalAssets: 17  # All pumps + chambers
+
+  # ---------------------------------------------------------------------------
+  # Type System
+  # ---------------------------------------------------------------------------
+  totalObjectTypes: 5
+    # AssetType (abstract)
+    # PumpType
+    # InfluentPumpType (extends PumpType)
+    # ChamberType
+    # SimulationConfigType
+
+  totalDataTypes: 4
+    # AssetStatusDataType (Structure)
+    # OperatingPointDataType (Structure)
+    # SimulationModeEnumeration (Enum)
+    # FailureTypeEnumeration (Enum)
+
+  # ---------------------------------------------------------------------------
+  # Data Points per Pump
+  # ---------------------------------------------------------------------------
+  totalSensorDataPoints: 27
+    # Flow: 1 (FlowRate)
+    # Pressure: 2 (SuctionPressure, DischargePressure)
+    # VFD/Electrical: 6 (RPM, MotorCurrent, Voltage, PowerConsumption, PowerFactor, VFDFrequency)
+    # Temperature: 5 (MotorWindingTemp, BearingTemp_DE, BearingTemp_NDE, SealChamberTemp, AmbientTemp)
+    # Vibration: 6 (DE_H, DE_V, DE_A, NDE_H, NDE_V, NDE_A)
+    # Counters: 2 (RuntimeHours, StartCount)
+    # Discrete: 5 (RunCommand, RunFeedback, FaultStatus, ReadyStatus, LocalRemote)
+    # InfluentPumpType adds: 1 (WetWellLevel)
+
+  # ---------------------------------------------------------------------------
+  # Methods & Alarms
+  # ---------------------------------------------------------------------------
+  totalMethods: 9
+    # Pump: StartPump, StopPump, SetSpeed, ResetFault
+    # Simulation: SetMode, TriggerFailure, ResetSimulation, ApplyAging
+    # Chamber: TriggerHighLevelAlarm
+
+  totalAlarms: 6
+    # HighVibrationAlarm, HighBearingTempAlarm, OverloadAlarm
+    # CavitationAlarm, HighLevelAlarm_WetWell, LowLevelAlarm_WetWell
+
+  # ---------------------------------------------------------------------------
+  # OPC-UA Features Demonstrated
+  # ---------------------------------------------------------------------------
+  opcuaFeaturesUsed:
+    informationModel:
+      - ObjectType inheritance hierarchy (AssetType → PumpType → InfluentPumpType)
+      - Abstract ObjectTypes (AssetType.isAbstract = true)
+      - ModellingRules (Mandatory/Optional)
+      - Property vs Variable distinction (HasProperty vs HasComponent)
+      - Nested Objects (DesignSpecs, AgedConfig, etc.)
+
+    variableTypes:
+      - AnalogItemType with EURange and InstrumentRange
+      - TwoStateDiscreteType for digital I/O
+      - DataItemType for counters
+
+    dataTypes:
+      - Custom Structure DataTypes (AssetStatusDataType)
+      - Custom Enumeration DataTypes (SimulationModeEnumeration)
+      - Engineering Units with UNECE codes
+
+    methods:
+      - Methods with InputArguments (SetSpeed, SetMode, ApplyAging)
+      - Methods with OutputArguments (Success, Message)
+      - Parameterless methods (StartPump, StopPump)
+
+    alarmsConditions:
+      - LimitAlarmType with High/HighHigh/Low/LowLow limits
+      - HasCondition references
+      - Severity levels per ISA-18.2
+
+    organization:
+      - FolderType for hierarchical navigation
+      - Multiple hierarchy patterns (full plant vs standalone)
+      - Organizes references
+
+    namingConventions:
+      - Plant: XX_PlantName
+      - Process: P00XX_ProcessName
+      - System: S00XXX_SystemName
+      - Asset: XXX_YYY_NNN (e.g., IPS_PMP_001)
