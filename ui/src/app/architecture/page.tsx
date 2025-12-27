@@ -8,7 +8,7 @@ import { usePumpStore } from '@/stores/pump-store';
 import { usePumpWebSocket } from '@/hooks/use-pump-websocket';
 import { Server, Zap, Activity, Info, Play, RefreshCw, Layers, ShieldCheck, Database, LayoutGrid, Monitor, Smartphone, Globe, Laptop, Cloud, Radio, ArrowLeftRight, Wifi, Cable, MessageSquare } from 'lucide-react';
 
-const TOTAL_SLIDES = 18;
+const TOTAL_SLIDES = 19;
 
 export default function ArchitecturePage() {
   const [currentSlide, setCurrentSlide] = useState(1);
@@ -865,6 +865,70 @@ export default function ArchitecturePage() {
           animation: brokenLine 1.5s ease-in-out infinite;
         }
 
+        @keyframes signalPulse {
+          0%, 100% { r: 3; opacity: 1; }
+          50% { r: 6; opacity: 0.6; }
+        }
+
+        @keyframes dataRise {
+          0% { transform: translateY(0); opacity: 1; }
+          100% { transform: translateY(-400px); opacity: 0; }
+        }
+
+        @keyframes electricFlow {
+          0% { stroke-dashoffset: 20; }
+          100% { stroke-dashoffset: 0; }
+        }
+
+        @keyframes sensorBlink {
+          0%, 100% { fill: #10b981; filter: drop-shadow(0 0 3px #10b981); }
+          50% { fill: #34d399; filter: drop-shadow(0 0 8px #34d399); }
+        }
+
+        @keyframes pumpRotate {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+
+        @keyframes layerGlow {
+          0%, 100% { box-shadow: 0 0 5px rgba(0, 212, 255, 0.2); }
+          50% { box-shadow: 0 0 20px rgba(0, 212, 255, 0.5); }
+        }
+
+        .data-particle {
+          animation: dataRise 3s linear infinite;
+        }
+
+        .data-particle:nth-child(2) { animation-delay: 0.5s; }
+        .data-particle:nth-child(3) { animation-delay: 1s; }
+        .data-particle:nth-child(4) { animation-delay: 1.5s; }
+        .data-particle:nth-child(5) { animation-delay: 2s; }
+
+        .layer-card {
+          background: var(--bg-card);
+          border: 1px solid var(--border-color);
+          border-radius: 12px;
+          padding: 1rem;
+          position: relative;
+          transition: all 0.3s ease;
+        }
+
+        .layer-card:hover {
+          transform: translateX(5px);
+          border-color: var(--accent-cyan);
+          animation: layerGlow 1.5s ease-in-out infinite;
+        }
+
+        .layer-card::before {
+          content: '';
+          position: absolute;
+          left: 0;
+          top: 0;
+          bottom: 0;
+          width: 4px;
+          border-radius: 12px 0 0 12px;
+        }
+
         .animate-fade-in {
           animation: fadeInUp 0.6s ease-out forwards;
         }
@@ -1314,8 +1378,332 @@ export default function ArchitecturePage() {
 
         </section>
 
-        {/* Slide 3: Historical Challenges */}
+        {/* Slide 3: Why Do We Need Industrial Communication? */}
         <section className="slide" id="slide-3">
+          <div className="section-header">
+            <div className="section-number">SECTION 01 • THE CHALLENGE</div>
+            <h2 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              Why Do We Need Industrial Communication?
+              <span style={{
+                fontSize: '0.65rem',
+                background: 'linear-gradient(135deg, rgba(0, 212, 255, 0.15), rgba(16, 185, 129, 0.15))',
+                color: 'var(--accent-cyan)',
+                padding: '0.3rem 0.8rem',
+                borderRadius: '20px',
+                fontWeight: 500,
+                border: '1px solid rgba(0, 212, 255, 0.3)'
+              }}>FROM SIGNAL TO INSIGHT</span>
+            </h2>
+            <p className="section-goal">Goal: Understand the data journey from physical world to enterprise decisions</p>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: '1.5rem', marginTop: '1rem' }}>
+
+            {/* Left: Animated Data Flow Diagram */}
+            <div className="diagram-container" style={{ position: 'relative', overflow: 'hidden', minHeight: '480px' }}>
+              <div className="diagram-title" style={{ marginBottom: '0.5rem' }}>
+                <span style={{ color: 'var(--accent-green)' }}>⚡</span> Data Journey: Physical → Digital → Business
+              </div>
+
+              <svg viewBox="0 0 450 420" xmlns="http://www.w3.org/2000/svg" style={{ width: '100%', height: 'auto' }}>
+                <defs>
+                  {/* Gradients */}
+                  <linearGradient id="dataFlowGrad" x1="0%" y1="100%" x2="0%" y2="0%">
+                    <stop offset="0%" stopColor="#10b981" />
+                    <stop offset="50%" stopColor="#00d4ff" />
+                    <stop offset="100%" stopColor="#8b5cf6" />
+                  </linearGradient>
+                  <linearGradient id="electricGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="#f59e0b" stopOpacity="0.3" />
+                    <stop offset="50%" stopColor="#f59e0b" stopOpacity="1" />
+                    <stop offset="100%" stopColor="#f59e0b" stopOpacity="0.3" />
+                  </linearGradient>
+                  <filter id="glowFilter">
+                    <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+                    <feMerge>
+                      <feMergeNode in="coloredBlur"/>
+                      <feMergeNode in="SourceGraphic"/>
+                    </feMerge>
+                  </filter>
+                </defs>
+
+                {/* Data Flow Arrow (vertical backbone) */}
+                <rect x="210" y="20" width="30" height="380" rx="15" fill="url(#dataFlowGrad)" opacity="0.15" />
+                <path d="M225 400 L225 30 M215 45 L225 20 L235 45" stroke="url(#dataFlowGrad)" strokeWidth="2" fill="none" opacity="0.6" />
+
+                {/* Rising data particles */}
+                {[0, 1, 2, 3, 4].map((i) => (
+                  <g key={i}>
+                    <circle cx="225" cy={380 - i * 70} r="4" fill="#00d4ff" filter="url(#glowFilter)">
+                      <animate attributeName="cy" values={`${380};20;380`} dur="4s" repeatCount="indefinite" begin={`${i * 0.8}s`} />
+                      <animate attributeName="opacity" values="1;0.3;1" dur="4s" repeatCount="indefinite" begin={`${i * 0.8}s`} />
+                    </circle>
+                  </g>
+                ))}
+
+                {/* LAYER 5: Enterprise (Top) */}
+                <g transform="translate(20, 20)">
+                  <rect width="170" height="55" rx="8" fill="#111827" stroke="#8b5cf6" strokeWidth="2" />
+                  <rect width="170" height="4" rx="2" fill="#8b5cf6" opacity="0.8" />
+                  <text x="15" y="30" fill="#8b5cf6" fontSize="11" fontWeight="bold">ENTERPRISE</text>
+                  <text x="15" y="45" fill="#94a3b8" fontSize="9">ERP • Analytics • Cloud</text>
+                  <text x="145" y="35" fill="#8b5cf6" fontSize="16">☁️</text>
+                </g>
+                <g transform="translate(260, 20)">
+                  <rect width="170" height="55" rx="8" fill="rgba(139, 92, 246, 0.1)" stroke="#8b5cf6" strokeWidth="1" strokeDasharray="4 2" />
+                  <text x="10" y="25" fill="#a78bfa" fontSize="9">Business Intelligence</text>
+                  <text x="10" y="40" fill="#94a3b8" fontSize="8">• Predictive Maintenance</text>
+                  <text x="10" y="52" fill="#94a3b8" fontSize="8">• Cost Optimization</text>
+                </g>
+
+                {/* LAYER 4: SCADA/HMI */}
+                <g transform="translate(20, 95)">
+                  <rect width="170" height="55" rx="8" fill="#111827" stroke="#ec4899" strokeWidth="2" />
+                  <rect width="170" height="4" rx="2" fill="#ec4899" opacity="0.8" />
+                  <text x="15" y="30" fill="#ec4899" fontSize="11" fontWeight="bold">SCADA / HMI</text>
+                  <text x="15" y="45" fill="#94a3b8" fontSize="9">Visualization • Alarming</text>
+                  <text x="145" y="35" fill="#ec4899" fontSize="16">🖥️</text>
+                </g>
+                <g transform="translate(260, 95)">
+                  <rect width="170" height="55" rx="8" fill="rgba(236, 72, 153, 0.1)" stroke="#ec4899" strokeWidth="1" strokeDasharray="4 2" />
+                  <text x="10" y="25" fill="#f472b6" fontSize="9">Operator Interface</text>
+                  <text x="10" y="40" fill="#94a3b8" fontSize="8">• Real-time Dashboards</text>
+                  <text x="10" y="52" fill="#94a3b8" fontSize="8">• Trend Analysis</text>
+                </g>
+
+                {/* LAYER 3: Industrial Network */}
+                <g transform="translate(20, 170)">
+                  <rect width="170" height="55" rx="8" fill="#111827" stroke="#f59e0b" strokeWidth="2" />
+                  <rect width="170" height="4" rx="2" fill="#f59e0b" opacity="0.8" />
+                  <text x="15" y="30" fill="#f59e0b" fontSize="11" fontWeight="bold">INDUSTRIAL NETWORK</text>
+                  <text x="15" y="45" fill="#94a3b8" fontSize="9">OPC UA • Ethernet/IP</text>
+                  <text x="145" y="35" fill="#f59e0b" fontSize="16">🔗</text>
+                </g>
+                <g transform="translate(260, 170)">
+                  <rect width="170" height="55" rx="8" fill="rgba(245, 158, 11, 0.1)" stroke="#f59e0b" strokeWidth="1" strokeDasharray="4 2" />
+                  <text x="10" y="25" fill="#fbbf24" fontSize="9">Protocol Translation</text>
+                  <text x="10" y="40" fill="#94a3b8" fontSize="8">• Secure Transport</text>
+                  <text x="10" y="52" fill="#94a3b8" fontSize="8">• Data Normalization</text>
+                </g>
+
+                {/* LAYER 2: PLC / Controllers */}
+                <g transform="translate(20, 245)">
+                  <rect width="170" height="55" rx="8" fill="#111827" stroke="#00d4ff" strokeWidth="2" />
+                  <rect width="170" height="4" rx="2" fill="#00d4ff" opacity="0.8" />
+                  <text x="15" y="30" fill="#00d4ff" fontSize="11" fontWeight="bold">PLC / CONTROLLERS</text>
+                  <text x="15" y="45" fill="#94a3b8" fontSize="9">Logic • Vendor Protocols</text>
+                  <text x="145" y="35" fill="#00d4ff" fontSize="16">🔲</text>
+                </g>
+                <g transform="translate(260, 245)">
+                  <rect width="170" height="55" rx="8" fill="rgba(0, 212, 255, 0.1)" stroke="#00d4ff" strokeWidth="1" strokeDasharray="4 2" />
+                  <text x="10" y="25" fill="#22d3ee" fontSize="9">Control Logic</text>
+                  <text x="10" y="40" fill="#94a3b8" fontSize="8">• S7, EtherNet/IP, Modbus</text>
+                  <text x="10" y="52" fill="#94a3b8" fontSize="8">• 4-20mA → Digital</text>
+                </g>
+
+                {/* LAYER 1: Sensors / Field Devices */}
+                <g transform="translate(20, 320)">
+                  <rect width="170" height="55" rx="8" fill="#111827" stroke="#10b981" strokeWidth="2" />
+                  <rect width="170" height="4" rx="2" fill="#10b981" opacity="0.8" />
+                  <text x="15" y="30" fill="#10b981" fontSize="11" fontWeight="bold">SENSORS / I/O</text>
+                  <text x="15" y="45" fill="#94a3b8" fontSize="9">4-20mA • HART • Digital</text>
+                  <text x="140" y="38" fill="#10b981" fontSize="18">📡</text>
+                </g>
+                <g transform="translate(260, 320)">
+                  <rect width="170" height="55" rx="8" fill="rgba(16, 185, 129, 0.1)" stroke="#10b981" strokeWidth="1" strokeDasharray="4 2" />
+                  <text x="10" y="25" fill="#34d399" fontSize="9">Field Instruments</text>
+                  <text x="10" y="40" fill="#94a3b8" fontSize="8">• Pressure, Flow, Level</text>
+                  <text x="10" y="52" fill="#94a3b8" fontSize="8">• VFD Feedback</text>
+                </g>
+
+                {/* LAYER 0: Physical Assets */}
+                <g transform="translate(70, 395)">
+                  <rect width="310" height="25" rx="5" fill="rgba(16, 185, 129, 0.2)" stroke="#10b981" strokeWidth="1" />
+
+                  {/* Animated pump icon */}
+                  <g transform="translate(30, 12)">
+                    <circle r="8" fill="none" stroke="#10b981" strokeWidth="2">
+                      <animateTransform attributeName="transform" type="rotate" values="0;360" dur="2s" repeatCount="indefinite" />
+                    </circle>
+                    <line x1="-5" y1="0" x2="5" y2="0" stroke="#10b981" strokeWidth="2">
+                      <animateTransform attributeName="transform" type="rotate" values="0;360" dur="2s" repeatCount="indefinite" />
+                    </line>
+                  </g>
+                  <text x="50" y="16" fill="#10b981" fontSize="10" fontWeight="bold">PUMP</text>
+
+                  {/* Tank icon */}
+                  <g transform="translate(130, 5)">
+                    <rect x="0" y="0" width="20" height="15" rx="2" fill="none" stroke="#10b981" strokeWidth="1.5" />
+                    <rect x="2" y="8" width="16" height="5" fill="#10b981" opacity="0.5">
+                      <animate attributeName="y" values="8;5;8" dur="3s" repeatCount="indefinite" />
+                      <animate attributeName="height" values="5;10;5" dur="3s" repeatCount="indefinite" />
+                    </rect>
+                  </g>
+                  <text x="155" y="16" fill="#10b981" fontSize="10" fontWeight="bold">TANK</text>
+
+                  {/* Motor icon */}
+                  <g transform="translate(230, 12)">
+                    <rect x="-12" y="-6" width="24" height="12" rx="2" fill="none" stroke="#10b981" strokeWidth="1.5" />
+                    <circle r="4" fill="#10b981" opacity="0.6">
+                      <animate attributeName="opacity" values="0.3;1;0.3" dur="0.5s" repeatCount="indefinite" />
+                    </circle>
+                  </g>
+                  <text x="250" y="16" fill="#10b981" fontSize="10" fontWeight="bold">MOTOR</text>
+                </g>
+
+                {/* Electric signal animation lines */}
+                <g opacity="0.6">
+                  {/* From assets to sensors */}
+                  <path d="M225 390 L225 375" stroke="#10b981" strokeWidth="2" strokeDasharray="4 2">
+                    <animate attributeName="stroke-dashoffset" values="6;0" dur="0.5s" repeatCount="indefinite" />
+                  </path>
+                  {/* Between layers */}
+                  <path d="M225 320 L225 300" stroke="#00d4ff" strokeWidth="2" strokeDasharray="4 2">
+                    <animate attributeName="stroke-dashoffset" values="6;0" dur="0.5s" repeatCount="indefinite" />
+                  </path>
+                  <path d="M225 245 L225 225" stroke="#f59e0b" strokeWidth="2" strokeDasharray="4 2">
+                    <animate attributeName="stroke-dashoffset" values="6;0" dur="0.5s" repeatCount="indefinite" />
+                  </path>
+                  <path d="M225 170 L225 150" stroke="#ec4899" strokeWidth="2" strokeDasharray="4 2">
+                    <animate attributeName="stroke-dashoffset" values="6;0" dur="0.5s" repeatCount="indefinite" />
+                  </path>
+                  <path d="M225 95 L225 75" stroke="#8b5cf6" strokeWidth="2" strokeDasharray="4 2">
+                    <animate attributeName="stroke-dashoffset" values="6;0" dur="0.5s" repeatCount="indefinite" />
+                  </path>
+                </g>
+              </svg>
+            </div>
+
+            {/* Right: The Challenge Explained */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+
+              {/* The Problem Statement */}
+              <div className="content-card" style={{
+                borderColor: 'rgba(0, 212, 255, 0.3)',
+                background: 'linear-gradient(135deg, var(--bg-card) 0%, rgba(0, 212, 255, 0.05) 100%)'
+              }}>
+                <h3 style={{ color: 'var(--accent-cyan)', marginBottom: '0.8rem' }}>
+                  <span className="icon" style={{ background: 'rgba(0, 212, 255, 0.1)' }}>🎯</span>
+                  The Core Challenge
+                </h3>
+                <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+                  Industrial systems generate <strong style={{ color: 'var(--accent-green)' }}>massive amounts of data</strong> from
+                  physical processes. This data must travel from <strong style={{ color: 'var(--accent-cyan)' }}>electrical signals</strong> at
+                  the sensor level all the way up to <strong style={{ color: 'var(--accent-purple)' }}>business decisions</strong> at the enterprise level.
+                </p>
+              </div>
+
+              {/* Signal Types */}
+              <div className="content-card" style={{ borderColor: 'rgba(16, 185, 129, 0.3)' }}>
+                <h3 style={{ color: 'var(--accent-green)' }}>
+                  <span className="icon" style={{ background: 'rgba(16, 185, 129, 0.1)' }}>⚡</span>
+                  Signal Types at the Edge
+                </h3>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', marginTop: '0.5rem' }}>
+                  {[
+                    { signal: '4-20mA', desc: 'Analog current' },
+                    { signal: '0-10V', desc: 'Analog voltage' },
+                    { signal: 'HART', desc: 'Digital overlay' },
+                    { signal: 'Modbus RTU', desc: 'Serial digital' },
+                  ].map((item, idx) => (
+                    <div key={idx} style={{
+                      background: 'rgba(16, 185, 129, 0.1)',
+                      padding: '0.4rem 0.6rem',
+                      borderRadius: '6px',
+                      fontSize: '0.75rem'
+                    }}>
+                      <span style={{ color: '#10b981', fontWeight: 600 }}>{item.signal}</span>
+                      <span style={{ color: 'var(--text-muted)', marginLeft: '0.3rem' }}>— {item.desc}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* What needs to happen */}
+              <div className="content-card" style={{ borderColor: 'rgba(245, 158, 11, 0.3)' }}>
+                <h3 style={{ color: 'var(--accent-orange)' }}>
+                  <span className="icon" style={{ background: 'rgba(245, 158, 11, 0.1)' }}>🔄</span>
+                  What Must Happen
+                </h3>
+                <ul style={{ margin: 0, fontSize: '0.85rem' }}>
+                  <li><strong>Convert</strong> electrical signals to digital values</li>
+                  <li><strong>Contextualize</strong> raw data with metadata</li>
+                  <li><strong>Transport</strong> securely across network layers</li>
+                  <li><strong>Aggregate</strong> for analytics and visualization</li>
+                </ul>
+              </div>
+
+              {/* The Question */}
+              <div style={{
+                background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(236, 72, 153, 0.1))',
+                border: '2px solid rgba(139, 92, 246, 0.4)',
+                borderRadius: '12px',
+                padding: '1rem',
+                textAlign: 'center'
+              }}>
+                <div style={{ fontSize: '1.1rem', color: 'var(--accent-purple)', fontWeight: 600, marginBottom: '0.3rem' }}>
+                  But how do all these layers talk to each other?
+                </div>
+                <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                  Every vendor has their own protocol... 🤔
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom: Data transformation strip */}
+          <div style={{
+            marginTop: '1rem',
+            background: 'var(--bg-card)',
+            border: '1px solid var(--border-color)',
+            borderRadius: '12px',
+            padding: '0.8rem 1rem',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '0.5rem',
+            overflow: 'hidden'
+          }}>
+            {[
+              { label: 'Electrical Signal', value: '12.45 mA', color: '#10b981', icon: '⚡' },
+              { label: '', value: '→', color: 'var(--text-muted)', icon: '' },
+              { label: 'Raw Value', value: '1450', color: '#00d4ff', icon: '🔢' },
+              { label: '', value: '→', color: 'var(--text-muted)', icon: '' },
+              { label: 'Engineering Unit', value: '1450 RPM', color: '#f59e0b', icon: '⚙️' },
+              { label: '', value: '→', color: 'var(--text-muted)', icon: '' },
+              { label: 'Contextualized', value: 'Pump.Speed', color: '#ec4899', icon: '🏷️' },
+              { label: '', value: '→', color: 'var(--text-muted)', icon: '' },
+              { label: 'Business Insight', value: '85% efficiency', color: '#8b5cf6', icon: '📊' },
+            ].map((item, idx) => (
+              <div key={idx} style={{
+                textAlign: 'center',
+                animation: item.label ? 'fadeInUp 0.5s ease-out forwards' : 'none',
+                animationDelay: `${idx * 0.1}s`,
+                opacity: item.label ? 0 : 1,
+                animationFillMode: 'forwards'
+              }}>
+                {item.label ? (
+                  <>
+                    <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', marginBottom: '0.2rem' }}>{item.label}</div>
+                    <div style={{
+                      fontSize: '0.85rem',
+                      fontWeight: 600,
+                      color: item.color,
+                      fontFamily: 'JetBrains Mono, monospace'
+                    }}>
+                      {item.icon} {item.value}
+                    </div>
+                  </>
+                ) : (
+                  <div style={{ fontSize: '1.2rem', color: item.color, animation: 'pulse 1s infinite' }}>{item.value}</div>
+                )}
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Slide 4: Historical Challenges (was Slide 3) */}
+        <section className="slide" id="slide-4">
           <div className="section-header">
             <div className="section-number">SECTION 01 • 0–5 MINUTES</div>
             <h2 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
@@ -1548,52 +1936,348 @@ export default function ArchitecturePage() {
           </div>
         </section>
 
-        {/* Slide 4: Classic OPC vs OPC UA */}
-        <section className="slide" id="slide-4">
+        {/* Slide 5: Classic OPC vs OPC UA - Enhanced with Timeline */}
+        <section className="slide" id="slide-5">
           <div className="section-header">
             <div className="section-number">SECTION 01 • EVOLUTION</div>
-            <h2 className="section-title">Classic OPC vs OPC UA</h2>
+            <h2 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              The Evolution: Classic OPC → OPC UA
+              <span style={{
+                fontSize: '0.65rem',
+                background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(16, 185, 129, 0.15))',
+                color: 'var(--accent-green)',
+                padding: '0.3rem 0.8rem',
+                borderRadius: '20px',
+                fontWeight: 500,
+                border: '1px solid rgba(16, 185, 129, 0.3)'
+              }}>30 YEARS OF PROGRESS</span>
+            </h2>
+            <p className="section-goal">Goal: Understand the journey from proprietary to universal</p>
           </div>
-          <div className="two-column">
-            <div className="content-card" style={{ borderColor: '#ef4444' }}>
-              <h3 style={{ color: '#ef4444' }}>
-                <span className="icon" style={{ background: 'rgba(239,68,68,0.1)' }}>📦</span> Classic OPC
+
+          {/* Animated Timeline */}
+          <div style={{
+            background: 'var(--bg-card)',
+            border: '1px solid var(--border-color)',
+            borderRadius: '12px',
+            padding: '1rem 1.5rem',
+            marginBottom: '1rem',
+            position: 'relative',
+            overflow: 'hidden'
+          }}>
+            <div className="diagram-title" style={{ marginBottom: '0.8rem' }}>
+              <span style={{ color: 'var(--accent-cyan)' }}>📅</span> OPC Foundation Timeline
+            </div>
+
+            <svg viewBox="0 0 900 120" xmlns="http://www.w3.org/2000/svg" style={{ width: '100%', height: 'auto' }}>
+              <defs>
+                <linearGradient id="timelineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#ef4444" />
+                  <stop offset="40%" stopColor="#f59e0b" />
+                  <stop offset="70%" stopColor="#00d4ff" />
+                  <stop offset="100%" stopColor="#10b981" />
+                </linearGradient>
+                <filter id="timeGlow">
+                  <feGaussianBlur stdDeviation="3" result="blur" />
+                  <feFlood floodColor="#00d4ff" floodOpacity="0.6" />
+                  <feComposite in2="blur" operator="in" />
+                  <feMerge>
+                    <feMergeNode />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+              </defs>
+
+              {/* Timeline base line */}
+              <rect x="50" y="55" width="800" height="6" rx="3" fill="#1e293b" />
+
+              {/* Animated progress line */}
+              <rect x="50" y="55" width="800" height="6" rx="3" fill="url(#timelineGrad)" opacity="0.8">
+                <animate attributeName="width" values="0;800" dur="2s" fill="freeze" />
+              </rect>
+
+              {/* Timeline events */}
+              {[
+                { x: 50, year: '1996', label: 'OPC DA 1.0', desc: 'Data Access', color: '#ef4444', legacy: true },
+                { x: 180, year: '1998', label: 'OPC HDA', desc: 'Historical Data', color: '#ef4444', legacy: true },
+                { x: 310, year: '2000', label: 'OPC A&E', desc: 'Alarms & Events', color: '#f59e0b', legacy: true },
+                { x: 440, year: '2006', label: 'UA Started', desc: 'Development Begins', color: '#f59e0b', legacy: false },
+                { x: 570, year: '2008', label: 'OPC UA 1.0', desc: 'First Release', color: '#00d4ff', legacy: false },
+                { x: 700, year: '2018', label: 'PubSub', desc: 'Part 14 Added', color: '#10b981', legacy: false },
+                { x: 830, year: '2024', label: 'UA 1.05', desc: 'Cloud Native', color: '#10b981', legacy: false },
+              ].map((event, idx) => (
+                <g key={idx} style={{
+                  animation: 'fadeInUp 0.5s ease-out forwards',
+                  animationDelay: `${0.3 + idx * 0.15}s`,
+                  opacity: 0,
+                }}>
+                  {/* Event dot */}
+                  <circle cx={event.x} cy="58" r="10" fill={event.color} filter={!event.legacy ? 'url(#timeGlow)' : ''}>
+                    <animate attributeName="r" values="0;10" dur="0.3s" fill="freeze" begin={`${0.3 + idx * 0.15}s`} />
+                  </circle>
+                  <circle cx={event.x} cy="58" r="5" fill={event.legacy ? '#1e293b' : 'white'} />
+
+                  {/* Year label */}
+                  <text x={event.x} y={idx % 2 === 0 ? 35 : 95} textAnchor="middle" fill={event.color} fontSize="11" fontWeight="bold">
+                    {event.year}
+                  </text>
+
+                  {/* Event label */}
+                  <text x={event.x} y={idx % 2 === 0 ? 20 : 110} textAnchor="middle" fill="#e2e8f0" fontSize="9" fontWeight="600">
+                    {event.label}
+                  </text>
+
+                  {/* Description */}
+                  <text x={event.x} y={idx % 2 === 0 ? 8 : 122} textAnchor="middle" fill="#64748b" fontSize="7">
+                    {event.desc}
+                  </text>
+                </g>
+              ))}
+
+              {/* Era labels */}
+              <g>
+                <rect x="50" y="75" width="250" height="18" rx="4" fill="rgba(239, 68, 68, 0.15)" stroke="#ef4444" strokeWidth="1" strokeDasharray="3 2" />
+                <text x="175" y="87" textAnchor="middle" fill="#ef4444" fontSize="9" fontWeight="600">CLASSIC OPC ERA (DCOM)</text>
+              </g>
+              <g>
+                <rect x="420" y="75" width="430" height="18" rx="4" fill="rgba(16, 185, 129, 0.15)" stroke="#10b981" strokeWidth="1" />
+                <text x="635" y="87" textAnchor="middle" fill="#10b981" fontSize="9" fontWeight="600">OPC UA ERA (Platform Independent)</text>
+              </g>
+            </svg>
+          </div>
+
+          {/* Comparison Cards */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', gap: '1rem', alignItems: 'stretch' }}>
+
+            {/* Classic OPC Card */}
+            <div className="content-card" style={{
+              borderColor: 'rgba(239, 68, 68, 0.4)',
+              background: 'linear-gradient(135deg, var(--bg-card) 0%, rgba(239, 68, 68, 0.05) 100%)',
+              position: 'relative',
+              overflow: 'hidden'
+            }}>
+              {/* Deprecated overlay effect */}
+              <div style={{
+                position: 'absolute',
+                top: 0,
+                right: 0,
+                background: 'linear-gradient(135deg, transparent 50%, rgba(239, 68, 68, 0.1) 50%)',
+                width: '80px',
+                height: '80px'
+              }} />
+              <div style={{
+                position: 'absolute',
+                top: '12px',
+                right: '-25px',
+                background: '#ef4444',
+                color: 'white',
+                fontSize: '0.6rem',
+                fontWeight: 700,
+                padding: '0.2rem 2rem',
+                transform: 'rotate(45deg)',
+                letterSpacing: '1px'
+              }}>LEGACY</div>
+
+              <h3 style={{ color: '#ef4444', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <span className="icon" style={{ background: 'rgba(239,68,68,0.1)', fontSize: '1.2rem' }}>📦</span>
+                Classic OPC (1996-2006)
               </h3>
-              <ul>
-                <li>Windows + DCOM dependent</li>
-                <li>No encryption</li>
-                <li>Not firewall friendly</li>
-                <li>Data only (no semantics)</li>
-              </ul>
-              <div style={{ marginTop: '0.6rem', padding: '0.4rem', background: 'rgba(239,68,68,0.1)', borderRadius: '5px' }}>
-                <span className="status-badge deprecated">Legacy</span>
+
+              <div style={{ marginTop: '0.8rem' }}>
+                {[
+                  { icon: '🪟', text: 'Windows + DCOM only', bad: true },
+                  { icon: '🔓', text: 'No encryption', bad: true },
+                  { icon: '🚫', text: 'Firewall nightmare', bad: true },
+                  { icon: '📊', text: 'Data only, no context', bad: true },
+                  { icon: '🔌', text: 'Separate specs (DA, HDA, A&E)', bad: true },
+                ].map((item, idx) => (
+                  <div key={idx} style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    padding: '0.4rem 0',
+                    borderBottom: idx < 4 ? '1px solid rgba(239, 68, 68, 0.1)' : 'none',
+                    animation: 'fadeInUp 0.4s ease-out forwards',
+                    animationDelay: `${1 + idx * 0.1}s`,
+                    opacity: 0,
+                    animationFillMode: 'forwards'
+                  }}>
+                    <span style={{ fontSize: '1rem' }}>{item.icon}</span>
+                    <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', flex: 1 }}>{item.text}</span>
+                    <span style={{ color: '#ef4444', fontSize: '1rem' }}>✗</span>
+                  </div>
+                ))}
+              </div>
+
+              <div style={{
+                marginTop: '0.8rem',
+                padding: '0.5rem',
+                background: 'rgba(239, 68, 68, 0.1)',
+                borderRadius: '8px',
+                textAlign: 'center'
+              }}>
+                <span style={{ fontSize: '0.75rem', color: '#ef4444', fontWeight: 600 }}>
+                  ⚠️ Deprecated - Do not use in new projects
+                </span>
               </div>
             </div>
-            <div className="content-card" style={{ borderColor: '#10b981' }}>
-              <h3 style={{ color: '#10b981' }}>
-                <span className="icon" style={{ background: 'rgba(16,185,129,0.1)' }}>🚀</span> OPC UA
+
+            {/* Transformation Arrow */}
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '0 0.5rem'
+            }}>
+              <svg viewBox="0 0 60 200" style={{ width: '60px', height: '200px' }}>
+                <defs>
+                  <linearGradient id="arrowGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="#ef4444" />
+                    <stop offset="100%" stopColor="#10b981" />
+                  </linearGradient>
+                  <marker id="arrowHead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                    <polygon points="0 0, 10 3.5, 0 7" fill="#10b981" />
+                  </marker>
+                </defs>
+
+                {/* Vertical transformation line */}
+                <path d="M30 20 L30 180" stroke="url(#arrowGrad)" strokeWidth="3" fill="none" strokeDasharray="8 4">
+                  <animate attributeName="stroke-dashoffset" values="24;0" dur="1s" repeatCount="indefinite" />
+                </path>
+
+                {/* Arrow pointing right */}
+                <path d="M10 100 L50 100" stroke="url(#arrowGrad)" strokeWidth="4" markerEnd="url(#arrowHead)">
+                  <animate attributeName="opacity" values="0.5;1;0.5" dur="1.5s" repeatCount="indefinite" />
+                </path>
+
+                {/* Evolution text */}
+                <text x="30" y="60" textAnchor="middle" fill="#f59e0b" fontSize="8" fontWeight="bold">EVOLVE</text>
+                <text x="30" y="150" textAnchor="middle" fill="#00d4ff" fontSize="8" fontWeight="bold">UNIFY</text>
+              </svg>
+            </div>
+
+            {/* OPC UA Card */}
+            <div className="content-card" style={{
+              borderColor: 'rgba(16, 185, 129, 0.4)',
+              background: 'linear-gradient(135deg, var(--bg-card) 0%, rgba(16, 185, 129, 0.08) 100%)',
+              position: 'relative',
+              overflow: 'hidden'
+            }}>
+              {/* Modern badge */}
+              <div style={{
+                position: 'absolute',
+                top: '12px',
+                right: '-20px',
+                background: 'linear-gradient(135deg, #10b981, #00d4ff)',
+                color: 'white',
+                fontSize: '0.6rem',
+                fontWeight: 700,
+                padding: '0.2rem 2rem',
+                transform: 'rotate(45deg)',
+                letterSpacing: '1px'
+              }}>CURRENT</div>
+
+              <h3 style={{ color: '#10b981', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <span className="icon" style={{ background: 'rgba(16, 185, 129, 0.1)', fontSize: '1.2rem' }}>🚀</span>
+                OPC UA (2008-Present)
               </h3>
-              <ul>
-                <li>Platform independent</li>
-                <li>Secure by design</li>
-                <li>Firewall friendly</li>
-                <li>Information-model driven</li>
-              </ul>
-              <div style={{ marginTop: '0.6rem', padding: '0.4rem', background: 'rgba(16,185,129,0.1)', borderRadius: '5px' }}>
-                <span className="status-badge current">Current</span>
+
+              <div style={{ marginTop: '0.8rem' }}>
+                {[
+                  { icon: '🌐', text: 'Platform independent', good: true },
+                  { icon: '🔒', text: 'Security built-in (X.509)', good: true },
+                  { icon: '🔥', text: 'Firewall friendly (single port)', good: true },
+                  { icon: '🧠', text: 'Rich information modeling', good: true },
+                  { icon: '📦', text: 'Unified spec (DA+HDA+A&E+more)', good: true },
+                ].map((item, idx) => (
+                  <div key={idx} style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    padding: '0.4rem 0',
+                    borderBottom: idx < 4 ? '1px solid rgba(16, 185, 129, 0.1)' : 'none',
+                    animation: 'fadeInUp 0.4s ease-out forwards',
+                    animationDelay: `${1.2 + idx * 0.1}s`,
+                    opacity: 0,
+                    animationFillMode: 'forwards'
+                  }}>
+                    <span style={{ fontSize: '1rem' }}>{item.icon}</span>
+                    <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', flex: 1 }}>{item.text}</span>
+                    <span style={{ color: '#10b981', fontSize: '1rem' }}>✓</span>
+                  </div>
+                ))}
+              </div>
+
+              <div style={{
+                marginTop: '0.8rem',
+                padding: '0.5rem',
+                background: 'rgba(16, 185, 129, 0.1)',
+                borderRadius: '8px',
+                textAlign: 'center'
+              }}>
+                <span style={{ fontSize: '0.75rem', color: '#10b981', fontWeight: 600 }}>
+                  ✨ IEC 62541 International Standard
+                </span>
               </div>
             </div>
           </div>
-          <div className="highlight-box" style={{ marginTop: '1rem' }}>
-            <p><strong>OPC UA is a Platform, Not Just a Protocol</strong></p>
-            <p style={{ marginTop: '0.3rem', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-              Communication Protocol + Information Modeling + Security Framework + Scalable Architecture
-            </p>
+
+          {/* Bottom: OPC UA is a Platform */}
+          <div style={{
+            marginTop: '1rem',
+            background: 'linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(16, 185, 129, 0.1))',
+            border: '2px solid rgba(0, 212, 255, 0.3)',
+            borderRadius: '12px',
+            padding: '1rem',
+            display: 'grid',
+            gridTemplateColumns: 'auto 1fr',
+            gap: '1rem',
+            alignItems: 'center'
+          }}>
+            <div style={{
+              background: 'linear-gradient(135deg, #00d4ff, #10b981)',
+              borderRadius: '12px',
+              padding: '1rem',
+              textAlign: 'center'
+            }}>
+              <div style={{ fontSize: '2rem', marginBottom: '0.3rem' }}>🏗️</div>
+              <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'white', letterSpacing: '1px' }}>PLATFORM</div>
+            </div>
+            <div>
+              <div style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--accent-cyan)', marginBottom: '0.5rem' }}>
+                OPC UA is a Platform, Not Just a Protocol
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                {[
+                  { label: 'Communication Protocol', color: '#00d4ff' },
+                  { label: 'Information Modeling', color: '#10b981' },
+                  { label: 'Security Framework', color: '#f59e0b' },
+                  { label: 'Scalable Architecture', color: '#8b5cf6' },
+                ].map((item, idx) => (
+                  <span key={idx} style={{
+                    background: `${item.color}20`,
+                    border: `1px solid ${item.color}40`,
+                    color: item.color,
+                    padding: '0.3rem 0.6rem',
+                    borderRadius: '6px',
+                    fontSize: '0.75rem',
+                    fontWeight: 600,
+                    animation: 'fadeInUp 0.4s ease-out forwards',
+                    animationDelay: `${1.8 + idx * 0.1}s`,
+                    opacity: 0,
+                    animationFillMode: 'forwards'
+                  }}>
+                    {item.label}
+                  </span>
+                ))}
+              </div>
+            </div>
           </div>
         </section>
 
-        {/* Slide 5: Purdue Model */}
-        <section className="slide" id="slide-5">
+        {/* Slide 6: Purdue Model */}
+        <section className="slide" id="slide-6">
           <div className="section-header">
             <div className="section-number">SECTION 01 • ARCHITECTURE</div>
             <h2 className="section-title flex items-center gap-3">
@@ -1810,8 +2494,8 @@ export default function ArchitecturePage() {
           </div>
         </section>
 
-        {/* Slide 6: Communication Models */}
-        <section className="slide" id="slide-6">
+        {/* Slide 7: Communication Models */}
+        <section className="slide" id="slide-7">
           <div className="section-header">
             <div className="section-number">SECTION 02 • 5–12 MINUTES</div>
             <h2 className="section-title">Communication Models</h2>
@@ -1842,8 +2526,8 @@ export default function ArchitecturePage() {
           </div>
         </section>
 
-        {/* Slide 7: SecureChannel vs Session */}
-        <section className="slide" id="slide-7">
+        {/* Slide 8: SecureChannel vs Session */}
+        <section className="slide" id="slide-8">
           <div className="section-header">
             <div className="section-number">SECTION 02 • SECURITY LAYERS</div>
             <h2 className="section-title">SecureChannel vs Session</h2>
@@ -1878,8 +2562,8 @@ export default function ArchitecturePage() {
           </div>
         </section>
 
-        {/* Slide 8: Address Space */}
-        <section className="slide" id="slide-8">
+        {/* Slide 9: Address Space */}
+        <section className="slide" id="slide-9">
           <div className="section-header">
             <div className="section-number">SECTION 03 • 12–22 MINUTES</div>
             <h2 className="section-title">Address Space: Heart of OPC UA</h2>
@@ -1937,8 +2621,8 @@ export default function ArchitecturePage() {
           </div>
         </section>
 
-        {/* Slide 9: NodeClasses - Enhanced with Icons and Animations */}
-        <section className="slide" id="slide-9">
+        {/* Slide 10: NodeClasses - Enhanced with Icons and Animations */}
+        <section className="slide" id="slide-10">
           <div className="section-header">
             <div className="section-number">SECTION 03 • NODECLASSES</div>
             <h2 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
@@ -2099,8 +2783,8 @@ export default function ArchitecturePage() {
           </div>
         </section>
 
-        {/* Slide 10: Services & Data Access */}
-        <section className="slide" id="slide-10">
+        {/* Slide 11: Services & Data Access */}
+        <section className="slide" id="slide-11">
           <div className="section-header">
             <div className="section-number">SECTION 04 • 22–30 MINUTES</div>
             <h2 className="section-title">Services & Data Access</h2>
@@ -2152,8 +2836,8 @@ export default function ArchitecturePage() {
           </div>
         </section>
 
-        {/* Slide 11: Network & Transport - Enhanced with Protocol Simulation */}
-        <section className="slide" id="slide-11" style={{ paddingTop: '60px' }}>
+        {/* Slide 12: Network & Transport - Enhanced with Protocol Simulation */}
+        <section className="slide" id="slide-12" style={{ paddingTop: '60px' }}>
           <div className="section-header" style={{ marginBottom: '0.8rem' }}>
             <div className="section-number">SECTION 05 • NETWORK PROTOCOLS</div>
             <h2 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
@@ -2401,8 +3085,8 @@ export default function ArchitecturePage() {
           </div>
         </section>
 
-        {/* Slide 12: Security Architecture */}
-        <section className="slide" id="slide-12">
+        {/* Slide 13: Security Architecture */}
+        <section className="slide" id="slide-13">
           <div className="section-header">
             <div className="section-number">SECTION 05 • SECURITY</div>
             <h2 className="section-title">Security Architecture</h2>
@@ -2441,8 +3125,8 @@ export default function ArchitecturePage() {
           </div>
         </section>
 
-        {/* Slide 13: Role-Based Access Control */}
-        <section className="slide" id="slide-13">
+        {/* Slide 14: Role-Based Access Control */}
+        <section className="slide" id="slide-14">
           <div className="section-header">
             <div className="section-number">SECTION 05 • AUTHORIZATION</div>
             <h2 className="section-title">Role-Based Access Control</h2>
@@ -2505,8 +3189,8 @@ export default function ArchitecturePage() {
           </div>
         </section>
 
-        {/* Slide 14: OPC UA PubSub */}
-        <section className="slide" id="slide-14">
+        {/* Slide 15: OPC UA PubSub */}
+        <section className="slide" id="slide-15">
           <div className="section-header">
             <div className="section-number">SECTION 07 • 48–55 MINUTES</div>
             <h2 className="section-title">OPC UA PubSub</h2>
@@ -2556,8 +3240,8 @@ export default function ArchitecturePage() {
           </div>
         </section>
 
-        {/* Slide 15: Information Modeling Mechanics - Enhanced with real types.yaml */}
-        <section className="slide" id="slide-15" style={{ paddingTop: '60px' }}>
+        {/* Slide 16: Information Modeling Mechanics - Enhanced with real types.yaml */}
+        <section className="slide" id="slide-16" style={{ paddingTop: '60px' }}>
           <div className="section-header" style={{ marginBottom: '0.8rem' }}>
             <div className="section-number">SECTION 08 • INFORMATION MODELING</div>
             <h2 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
@@ -2748,8 +3432,8 @@ export default function ArchitecturePage() {
           </div>
         </section>
 
-        {/* Slide 16: Interoperability - Complete OPC-UA Architecture */}
-        <section className="slide" id="slide-16" style={{ paddingTop: '60px' }}>
+        {/* Slide 17: Interoperability - Complete OPC-UA Architecture */}
+        <section className="slide" id="slide-17" style={{ paddingTop: '60px' }}>
           <div className="section-header" style={{ marginBottom: '1rem' }}>
             <div className="section-number">SECTION 08 • COMMUNICATION ARCHITECTURE</div>
             <h2 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
@@ -2986,8 +3670,8 @@ export default function ArchitecturePage() {
           </div>
         </section>
 
-        {/* Slide 17: Future Directions */}
-        <section className="slide" id="slide-17">
+        {/* Slide 18: Future Directions */}
+        <section className="slide" id="slide-18">
           <div className="section-header">
             <div className="section-number">SECTION 08 • FUTURE READY</div>
             <h2 className="section-title">Future Directions</h2>
@@ -3038,8 +3722,8 @@ export default function ArchitecturePage() {
           </div>
         </section>
 
-        {/* Slide 18: Conclusion */}
-        <section className="slide title-slide" id="slide-18">
+        {/* Slide 19: Conclusion */}
+        <section className="slide title-slide" id="slide-19">
           <div className="quote" style={{ fontSize: '1.3rem', border: 'none', background: 'none' }}>
             <strong style={{ fontSize: '1.5rem' }}>OPC UA is not about moving numbers.</strong><br /><br />
             It is about preserving <strong>meaning</strong>, <strong>trust</strong>, and <strong>quality</strong><br />
