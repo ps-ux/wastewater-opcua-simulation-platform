@@ -8,7 +8,7 @@ import { usePumpStore } from '@/stores/pump-store';
 import { usePumpWebSocket } from '@/hooks/use-pump-websocket';
 import { Server, Zap, Activity, Info, Play, RefreshCw, Layers, ShieldCheck, Database, LayoutGrid, Monitor, Smartphone, Globe, Laptop, Cloud, Radio, ArrowLeftRight, Wifi, Cable, MessageSquare, Sun, Moon, Lock, User, AlertTriangle, Shield } from 'lucide-react';
 
-const TOTAL_SLIDES = 19;
+const TOTAL_SLIDES = 22;
 
 type Theme = 'dark' | 'business';
 
@@ -19,12 +19,25 @@ export default function ArchitecturePage() {
   const [simStatus, setSimStatus] = useState<string>("");
   const [commModel, setCommModel] = useState<string>("");
   const [theme, setTheme] = useState<Theme>('dark');
+  const [currentTime, setCurrentTime] = useState<string>('');
+  const [showKeyboardHints, setShowKeyboardHints] = useState<boolean>(true);
+  const [showServerStatus, setShowServerStatus] = useState<boolean>(true);
 
   const toggleTheme = useCallback(() => {
     setTheme(prev => prev === 'dark' ? 'business' : 'dark');
   }, []);
   const { pumps, pumpData, fetchPumps } = usePumpStore();
   const { isConnected } = usePumpWebSocket();
+
+  // Update current time on client side only
+  useEffect(() => {
+    const updateTime = () => {
+      setCurrentTime(new Date().toISOString().split('T')[1].split('.')[0]);
+    };
+    updateTime();
+    const interval = setInterval(updateTime, 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     fetchPumps();
@@ -70,6 +83,12 @@ export default function ArchitecturePage() {
       } else if (e.key === 't') {
         // 't' for Theme toggle
         toggleTheme();
+      } else if (e.key === 'k') {
+        // 'k' for Keyboard hints toggle
+        setShowKeyboardHints(prev => !prev);
+      } else if (e.key === 's') {
+        // 's' for Server status toggle
+        setShowServerStatus(prev => !prev);
       }
     };
 
@@ -1118,6 +1137,274 @@ export default function ArchitecturePage() {
           50% { box-shadow: 0 0 20px rgba(0, 212, 255, 0.5); }
         }
 
+        @keyframes slideInLeft {
+          from { opacity: 0; transform: translateX(-50px); }
+          to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes slideInRight {
+          from { opacity: 0; transform: translateX(50px); }
+          to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes scaleIn {
+          from { opacity: 0; transform: scale(0.8); }
+          to { opacity: 1; transform: scale(1); }
+        }
+
+        @keyframes morphGlow {
+          0%, 100% {
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.3), 0 0 40px rgba(16, 185, 129, 0.2);
+            border-color: var(--accent-cyan);
+          }
+          50% {
+            box-shadow: 0 0 30px rgba(16, 185, 129, 0.4), 0 0 60px rgba(0, 212, 255, 0.3);
+            border-color: var(--accent-green);
+          }
+        }
+
+        @keyframes packetTravel {
+          0% { offset-distance: 0%; opacity: 1; }
+          100% { offset-distance: 100%; opacity: 1; }
+        }
+
+        @keyframes typewriterCursor {
+          0%, 50% { border-right-color: var(--accent-cyan); }
+          51%, 100% { border-right-color: transparent; }
+        }
+
+        @keyframes rainbowGlow {
+          0% { filter: drop-shadow(0 0 10px rgba(0, 212, 255, 0.8)); }
+          25% { filter: drop-shadow(0 0 10px rgba(16, 185, 129, 0.8)); }
+          50% { filter: drop-shadow(0 0 10px rgba(139, 92, 246, 0.8)); }
+          75% { filter: drop-shadow(0 0 10px rgba(245, 158, 11, 0.8)); }
+          100% { filter: drop-shadow(0 0 10px rgba(0, 212, 255, 0.8)); }
+        }
+
+        @keyframes floatUp {
+          0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+          100% { transform: translateY(-100px) rotate(10deg); opacity: 0; }
+        }
+
+        @keyframes heartbeat {
+          0%, 100% { transform: scale(1); }
+          14% { transform: scale(1.1); }
+          28% { transform: scale(1); }
+          42% { transform: scale(1.1); }
+          70% { transform: scale(1); }
+        }
+
+        .animate-slide-left {
+          animation: slideInLeft 0.6s ease-out forwards;
+        }
+
+        .animate-slide-right {
+          animation: slideInRight 0.6s ease-out forwards;
+        }
+
+        .animate-scale-in {
+          animation: scaleIn 0.5s ease-out forwards;
+        }
+
+        .animate-morph-glow {
+          animation: morphGlow 3s ease-in-out infinite;
+        }
+
+        .animate-heartbeat {
+          animation: heartbeat 1.5s ease-in-out infinite;
+        }
+
+        .animate-rainbow {
+          animation: rainbowGlow 4s linear infinite;
+        }
+
+        /* Interactive Demo Styles */
+        .demo-terminal {
+          background: linear-gradient(180deg, #0d1117 0%, #161b22 100%);
+          border: 1px solid #30363d;
+          border-radius: 12px;
+          overflow: hidden;
+          font-family: 'JetBrains Mono', monospace;
+        }
+
+        .demo-terminal-header {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          padding: 12px 16px;
+          background: #21262d;
+          border-bottom: 1px solid #30363d;
+        }
+
+        .demo-terminal-dot {
+          width: 12px;
+          height: 12px;
+          border-radius: 50%;
+        }
+
+        .demo-terminal-body {
+          padding: 16px;
+          min-height: 200px;
+          max-height: 300px;
+          overflow-y: auto;
+        }
+
+        .demo-terminal-line {
+          display: flex;
+          gap: 8px;
+          margin-bottom: 4px;
+          font-size: 0.75rem;
+        }
+
+        .demo-terminal-prompt {
+          color: var(--accent-green);
+          font-weight: 600;
+        }
+
+        .demo-terminal-output {
+          color: #c9d1d9;
+        }
+
+        /* Message Sequence Diagram Styles */
+        .sequence-diagram {
+          background: var(--bg-card);
+          border: 1px solid var(--border-color);
+          border-radius: 12px;
+          padding: 1.5rem;
+          position: relative;
+          overflow: hidden;
+        }
+
+        .sequence-lifeline {
+          stroke-dasharray: 8 4;
+          animation: dataFlow 2s linear infinite;
+        }
+
+        .sequence-message {
+          transition: all 0.3s ease;
+        }
+
+        .sequence-message:hover {
+          transform: scale(1.05);
+          filter: drop-shadow(0 0 8px var(--accent-cyan));
+        }
+
+        /* Keyboard Hints Overlay */
+        .keyboard-hints {
+          position: fixed;
+          bottom: 80px;
+          left: 20px;
+          background: var(--bg-card);
+          border: 1px solid var(--border-color);
+          border-radius: 10px;
+          padding: 0.8rem;
+          font-size: 0.7rem;
+          z-index: 999;
+          opacity: 0.9;
+          transition: opacity 0.3s;
+        }
+
+        .keyboard-hints:hover {
+          opacity: 1;
+        }
+
+        .keyboard-hint-row {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          margin-bottom: 0.3rem;
+        }
+
+        .keyboard-hint-row:last-child {
+          margin-bottom: 0;
+        }
+
+        .kbd {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          min-width: 24px;
+          height: 22px;
+          padding: 0 6px;
+          background: var(--bg-elevated);
+          border: 1px solid var(--border-color);
+          border-radius: 4px;
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 0.65rem;
+          font-weight: 600;
+          color: var(--text-secondary);
+          box-shadow: 0 2px 0 var(--border-color);
+        }
+
+        /* Live Control Panel */
+        .control-panel {
+          background: linear-gradient(135deg, var(--bg-card) 0%, rgba(0, 212, 255, 0.05) 100%);
+          border: 2px solid var(--accent-cyan);
+          border-radius: 16px;
+          padding: 1.5rem;
+          position: relative;
+          overflow: hidden;
+        }
+
+        .control-panel::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 4px;
+          background: linear-gradient(90deg, var(--accent-cyan), var(--accent-green), var(--accent-purple));
+        }
+
+        .control-button {
+          background: linear-gradient(135deg, var(--accent-green) 0%, #059669 100%);
+          color: white;
+          border: none;
+          padding: 0.8rem 1.5rem;
+          border-radius: 8px;
+          font-weight: 600;
+          font-size: 0.9rem;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+        }
+
+        .control-button:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+        }
+
+        .control-button.stop {
+          background: linear-gradient(135deg, var(--accent-red) 0%, #dc2626 100%);
+        }
+
+        .control-button.stop:hover {
+          box-shadow: 0 8px 20px rgba(239, 68, 68, 0.4);
+        }
+
+        .gauge-container {
+          position: relative;
+          width: 120px;
+          height: 120px;
+        }
+
+        .gauge-ring {
+          fill: none;
+          stroke: var(--border-color);
+          stroke-width: 10;
+        }
+
+        .gauge-value {
+          fill: none;
+          stroke-width: 10;
+          stroke-linecap: round;
+          transform-origin: center;
+          transform: rotate(-90deg);
+          transition: stroke-dashoffset 0.5s ease;
+        }
+
         .data-particle {
           animation: dataRise 3s linear infinite;
         }
@@ -1537,14 +1824,14 @@ export default function ArchitecturePage() {
             margin: '0 auto'
           }}>
             {[
-              { num: '01', title: 'Introduction', desc: 'Why OPC UA Exists & Industrial Reality', icon: <Info size={18} />, color: 'var(--accent-cyan)' },
-              { num: '02', title: 'Core Concepts', desc: 'Client–Server & PubSub Models', icon: <ArrowLeftRight size={18} />, color: 'var(--accent-green)' },
-              { num: '03', title: 'Address Space', desc: 'Information Modeling & NodeClasses', icon: <Database size={18} />, color: 'var(--accent-purple)' },
-              { num: '04', title: 'Services & Data Access', desc: 'Browse, Read, Subscribe, Call, History', icon: <Activity size={18} />, color: 'var(--accent-orange)' },
-              { num: '05', title: 'Network & Security', desc: 'Transport Protocols & Authentication', icon: <ShieldCheck size={18} />, color: 'var(--accent-pink)' },
-              { num: '06', title: 'Communication Architecture', desc: 'Cross-Platform Interoperability', icon: <Globe size={18} />, color: 'var(--accent-cyan)' },
-              { num: '07', title: 'PubSub Deep Dive', desc: 'Broker-less & Broker-based Patterns', icon: <Radio size={18} />, color: 'var(--accent-green)' },
-              { num: '08', title: 'Live Demonstration', desc: 'Interactive Dashboard & Real-time Data', icon: <Play size={18} />, color: 'var(--accent-orange)' },
+              { num: '01', title: 'Introduction', desc: 'Why OPC UA Exists & Industrial Reality', icon: <Info size={18} />, color: 'var(--accent-cyan)', slides: [3, 4, 5] },
+              { num: '02', title: 'Address Space & Modeling', desc: 'Information Modeling & NodeClasses', icon: <Database size={18} />, color: 'var(--accent-purple)', slides: [9, 10, 16] },
+              { num: '03', title: 'Core Concepts', desc: 'Client–Server & PubSub Architectures', icon: <ArrowLeftRight size={18} />, color: 'var(--accent-green)', slides: [7, 15, 17] },
+              { num: '04', title: 'Services & Data Access', desc: 'Browse, Read, Subscribe, Call, History', icon: <Activity size={18} />, color: 'var(--accent-orange)', slides: [11] },
+              { num: '05', title: 'Network & Security', desc: 'Transport, SecureChannel & RBAC', icon: <ShieldCheck size={18} />, color: 'var(--accent-pink)', slides: [6, 12, 8, 13, 14] },
+              { num: '06', title: 'Future Directions', desc: 'TSN, 5G, OPC UA FX & Beyond', icon: <Globe size={18} />, color: 'var(--accent-cyan)', slides: [18] },
+              { num: '07', title: 'Deep Dive: Communication', desc: 'Message Sequence & Session Flow', icon: <Radio size={18} />, color: 'var(--accent-green)', slides: [19] },
+              { num: '08', title: 'Live Demo', desc: 'Interactive Pump Control & Real-time Data', icon: <Play size={18} />, color: 'var(--accent-orange)', slides: [20] },
             ].map((item, i) => (
               <div
                 key={i}
@@ -1572,7 +1859,7 @@ export default function ArchitecturePage() {
                   e.currentTarget.style.transform = 'translateX(0)';
                   e.currentTarget.style.boxShadow = 'none';
                 }}
-                onClick={() => goToSlide(i + 3)}
+                onClick={() => goToSlide(item.slides[0])}
               >
                 <div style={{
                   display: 'flex',
@@ -4906,14 +5193,555 @@ export default function ArchitecturePage() {
             It preserves <strong>meaning, trust, and quality</strong> across decades of industrial systems.
           </div>
           <div style={{ marginTop: '1.5rem', textAlign: 'center' }}>
-            <button className="btn-action" onClick={() => goToSlide(18)}>
-              Final Conclusion →
+            <button className="btn-action" onClick={() => goToSlide(19)}>
+              Deep Dive: Communication →
             </button>
           </div>
         </section>
 
-        {/* Slide 19: Conclusion */}
-        <section className="slide title-slide" id="slide-19">
+        {/* Slide 19: Deep Dive - Communication Model */}
+        <section className="slide" id="slide-19" style={{ paddingTop: '60px' }}>
+          <div className="section-header" style={{ marginBottom: '0.8rem' }}>
+            <div className="section-number">DEEP DIVE • COMMUNICATION MODEL</div>
+            <h2 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              Message Sequence in Detail
+              <span className="live-badge animate-morph-glow" style={{ fontSize: '0.7rem' }}>
+                <div className="pulse-dot" />
+                INTERACTIVE
+              </span>
+            </h2>
+            <p className="section-goal">Understanding the complete request/response lifecycle</p>
+          </div>
+
+          {/* Interactive Message Sequence Diagram */}
+          <div className="sequence-diagram" style={{ marginBottom: '1rem' }}>
+            <svg viewBox="0 0 900 320" style={{ width: '100%', height: '320px' }}>
+              <defs>
+                <linearGradient id="clientLifeline" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="var(--accent-cyan)" stopOpacity="1" />
+                  <stop offset="100%" stopColor="var(--accent-cyan)" stopOpacity="0.3" />
+                </linearGradient>
+                <linearGradient id="serverLifeline" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="var(--accent-green)" stopOpacity="1" />
+                  <stop offset="100%" stopColor="var(--accent-green)" stopOpacity="0.3" />
+                </linearGradient>
+                <filter id="msgGlow">
+                  <feGaussianBlur stdDeviation="3" result="blur" />
+                  <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                </filter>
+                <marker id="arrowCyan" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                  <path d="M0,0 L0,6 L9,3 z" fill="var(--accent-cyan)" />
+                </marker>
+                <marker id="arrowGreen" markerWidth="10" markerHeight="10" refX="0" refY="3" orient="auto">
+                  <path d="M9,0 L9,6 L0,3 z" fill="var(--accent-green)" />
+                </marker>
+              </defs>
+
+              {/* Client Actor */}
+              <g transform="translate(80, 15)">
+                <rect x="-40" y="0" width="80" height="45" rx="8" fill={theme === 'business' ? '#e0f2fe' : 'rgba(0,212,255,0.15)'} stroke="var(--accent-cyan)" strokeWidth="2" />
+                <text x="0" y="20" fill="var(--accent-cyan)" fontSize="12" textAnchor="middle" fontWeight="700">OPC UA Client</text>
+                <text x="0" y="35" fill={theme === 'business' ? '#0284c7' : '#67e8f9'} fontSize="9" textAnchor="middle">SCADA / HMI</text>
+              </g>
+
+              {/* Server Actor */}
+              <g transform="translate(820, 15)">
+                <rect x="-40" y="0" width="80" height="45" rx="8" fill={theme === 'business' ? '#dcfce7' : 'rgba(16,185,129,0.15)'} stroke="var(--accent-green)" strokeWidth="2" />
+                <text x="0" y="20" fill="var(--accent-green)" fontSize="12" textAnchor="middle" fontWeight="700">OPC UA Server</text>
+                <text x="0" y="35" fill={theme === 'business' ? '#059669' : '#6ee7b7'} fontSize="9" textAnchor="middle">Pump Controller</text>
+              </g>
+
+              {/* Lifelines */}
+              <line x1="80" y1="65" x2="80" y2="310" stroke="url(#clientLifeline)" strokeWidth="3" className="sequence-lifeline" />
+              <line x1="820" y1="65" x2="820" y2="310" stroke="url(#serverLifeline)" strokeWidth="3" className="sequence-lifeline" />
+
+              {/* Message 1: CreateSessionRequest */}
+              <g className="sequence-message" style={{ cursor: 'pointer' }}>
+                <line x1="90" y1="85" x2="810" y2="85" stroke="var(--accent-cyan)" strokeWidth="2" markerEnd="url(#arrowCyan)" />
+                <rect x="350" y="72" width="200" height="26" rx="5" fill={theme === 'business' ? '#f0f9ff' : 'var(--bg-dark)'} stroke="var(--accent-cyan)" strokeWidth="1.5" />
+                <text x="450" y="90" fill="var(--accent-cyan)" fontSize="11" textAnchor="middle" fontWeight="600">CreateSessionRequest</text>
+                <text x="100" y="78" fill={theme === 'business' ? '#64748b' : '#94a3b8'} fontSize="9">1.</text>
+                {/* Animated packet */}
+                <circle r="6" fill="var(--accent-cyan)" filter="url(#msgGlow)">
+                  <animate attributeName="cx" values="90;810" dur="2s" repeatCount="indefinite" />
+                  <animate attributeName="cy" values="85;85" dur="2s" repeatCount="indefinite" />
+                  <animate attributeName="opacity" values="1;1;0" keyTimes="0;0.9;1" dur="2s" repeatCount="indefinite" />
+                </circle>
+              </g>
+
+              {/* Message 2: CreateSessionResponse */}
+              <g className="sequence-message" style={{ cursor: 'pointer' }}>
+                <line x1="810" y1="115" x2="90" y2="115" stroke="var(--accent-green)" strokeWidth="2" markerEnd="url(#arrowGreen)" />
+                <rect x="330" y="102" width="240" height="26" rx="5" fill={theme === 'business' ? '#f0fdf4' : 'var(--bg-dark)'} stroke="var(--accent-green)" strokeWidth="1.5" />
+                <text x="450" y="120" fill="var(--accent-green)" fontSize="11" textAnchor="middle" fontWeight="600">CreateSessionResponse (SessionId, Nonce)</text>
+                <text x="830" y="108" fill={theme === 'business' ? '#64748b' : '#94a3b8'} fontSize="9">2.</text>
+                <circle r="6" fill="var(--accent-green)" filter="url(#msgGlow)">
+                  <animate attributeName="cx" values="810;90" dur="2s" begin="0.5s" repeatCount="indefinite" />
+                  <animate attributeName="cy" values="115;115" dur="2s" begin="0.5s" repeatCount="indefinite" />
+                  <animate attributeName="opacity" values="1;1;0" keyTimes="0;0.9;1" dur="2s" begin="0.5s" repeatCount="indefinite" />
+                </circle>
+              </g>
+
+              {/* Message 3: ActivateSessionRequest */}
+              <g className="sequence-message" style={{ cursor: 'pointer' }}>
+                <line x1="90" y1="150" x2="810" y2="150" stroke="var(--accent-orange)" strokeWidth="2" markerEnd="url(#arrowCyan)" />
+                <rect x="310" y="137" width="280" height="26" rx="5" fill={theme === 'business' ? '#fffbeb' : 'var(--bg-dark)'} stroke="var(--accent-orange)" strokeWidth="1.5" />
+                <text x="450" y="155" fill="var(--accent-orange)" fontSize="11" textAnchor="middle" fontWeight="600">ActivateSessionRequest (Credentials, Signature)</text>
+                <text x="100" y="143" fill={theme === 'business' ? '#64748b' : '#94a3b8'} fontSize="9">3.</text>
+                <circle r="6" fill="var(--accent-orange)" filter="url(#msgGlow)">
+                  <animate attributeName="cx" values="90;810" dur="2s" begin="1s" repeatCount="indefinite" />
+                  <animate attributeName="cy" values="150;150" dur="2s" begin="1s" repeatCount="indefinite" />
+                  <animate attributeName="opacity" values="1;1;0" keyTimes="0;0.9;1" dur="2s" begin="1s" repeatCount="indefinite" />
+                </circle>
+              </g>
+
+              {/* Message 4: ActivateSessionResponse */}
+              <g className="sequence-message" style={{ cursor: 'pointer' }}>
+                <line x1="810" y1="180" x2="90" y2="180" stroke="var(--accent-green)" strokeWidth="2" markerEnd="url(#arrowGreen)" />
+                <rect x="350" y="167" width="200" height="26" rx="5" fill={theme === 'business' ? '#f0fdf4' : 'var(--bg-dark)'} stroke="var(--accent-green)" strokeWidth="1.5" />
+                <text x="450" y="185" fill="var(--accent-green)" fontSize="11" textAnchor="middle" fontWeight="600">ActivateSessionResponse ✓</text>
+                <text x="830" y="173" fill={theme === 'business' ? '#64748b' : '#94a3b8'} fontSize="9">4.</text>
+              </g>
+
+              {/* Secure Channel Box */}
+              <rect x="70" y="200" width="760" height="90" rx="8" fill="rgba(139,92,246,0.1)" stroke="var(--accent-purple)" strokeWidth="2" strokeDasharray="8 4" />
+              <text x="450" y="218" fill="var(--accent-purple)" fontSize="10" textAnchor="middle" fontWeight="600">ENCRYPTED SESSION ESTABLISHED</text>
+
+              {/* Message 5: ReadRequest (inside secure channel) */}
+              <g className="sequence-message" style={{ cursor: 'pointer' }}>
+                <line x1="90" y1="240" x2="810" y2="240" stroke="var(--accent-cyan)" strokeWidth="2" markerEnd="url(#arrowCyan)" />
+                <rect x="330" y="227" width="240" height="26" rx="5" fill="var(--accent-purple)" fillOpacity="0.2" stroke="var(--accent-cyan)" strokeWidth="1.5" />
+                <text x="450" y="245" fill="var(--accent-cyan)" fontSize="11" textAnchor="middle" fontWeight="600">ReadRequest (ns=1;s=Pump_01.FlowRate)</text>
+                <text x="100" y="233" fill={theme === 'business' ? '#64748b' : '#94a3b8'} fontSize="9">5.</text>
+                <circle r="6" fill="var(--accent-cyan)" filter="url(#msgGlow)">
+                  <animate attributeName="cx" values="90;810" dur="1.5s" begin="1.5s" repeatCount="indefinite" />
+                  <animate attributeName="cy" values="240;240" dur="1.5s" begin="1.5s" repeatCount="indefinite" />
+                  <animate attributeName="opacity" values="1;1;0" keyTimes="0;0.9;1" dur="1.5s" begin="1.5s" repeatCount="indefinite" />
+                </circle>
+              </g>
+
+              {/* Message 6: ReadResponse (inside secure channel) */}
+              <g className="sequence-message" style={{ cursor: 'pointer' }}>
+                <line x1="810" y1="270" x2="90" y2="270" stroke="var(--accent-green)" strokeWidth="2" markerEnd="url(#arrowGreen)" />
+                <rect x="300" y="257" width="300" height="26" rx="5" fill="var(--accent-purple)" fillOpacity="0.2" stroke="var(--accent-green)" strokeWidth="1.5" />
+                <text x="450" y="275" fill="var(--accent-green)" fontSize="11" textAnchor="middle" fontWeight="600">ReadResponse (Value: 2340.5, Status: Good, Timestamp)</text>
+                <text x="830" y="263" fill={theme === 'business' ? '#64748b' : '#94a3b8'} fontSize="9">6.</text>
+                <circle r="6" fill="var(--accent-green)" filter="url(#msgGlow)">
+                  <animate attributeName="cx" values="810;90" dur="1.5s" begin="2s" repeatCount="indefinite" />
+                  <animate attributeName="cy" values="270;270" dur="1.5s" begin="2s" repeatCount="indefinite" />
+                  <animate attributeName="opacity" values="1;1;0" keyTimes="0;0.9;1" dur="1.5s" begin="2s" repeatCount="indefinite" />
+                </circle>
+              </g>
+
+              {/* Time annotations */}
+              <g transform="translate(20, 85)">
+                <text fill={theme === 'business' ? '#64748b' : '#94a3b8'} fontSize="8" textAnchor="end">t₀</text>
+              </g>
+              <g transform="translate(20, 180)">
+                <text fill={theme === 'business' ? '#64748b' : '#94a3b8'} fontSize="8" textAnchor="end">t₁</text>
+              </g>
+              <g transform="translate(20, 270)">
+                <text fill={theme === 'business' ? '#64748b' : '#94a3b8'} fontSize="8" textAnchor="end">t₂</text>
+              </g>
+            </svg>
+          </div>
+
+          {/* Key Insights */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.8rem' }}>
+            {[
+              { step: '1-2', title: 'Session Creation', desc: 'Server allocates resources, generates nonces for crypto', color: 'var(--accent-cyan)', icon: '🔗' },
+              { step: '3-4', title: 'Authentication', desc: 'Client proves identity via signature over server nonce', color: 'var(--accent-orange)', icon: '🔐' },
+              { step: '5-6', title: 'Data Exchange', desc: 'All messages encrypted with session keys', color: 'var(--accent-purple)', icon: '📨' },
+              { step: 'Always', title: 'Quality Metadata', desc: 'Every response includes StatusCode + Timestamp', color: 'var(--accent-green)', icon: '✅' },
+            ].map((item, i) => (
+              <div key={i} className="content-card animate-fade-in" style={{
+                padding: '1rem',
+                borderColor: item.color,
+                animationDelay: `${i * 0.1}s`
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                  <span style={{ fontSize: '1.3rem' }}>{item.icon}</span>
+                  <span style={{ fontSize: '0.7rem', padding: '0.2rem 0.4rem', background: `${item.color}20`, borderRadius: '4px', color: item.color, fontFamily: 'JetBrains Mono', fontWeight: 600 }}>Step {item.step}</span>
+                </div>
+                <div style={{ fontSize: '0.9rem', fontWeight: 700, color: item.color, marginBottom: '0.3rem' }}>{item.title}</div>
+                <div style={{ fontSize: '0.75rem', color: theme === 'business' ? '#475569' : 'var(--text-secondary)', lineHeight: 1.4 }}>{item.desc}</div>
+              </div>
+            ))}
+          </div>
+
+          <div className="highlight-box" style={{ marginTop: '1rem' }}>
+            <p style={{ margin: 0 }}>
+              <strong>Key Insight:</strong> OPC UA's session model provides <strong style={{ color: 'var(--accent-purple)' }}>mutual authentication</strong> — both client and server verify each other's identity before any data is exchanged.
+              This prevents man-in-the-middle attacks and ensures audit trails are attributable to real users.
+            </p>
+          </div>
+        </section>
+
+        {/* Slide 20: Live Demo */}
+        <section className="slide" id="slide-20" style={{ paddingTop: '60px' }}>
+          <div className="section-header" style={{ marginBottom: '0.8rem' }}>
+            <div className="section-number">LIVE DEMO • INTERACTIVE</div>
+            <h2 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              Live Pump Control Demo
+              <span className="live-badge animate-heartbeat" style={{ fontSize: '0.7rem', background: 'rgba(16,185,129,0.1)', borderColor: 'var(--accent-green)' }}>
+                <div className="pulse-dot" style={{ background: 'var(--accent-green)' }} />
+                {isConnected ? 'CONNECTED' : 'CONNECTING...'}
+              </span>
+            </h2>
+            <p className="section-goal">Real-time OPC UA server interaction via this dashboard</p>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: '1.5rem', marginBottom: '1rem' }}>
+            {/* Control Panel */}
+            <div className="control-panel">
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                <h3 style={{ margin: 0, fontSize: '1.1rem', color: 'var(--accent-cyan)' }}>Pump Control</h3>
+                <span style={{ fontSize: '0.7rem', fontFamily: 'JetBrains Mono', color: 'var(--text-muted)' }}>
+                  ns=1;s={Object.values(pumpData)[0]?.name || 'IPS_PMP_001'}
+                </span>
+              </div>
+
+              {/* Live Status Display */}
+              <div style={{
+                background: 'var(--bg-dark)',
+                borderRadius: '10px',
+                padding: '1rem',
+                marginBottom: '1rem',
+                border: `2px solid ${Object.values(pumpData)[0]?.is_running ? 'var(--accent-green)' : 'var(--accent-orange)'}`
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.8rem' }}>
+                  <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Status:</span>
+                  <span style={{
+                    fontSize: '1rem',
+                    fontWeight: 700,
+                    color: Object.values(pumpData)[0]?.is_running ? 'var(--accent-green)' : 'var(--accent-orange)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem'
+                  }}>
+                    {Object.values(pumpData)[0]?.is_running ? (
+                      <>
+                        <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--accent-green)', animation: 'pulse 1.5s infinite' }} />
+                        RUNNING
+                      </>
+                    ) : (
+                      <>
+                        <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--accent-orange)' }} />
+                        STOPPED
+                      </>
+                    )}
+                  </span>
+                </div>
+
+                {/* Live Values */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.8rem' }}>
+                  <div style={{ background: 'var(--bg-elevated)', padding: '0.6rem', borderRadius: '8px' }}>
+                    <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', marginBottom: '0.2rem' }}>Flow Rate</div>
+                    <div style={{ fontSize: '1.2rem', fontWeight: 700, fontFamily: 'JetBrains Mono', color: 'var(--accent-cyan)' }}>
+                      {(Object.values(pumpData)[0]?.flow_rate || 0).toFixed(1)}
+                      <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginLeft: '4px' }}>GPM</span>
+                    </div>
+                  </div>
+                  <div style={{ background: 'var(--bg-elevated)', padding: '0.6rem', borderRadius: '8px' }}>
+                    <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', marginBottom: '0.2rem' }}>RPM</div>
+                    <div style={{ fontSize: '1.2rem', fontWeight: 700, fontFamily: 'JetBrains Mono', color: 'var(--accent-orange)' }}>
+                      {(Object.values(pumpData)[0]?.rpm || 0).toFixed(0)}
+                    </div>
+                  </div>
+                  <div style={{ background: 'var(--bg-elevated)', padding: '0.6rem', borderRadius: '8px' }}>
+                    <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', marginBottom: '0.2rem' }}>Power</div>
+                    <div style={{ fontSize: '1.2rem', fontWeight: 700, fontFamily: 'JetBrains Mono', color: 'var(--accent-green)' }}>
+                      {(Object.values(pumpData)[0]?.power_consumption || 0).toFixed(1)}
+                      <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginLeft: '4px' }}>kW</span>
+                    </div>
+                  </div>
+                  <div style={{ background: 'var(--bg-elevated)', padding: '0.6rem', borderRadius: '8px' }}>
+                    <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', marginBottom: '0.2rem' }}>Power Factor</div>
+                    <div style={{ fontSize: '1.2rem', fontWeight: 700, fontFamily: 'JetBrains Mono', color: 'var(--accent-purple)' }}>
+                      {(Object.values(pumpData)[0]?.power_factor || 0).toFixed(2)}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Control Buttons */}
+              <div style={{ display: 'flex', gap: '0.8rem', justifyContent: 'center' }}>
+                <button
+                  className="control-button"
+                  onClick={() => {
+                    const pump = Object.keys(pumpData)[0];
+                    if (pump) {
+                      usePumpStore.getState().startPump(pump);
+                    }
+                  }}
+                  disabled={Object.values(pumpData)[0]?.is_running}
+                  style={{ opacity: Object.values(pumpData)[0]?.is_running ? 0.5 : 1 }}
+                >
+                  <Play size={16} /> Start Pump
+                </button>
+                <button
+                  className="control-button stop"
+                  onClick={() => {
+                    const pump = Object.keys(pumpData)[0];
+                    if (pump) {
+                      usePumpStore.getState().stopPump(pump);
+                    }
+                  }}
+                  disabled={!Object.values(pumpData)[0]?.is_running}
+                  style={{ opacity: !Object.values(pumpData)[0]?.is_running ? 0.5 : 1 }}
+                >
+                  <Activity size={16} /> Stop Pump
+                </button>
+              </div>
+            </div>
+
+            {/* OPC UA Request/Response Log */}
+            <div className="demo-terminal">
+              <div className="demo-terminal-header">
+                <div className="demo-terminal-dot" style={{ background: '#ff5f56' }} />
+                <div className="demo-terminal-dot" style={{ background: '#ffbd2e' }} />
+                <div className="demo-terminal-dot" style={{ background: '#27ca40' }} />
+                <span style={{ marginLeft: '12px', fontSize: '0.75rem', color: '#8b949e' }}>OPC UA Communication Log</span>
+              </div>
+              <div className="demo-terminal-body">
+                <div className="demo-terminal-line">
+                  <span className="demo-terminal-prompt">$</span>
+                  <span style={{ color: 'var(--accent-cyan)' }}>opcua-client connect opc.tcp://localhost:4840</span>
+                </div>
+                <div className="demo-terminal-line">
+                  <span style={{ color: '#8b949e' }}>[INFO]</span>
+                  <span className="demo-terminal-output">Establishing SecureChannel with SecurityPolicy: Aes256_Sha256_RsaPss</span>
+                </div>
+                <div className="demo-terminal-line">
+                  <span style={{ color: 'var(--accent-green)' }}>[SUCCESS]</span>
+                  <span className="demo-terminal-output">SecureChannel established, TokenId: 1</span>
+                </div>
+                <div className="demo-terminal-line">
+                  <span style={{ color: '#8b949e' }}>[INFO]</span>
+                  <span className="demo-terminal-output">Creating session...</span>
+                </div>
+                <div className="demo-terminal-line">
+                  <span style={{ color: 'var(--accent-green)' }}>[SUCCESS]</span>
+                  <span className="demo-terminal-output">Session activated, SessionId: ns=1;i=42</span>
+                </div>
+                <div className="demo-terminal-line" style={{ marginTop: '8px' }}>
+                  <span className="demo-terminal-prompt">$</span>
+                  <span style={{ color: 'var(--accent-cyan)' }}>read ns=1;s=IPS_PMP_001.FlowRate</span>
+                </div>
+                <div className="demo-terminal-line">
+                  <span style={{ color: 'var(--accent-purple)' }}>[READ]</span>
+                  <span className="demo-terminal-output">NodeId: ns=1;s=IPS_PMP_001.FlowRate</span>
+                </div>
+                <div className="demo-terminal-line">
+                  <span style={{ color: 'var(--accent-green)' }}>[RESPONSE]</span>
+                  <span className="demo-terminal-output">
+                    Value: <span style={{ color: 'var(--accent-cyan)', fontWeight: 600 }}>{(Object.values(pumpData)[0]?.flow_rate || 2340.5).toFixed(2)}</span> |
+                    Status: <span style={{ color: 'var(--accent-green)', fontWeight: 600 }}>Good</span> |
+                    Time: {currentTime || '00:00:00'}
+                  </span>
+                </div>
+                <div className="demo-terminal-line" style={{ marginTop: '8px' }}>
+                  <span className="demo-terminal-prompt">$</span>
+                  <span style={{ color: 'var(--accent-orange)' }}>subscribe ns=1;s=IPS_PMP_001.* --interval=1000ms</span>
+                </div>
+                <div className="demo-terminal-line">
+                  <span style={{ color: 'var(--accent-green)' }}>[SUBSCRIBED]</span>
+                  <span className="demo-terminal-output">MonitoredItem created for 27 variables, PublishingInterval: 1000ms</span>
+                </div>
+                <div className="demo-terminal-line">
+                  <span style={{ color: '#8b949e' }}>[NOTIFICATION]</span>
+                  <span className="demo-terminal-output">
+                    RPM: <span style={{ color: 'var(--accent-orange)' }}>{(Object.values(pumpData)[0]?.rpm || 1145).toFixed(0)}</span> |
+                    Power: <span style={{ color: 'var(--accent-green)' }}>{(Object.values(pumpData)[0]?.power_consumption || 124.8).toFixed(1)} kW</span> |
+                    PF: <span style={{ color: 'var(--accent-purple)' }}>{(Object.values(pumpData)[0]?.power_factor || 0.85).toFixed(2)}</span>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Architecture Visualization */}
+          <div className="diagram-container" style={{ padding: '1rem' }}>
+            <div className="diagram-title">Live Data Flow Architecture</div>
+            <svg viewBox="0 0 900 140" style={{ width: '100%', height: '140px' }}>
+              {/* This Dashboard */}
+              <g transform="translate(50, 50)">
+                <rect width="100" height="50" rx="8" fill={theme === 'business' ? '#f0f9ff' : 'rgba(0,212,255,0.15)'} stroke="var(--accent-cyan)" strokeWidth="2" className="animate-glow" />
+                <text x="50" y="25" fill="var(--accent-cyan)" fontSize="10" textAnchor="middle" fontWeight="700">This Dashboard</text>
+                <text x="50" y="40" fill={theme === 'business' ? '#0284c7' : '#67e8f9'} fontSize="8" textAnchor="middle">React + WebSocket</text>
+              </g>
+
+              {/* Arrow to API */}
+              <g>
+                <line x1="155" y1="75" x2="250" y2="75" stroke="var(--accent-cyan)" strokeWidth="2" markerEnd="url(#arrowRight)" />
+                <text x="202" y="68" fill="var(--text-muted)" fontSize="8" textAnchor="middle">HTTP/WS</text>
+                <circle r="4" fill="var(--accent-cyan)">
+                  <animate attributeName="cx" values="160;245" dur="1.5s" repeatCount="indefinite" />
+                  <animate attributeName="cy" values="75;75" dur="1.5s" repeatCount="indefinite" />
+                </circle>
+              </g>
+
+              {/* FastAPI */}
+              <g transform="translate(255, 40)">
+                <rect width="120" height="70" rx="8" fill={theme === 'business' ? '#fefce8' : 'rgba(245,158,11,0.15)'} stroke="var(--accent-orange)" strokeWidth="2" />
+                <text x="60" y="25" fill="var(--accent-orange)" fontSize="10" textAnchor="middle" fontWeight="700">FastAPI Backend</text>
+                <text x="60" y="40" fill={theme === 'business' ? '#b45309' : '#fde047'} fontSize="8" textAnchor="middle">Python + asyncua</text>
+                <rect x="15" y="48" width="90" height="16" rx="4" fill={theme === 'business' ? '#fef3c7' : 'rgba(245,158,11,0.2)'} />
+                <text x="60" y="60" fill="var(--accent-orange)" fontSize="7" textAnchor="middle">OPC UA Client Lib</text>
+              </g>
+
+              {/* Arrow to Server */}
+              <g>
+                <line x1="380" y1="75" x2="490" y2="75" stroke="var(--accent-purple)" strokeWidth="2" markerEnd="url(#arrowRight)" />
+                <text x="435" y="68" fill="var(--text-muted)" fontSize="8" textAnchor="middle">UA TCP :4840</text>
+                <rect x="410" y="82" width="50" height="16" rx="3" fill="var(--accent-purple)" opacity="0.2" stroke="var(--accent-purple)" strokeDasharray="3 2" />
+                <text x="435" y="93" fill="var(--accent-purple)" fontSize="7" textAnchor="middle">Encrypted</text>
+                <circle r="4" fill="var(--accent-purple)">
+                  <animate attributeName="cx" values="385;485" dur="1.5s" begin="0.3s" repeatCount="indefinite" />
+                  <animate attributeName="cy" values="75;75" dur="1.5s" begin="0.3s" repeatCount="indefinite" />
+                </circle>
+              </g>
+
+              {/* OPC UA Server */}
+              <g transform="translate(495, 30)">
+                <rect width="140" height="90" rx="8" fill={theme === 'business' ? '#f0fdf4' : 'rgba(16,185,129,0.15)'} stroke="var(--accent-green)" strokeWidth="2" />
+                <text x="70" y="22" fill="var(--accent-green)" fontSize="10" textAnchor="middle" fontWeight="700">OPC UA Server</text>
+                <text x="70" y="36" fill={theme === 'business' ? '#059669' : '#6ee7b7'} fontSize="8" textAnchor="middle">Python asyncua</text>
+                <rect x="10" y="44" width="55" height="38" rx="4" fill={theme === 'business' ? '#dcfce7' : 'rgba(16,185,129,0.2)'} />
+                <text x="37" y="58" fill="var(--accent-green)" fontSize="7" textAnchor="middle" fontWeight="600">Address</text>
+                <text x="37" y="70" fill="var(--accent-green)" fontSize="7" textAnchor="middle" fontWeight="600">Space</text>
+                <rect x="75" y="44" width="55" height="38" rx="4" fill={theme === 'business' ? '#fef3c7' : 'rgba(245,158,11,0.2)'} />
+                <text x="102" y="58" fill="var(--accent-orange)" fontSize="7" textAnchor="middle" fontWeight="600">Simulation</text>
+                <text x="102" y="70" fill="var(--accent-orange)" fontSize="7" textAnchor="middle" fontWeight="600">Engine</text>
+              </g>
+
+              {/* Arrow to Pumps */}
+              <g>
+                <line x1="640" y1="75" x2="720" y2="75" stroke="var(--accent-green)" strokeWidth="2" markerEnd="url(#arrowRight)" />
+                <text x="680" y="68" fill="var(--text-muted)" fontSize="8" textAnchor="middle">Simulated</text>
+              </g>
+
+              {/* Physical Pumps */}
+              <g transform="translate(725, 35)">
+                <rect width="120" height="80" rx="8" fill={theme === 'business' ? '#ede9fe' : 'rgba(139,92,246,0.15)'} stroke="var(--accent-purple)" strokeWidth="2" />
+                <text x="60" y="22" fill="var(--accent-purple)" fontSize="10" textAnchor="middle" fontWeight="700">Virtual Pumps</text>
+                <g transform="translate(10, 32)">
+                  <rect width="30" height="25" rx="4" fill={theme === 'business' ? '#f5f3ff' : 'var(--bg-dark)'} stroke="var(--accent-green)" strokeWidth="1.5" />
+                  <text x="15" y="18" fill="var(--accent-green)" fontSize="8" textAnchor="middle" fontWeight="600">P1</text>
+                </g>
+                <g transform="translate(45, 32)">
+                  <rect width="30" height="25" rx="4" fill={theme === 'business' ? '#f5f3ff' : 'var(--bg-dark)'} stroke="var(--accent-cyan)" strokeWidth="1.5" />
+                  <text x="15" y="18" fill="var(--accent-cyan)" fontSize="8" textAnchor="middle" fontWeight="600">P2</text>
+                </g>
+                <g transform="translate(80, 32)">
+                  <rect width="30" height="25" rx="4" fill={theme === 'business' ? '#f5f3ff' : 'var(--bg-dark)'} stroke="var(--accent-orange)" strokeWidth="1.5" />
+                  <text x="15" y="18" fill="var(--accent-orange)" fontSize="8" textAnchor="middle" fontWeight="600">P3</text>
+                </g>
+                <text x="60" y="72" fill={theme === 'business' ? '#7c3aed' : '#c4b5fd'} fontSize="7" textAnchor="middle">Realistic Physics Engine</text>
+              </g>
+            </svg>
+          </div>
+        </section>
+
+        {/* Slide 21: Key Takeaways */}
+        <section className="slide" id="slide-21" style={{ paddingTop: '60px' }}>
+          <div className="section-header" style={{ marginBottom: '1rem' }}>
+            <div className="section-number">SUMMARY • KEY TAKEAWAYS</div>
+            <h2 className="section-title">What You Should Remember</h2>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.2rem', marginBottom: '1.5rem' }}>
+            {[
+              {
+                icon: <Database size={32} />,
+                title: 'Address Space is a Graph',
+                points: ['Not flat registers or tags', 'Nodes + References = Semantic context', 'Self-describing with types and engineering units'],
+                color: 'var(--accent-cyan)'
+              },
+              {
+                icon: <Shield size={32} />,
+                title: 'Security is Layered',
+                points: ['SecureChannel: encrypts the pipe', 'Session: authenticates the user', 'Both required for defense in depth'],
+                color: 'var(--accent-purple)'
+              },
+              {
+                icon: <ArrowLeftRight size={32} />,
+                title: 'Two Communication Models',
+                points: ['Client-Server: interactive, bidirectional', 'PubSub: scalable, unidirectional', 'Choose based on use case'],
+                color: 'var(--accent-orange)'
+              },
+              {
+                icon: <Layers size={32} />,
+                title: 'Type System is Powerful',
+                points: ['Define once, instantiate many', 'ObjectTypes carry full schemas', 'Companion specs extend with domain knowledge'],
+                color: 'var(--accent-green)'
+              },
+              {
+                icon: <Activity size={32} />,
+                title: 'Quality is First-Class',
+                points: ['Every value has StatusCode + Timestamp', 'Bad quality propagates clearly', 'No silent failures'],
+                color: 'var(--accent-pink)'
+              },
+              {
+                icon: <Globe size={32} />,
+                title: 'Platform Agnostic',
+                points: ['Works across OS, languages, networks', 'From embedded to cloud', 'Vendor-neutral interoperability'],
+                color: 'var(--accent-cyan)'
+              }
+            ].map((item, i) => (
+              <div key={i} className="content-card animate-fade-in" style={{
+                padding: '1.2rem',
+                borderColor: item.color,
+                animationDelay: `${i * 0.1}s`,
+                transition: 'all 0.3s ease'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', marginBottom: '0.8rem' }}>
+                  <div style={{ color: item.color }}>{item.icon}</div>
+                  <h3 style={{ margin: 0, fontSize: '1rem', color: item.color, fontWeight: 700 }}>{item.title}</h3>
+                </div>
+                <ul style={{ margin: 0, paddingLeft: '1.2rem', fontSize: '0.85rem', lineHeight: 1.6 }}>
+                  {item.points.map((point, j) => (
+                    <li key={j} style={{ color: theme === 'business' ? '#475569' : 'var(--text-secondary)', marginBottom: '0.3rem' }}>{point}</li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+
+          {/* Quick Reference Card */}
+          <div className="diagram-container" style={{ padding: '1.2rem' }}>
+            <div className="diagram-title" style={{ marginBottom: '1rem' }}>Quick Reference: When to Use What</div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem' }}>
+              {[
+                { scenario: 'Control a pump', solution: 'Client-Server + Write', protocol: 'TCP :4840', color: 'var(--accent-cyan)' },
+                { scenario: 'Dashboard monitoring', solution: 'Client-Server + Subscribe', protocol: 'WebSocket', color: 'var(--accent-purple)' },
+                { scenario: 'Cloud analytics', solution: 'PubSub + MQTT', protocol: 'MQTT :8883', color: 'var(--accent-orange)' },
+                { scenario: 'Historical trends', solution: 'HistoryRead + Aggregates', protocol: 'TCP :4840', color: 'var(--accent-green)' },
+              ].map((item, i) => (
+                <div key={i} style={{
+                  background: theme === 'business' ? '#f8fafc' : 'var(--bg-dark)',
+                  padding: '1rem',
+                  borderRadius: '8px',
+                  border: `1px solid ${item.color}`,
+                  borderLeft: `4px solid ${item.color}`
+                }}>
+                  <div style={{ fontSize: '0.85rem', fontWeight: 700, color: item.color, marginBottom: '0.4rem' }}>{item.scenario}</div>
+                  <div style={{ fontSize: '0.8rem', color: theme === 'business' ? '#334155' : 'var(--text-primary)', marginBottom: '0.4rem' }}>{item.solution}</div>
+                  <div style={{ fontSize: '0.7rem', fontFamily: 'JetBrains Mono', color: 'var(--text-muted)', background: 'var(--bg-elevated)', padding: '0.2rem 0.4rem', borderRadius: '4px', display: 'inline-block' }}>{item.protocol}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div style={{ marginTop: '1.5rem', textAlign: 'center' }}>
+            <button className="btn-action" onClick={() => goToSlide(22)}>
+              Final Thoughts →
+            </button>
+          </div>
+        </section>
+
+        {/* Slide 22: Conclusion */}
+        <section className="slide title-slide" id="slide-22">
           <div className="quote" style={{ fontSize: '1.3rem', border: 'none', background: 'none' }}>
             <strong style={{ fontSize: '1.5rem' }}>OPC UA is not about moving numbers.</strong><br /><br />
             It is about preserving <strong>meaning</strong>, <strong>trust</strong>, and <strong>quality</strong><br />
@@ -4943,52 +5771,94 @@ export default function ArchitecturePage() {
         </section>
 
         {/* Floating Live Data Overlay */}
-        <div className="float-dashboard">
-          <div className="float-header">
-            <div className="float-title">
-              Live Server Node: {Object.values(pumpData)[0]?.name || 'Discovery'}
+        {showServerStatus && (
+          <div className="float-dashboard">
+            <div className="float-header">
+              <div className="float-title">
+                Live Server Node: {Object.values(pumpData)[0]?.name || 'Discovery'}
+              </div>
+              <div className="live-badge" style={{ transform: 'scale(0.8)' }}>
+                {isConnected ? 'ON' : 'OFF'}
+              </div>
             </div>
-            <div className="live-badge" style={{ transform: 'scale(0.8)' }}>
-              {isConnected ? 'ON' : 'OFF'}
+            {Object.values(pumpData).length > 0 ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
+                  <span style={{ color: 'var(--text-muted)' }}>Flow Rate:</span>
+                  <span style={{ color: 'var(--accent-cyan)', fontFamily: 'monospace' }}>
+                    {Object.values(pumpData)[0]?.flow_rate.toFixed(1)} m³/h
+                  </span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
+                  <span style={{ color: 'var(--text-muted)' }}>Power:</span>
+                  <span style={{ color: 'var(--accent-green)', fontFamily: 'monospace' }}>
+                    {Object.values(pumpData)[0]?.power_consumption.toFixed(2)} kW
+                  </span>
+                </div>
+                <div style={{ height: '4px', background: 'var(--bg-elevated)', borderRadius: '2px', marginTop: '0.2rem', overflow: 'hidden' }}>
+                  <div style={{
+                    height: '100%',
+                    width: `${Math.min(100, (Object.values(pumpData)[0]?.flow_rate || 0) / 2)}%`,
+                    background: 'var(--accent-cyan)',
+                    transition: 'width 0.5s ease-out'
+                  }} />
+                </div>
+              </div>
+            ) : (
+              <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Searching for live assets...</p>
+            )}
+            <button
+              onClick={() => {
+                const searchParams = new URLSearchParams();
+                searchParams.set('open', 'true');
+                window.open('/monitoring?' + searchParams.toString(), '_blank');
+              }}
+              style={{ background: 'none', border: '1px solid var(--border-color)', color: 'var(--accent-cyan)', fontSize: '0.65rem', padding: '0.3rem', borderRadius: '4px', marginTop: '0.4rem', cursor: 'pointer' }}
+            >
+              View in Full Monitor
+            </button>
+          </div>
+        )}
+
+        {/* Keyboard Hints Overlay */}
+        {showKeyboardHints && (
+          <div className="keyboard-hints">
+            <div style={{ fontSize: '0.75rem', fontWeight: 600, marginBottom: '0.5rem', color: 'var(--text-primary)' }}>Keyboard Shortcuts</div>
+            <div className="keyboard-hint-row">
+              <span className="kbd">→</span>
+              <span className="kbd">Space</span>
+              <span style={{ color: 'var(--text-muted)' }}>Next slide</span>
+            </div>
+            <div className="keyboard-hint-row">
+              <span className="kbd">←</span>
+              <span style={{ color: 'var(--text-muted)' }}>Previous slide</span>
+            </div>
+            <div className="keyboard-hint-row">
+              <span className="kbd">Home</span>
+              <span style={{ color: 'var(--text-muted)' }}>First slide</span>
+            </div>
+            <div className="keyboard-hint-row">
+              <span className="kbd">End</span>
+              <span style={{ color: 'var(--text-muted)' }}>Last slide</span>
+            </div>
+            <div className="keyboard-hint-row">
+              <span className="kbd">T</span>
+              <span style={{ color: 'var(--text-muted)' }}>Toggle theme</span>
+            </div>
+            <div className="keyboard-hint-row">
+              <span className="kbd">K</span>
+              <span style={{ color: 'var(--text-muted)' }}>Toggle hints</span>
+            </div>
+            <div className="keyboard-hint-row">
+              <span className="kbd">S</span>
+              <span style={{ color: 'var(--text-muted)' }}>Toggle server status</span>
+            </div>
+            <div className="keyboard-hint-row">
+              <span className="kbd">D</span>
+              <span style={{ color: 'var(--text-muted)' }}>Go to dashboard</span>
             </div>
           </div>
-          {Object.values(pumpData).length > 0 ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
-                <span style={{ color: 'var(--text-muted)' }}>Flow Rate:</span>
-                <span style={{ color: 'var(--accent-cyan)', fontFamily: 'monospace' }}>
-                  {Object.values(pumpData)[0]?.flow_rate.toFixed(1)} m³/h
-                </span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
-                <span style={{ color: 'var(--text-muted)' }}>Power:</span>
-                <span style={{ color: 'var(--accent-green)', fontFamily: 'monospace' }}>
-                  {Object.values(pumpData)[0]?.power_consumption.toFixed(2)} kW
-                </span>
-              </div>
-              <div style={{ height: '4px', background: 'var(--bg-elevated)', borderRadius: '2px', marginTop: '0.2rem', overflow: 'hidden' }}>
-                <div style={{
-                  height: '100%',
-                  width: `${Math.min(100, (Object.values(pumpData)[0]?.flow_rate || 0) / 2)}%`,
-                  background: 'var(--accent-cyan)',
-                  transition: 'width 0.5s ease-out'
-                }} />
-              </div>
-            </div>
-          ) : (
-            <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Searching for live assets...</p>
-          )}
-          <button
-            onClick={() => {
-              const searchParams = new URLSearchParams();
-              searchParams.set('open', 'true');
-              window.open('/monitoring?' + searchParams.toString(), '_blank');
-            }}
-            style={{ background: 'none', border: '1px solid var(--border-color)', color: 'var(--accent-cyan)', fontSize: '0.65rem', padding: '0.3rem', borderRadius: '4px', marginTop: '0.4rem', cursor: 'pointer' }}
-          >
-            View in Full Monitor
-          </button>
-        </div>
+        )}
       </div>
     </>
   );
