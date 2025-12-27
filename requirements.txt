@@ -1,33 +1,25 @@
-# OPC-UA Pump Simulation Server Dependencies
+# Wastewater OPC-UA Simulation Platform - Python Dependencies
 
-# OPC-UA server implementation
-asyncua>=1.0.0
+# Core OPC-UA Server
+asyncua>=1.1.0
 
-# Configuration parsing
-pyyaml>=6.0
-
-# Database (SQLite with ORM)
+# Database & Persistence
 sqlalchemy>=2.0.0
 
-# REST API
+# Configuration
+pyyaml>=6.0
+
+# REST API & Web Server
 fastapi>=0.109.0
 uvicorn[standard]>=0.27.0
 pydantic>=2.0.0
+python-multipart>=0.0.9
 
-# Optional: for production deployment
-# gunicorn>=21.0.0
+# Pub/Sub Messaging (MQTT)
+# amqtt is the broker, paho-mqtt is the client
+amqtt>=0.10.1
+paho-mqtt>=1.6.1
 
-# Note: The following are part of Python standard library (no install needed):
-# - asyncio (async/await support)
-# - logging (logging framework)
-# - dataclasses (data structures)
-# - pathlib (path handling)
-# - json (JSON parsing)
-# - math (mathematical functions)
-# - random (random number generation)
-# - datetime (date/time handling)
-# - enum (enumerations)
-# - typing (type hints)
-# - sqlite3 (SQLite database - used by SQLAlchemy)
-# - argparse (command line parsing)
-# - signal (signal handling)
+# Utilities
+psutil>=5.9.0
+typing-extensions>=4.5.0

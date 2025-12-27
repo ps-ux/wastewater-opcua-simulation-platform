@@ -2,14 +2,17 @@
 
 import { useEffect, useCallback, useState } from 'react';
 import { usePumpStore } from '@/stores/pump-store';
+import { usePubSubStore } from '@/stores/pubsub-store';
 import type { PumpData } from '@/lib/types';
 
 const WS_URL = process.env.NEXT_PUBLIC_WS_URL || 'ws://127.0.0.1:8080/ws/pumps';
 
 interface WebSocketMessage {
-  type: 'initial_state' | 'bulk_update' | 'pump_update';
+  type: 'initial_state' | 'bulk_update' | 'pump_update' | 'pubsub_update';
   data: Record<string, PumpData>;
   pump_id?: string;
+  topic?: string;
+  payload?: any;
   timestamp: string;
 }
 
@@ -75,7 +78,10 @@ export function usePumpWebSocket() {
               store.updatePumpData(pumpId, data);
             });
           } else if (message.type === 'pump_update' && message.pump_id) {
-            usePumpStore.getState().updatePumpData(message.pump_id, message.data[message.pump_id]);
+            const store = usePumpStore.getState();
+            store.updatePumpData(message.pump_id, message.data[message.pump_id]);
+          } else if (message.type === 'pubsub_update' && message.topic) {
+            usePubSubStore.getState().addMessage(message.topic, message.payload);
           }
         } catch (err) {
           console.error('Failed to parse WebSocket message:', err);

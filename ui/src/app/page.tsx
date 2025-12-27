@@ -15,6 +15,7 @@ import {
   ArrowRight,
   TrendingUp,
   AlertTriangle,
+  Radio,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -64,7 +65,15 @@ export default function Dashboard() {
       {/* Page Header */}
       <div>
         <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">Dashboard</h1>
-        <p className="text-zinc-500">System overview and real-time metrics</p>
+        <div className="flex justify-between items-center">
+          <p className="text-zinc-500">System overview and real-time metrics</p>
+          <Link href="/pubsub">
+            <Button variant="outline" size="sm" className="gap-2 border-orange-500/50 text-orange-600 hover:bg-orange-50 dark:text-orange-400 dark:hover:bg-orange-950/30">
+              <Radio className="h-4 w-4" />
+              Pub/Sub Explorer
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {/* Stats Grid */}

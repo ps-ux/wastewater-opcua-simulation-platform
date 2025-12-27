@@ -1608,31 +1608,165 @@ export default function ArchitecturePage() {
           </div>
         </section>
 
-        {/* Slide 9: NodeClasses */}
+        {/* Slide 9: NodeClasses - Enhanced with Icons and Animations */}
         <section className="slide" id="slide-9">
           <div className="section-header">
             <div className="section-number">SECTION 03 • NODECLASSES</div>
-            <h2 className="section-title">8 NodeClasses</h2>
+            <h2 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              8 NodeClasses
+              <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 400 }}>(OPC 10000-3)</span>
+            </h2>
           </div>
-          <div className="node-grid">
+
+          {/* Categorized NodeClasses */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.8rem', marginBottom: '1rem' }}>
             {[
-              { name: 'Object', desc: 'Container' },
-              { name: 'Variable', desc: 'Data values' },
-              { name: 'Method', desc: 'Behavior' },
-              { name: 'ObjectType', desc: 'Templates' },
-              { name: 'VariableType', desc: 'Var templates' },
-              { name: 'ReferenceType', desc: 'Relationships' },
-              { name: 'DataType', desc: 'Value types' },
-              { name: 'View', desc: 'Filtered views' },
+              { name: 'Object', desc: 'Container for variables, methods, and other objects', icon: <Database size={20} />, color: 'var(--accent-cyan)', category: 'Instance', example: 'Pump_01' },
+              { name: 'Variable', desc: 'Holds data values with DataType and AccessLevel', icon: <Activity size={20} />, color: 'var(--accent-green)', category: 'Instance', example: 'FlowRate = 2340.5' },
+              { name: 'Method', desc: 'Callable function with input/output arguments', icon: <Play size={20} />, color: 'var(--accent-orange)', category: 'Instance', example: 'StartPump()' },
+              { name: 'ObjectType', desc: 'Template defining structure for Object instances', icon: <Layers size={20} />, color: 'var(--accent-purple)', category: 'Type', example: 'PumpType' },
+              { name: 'VariableType', desc: 'Template for Variable nodes with default attributes', icon: <LayoutGrid size={20} />, color: 'var(--accent-pink)', category: 'Type', example: 'AnalogItemType' },
+              { name: 'ReferenceType', desc: 'Defines relationships between nodes', icon: <ArrowLeftRight size={20} />, color: 'var(--accent-cyan)', category: 'Meta', example: 'HasComponent' },
+              { name: 'DataType', desc: 'Defines value types (Int32, String, Structure)', icon: <Server size={20} />, color: 'var(--accent-green)', category: 'Meta', example: 'Double, Boolean' },
+              { name: 'View', desc: 'Filtered subset of the Address Space', icon: <Globe size={20} />, color: 'var(--accent-orange)', category: 'Meta', example: 'OperatorView' },
             ].map((node, i) => (
-              <div key={i} className="node-item">
-                <div className="name">{node.name}</div>
-                <div className="desc">{node.desc}</div>
+              <div
+                key={i}
+                className="content-card animate-fade-in"
+                style={{
+                  padding: '0.8rem',
+                  borderColor: node.color,
+                  animationDelay: `${i * 0.05}s`,
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-4px) scale(1.02)';
+                  e.currentTarget.style.boxShadow = `0 8px 25px ${node.color}30`;
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0) scale(1)';
+                  e.currentTarget.style.boxShadow = 'none';
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                  <div style={{
+                    width: '32px',
+                    height: '32px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: `${node.color}15`,
+                    borderRadius: '8px',
+                    color: node.color
+                  }}>
+                    {node.icon}
+                  </div>
+                  <div>
+                    <div style={{ fontFamily: 'JetBrains Mono', fontSize: '0.85rem', fontWeight: 700, color: node.color }}>{node.name}</div>
+                    <span style={{
+                      fontSize: '0.55rem',
+                      padding: '0.1rem 0.3rem',
+                      background: `${node.color}20`,
+                      borderRadius: '3px',
+                      color: node.color,
+                      fontWeight: 600
+                    }}>{node.category}</span>
+                  </div>
+                </div>
+                <p style={{ fontSize: '0.65rem', color: 'var(--text-muted)', margin: '0 0 0.4rem 0', lineHeight: 1.4 }}>{node.desc}</p>
+                <div style={{
+                  fontSize: '0.6rem',
+                  fontFamily: 'JetBrains Mono',
+                  color: node.color,
+                  background: 'var(--bg-dark)',
+                  padding: '0.3rem 0.5rem',
+                  borderRadius: '4px',
+                  opacity: 0.8
+                }}>
+                  {node.example}
+                </div>
               </div>
             ))}
           </div>
-          <div className="highlight-box">
-            <p><strong>PumpType (ObjectType)</strong> defines: Speed, Status, Power, Runtime, Start(), Stop() → <strong>Pump_01 (Instance)</strong> inherits all with live values</p>
+
+          {/* Type Hierarchy Diagram */}
+          <div className="diagram-container" style={{ padding: '1rem' }}>
+            <div className="diagram-title">Type System Hierarchy (from types.yaml)</div>
+            <svg viewBox="0 0 800 100" style={{ width: '100%', height: '100px' }}>
+              {/* BaseObjectType */}
+              <g transform="translate(50, 40)">
+                <rect width="110" height="30" rx="5" fill="var(--bg-elevated)" stroke="var(--text-muted)" strokeWidth="1.5" strokeDasharray="4 2" />
+                <text x="55" y="20" fill="var(--text-muted)" fontSize="8" textAnchor="middle">BaseObjectType</text>
+                <text x="55" y="45" fill="var(--text-muted)" fontSize="6" textAnchor="middle">(OPC UA Base)</text>
+              </g>
+
+              {/* Arrow */}
+              <line x1="160" y1="55" x2="200" y2="55" stroke="var(--text-muted)" strokeWidth="1.5" markerEnd="url(#arrowRight)" />
+              <text x="180" y="48" fill="var(--text-muted)" fontSize="6" textAnchor="middle">extends</text>
+
+              {/* AssetType */}
+              <g transform="translate(200, 40)">
+                <rect width="80" height="30" rx="5" fill="var(--bg-elevated)" stroke="var(--accent-purple)" strokeWidth="2" />
+                <text x="40" y="20" fill="var(--accent-purple)" fontSize="9" textAnchor="middle" fontWeight="600">AssetType</text>
+                <text x="40" y="45" fill="var(--text-muted)" fontSize="6" textAnchor="middle">(abstract)</text>
+              </g>
+
+              {/* Arrow to PumpType */}
+              <line x1="280" y1="55" x2="330" y2="35" stroke="var(--accent-purple)" strokeWidth="1.5" />
+              <line x1="280" y1="55" x2="330" y2="75" stroke="var(--accent-purple)" strokeWidth="1.5" />
+
+              {/* PumpType */}
+              <g transform="translate(330, 20)">
+                <rect width="90" height="30" rx="5" fill="var(--bg-elevated)" stroke="var(--accent-green)" strokeWidth="2" />
+                <text x="45" y="20" fill="var(--accent-green)" fontSize="9" textAnchor="middle" fontWeight="600">PumpType</text>
+              </g>
+
+              {/* ChamberType */}
+              <g transform="translate(330, 60)">
+                <rect width="90" height="30" rx="5" fill="var(--bg-elevated)" stroke="var(--accent-pink)" strokeWidth="2" />
+                <text x="45" y="20" fill="var(--accent-pink)" fontSize="9" textAnchor="middle" fontWeight="600">ChamberType</text>
+              </g>
+
+              {/* Arrow to InfluentPumpType */}
+              <line x1="420" y1="35" x2="470" y2="35" stroke="var(--accent-green)" strokeWidth="1.5" />
+
+              {/* InfluentPumpType */}
+              <g transform="translate(470, 20)">
+                <rect width="120" height="30" rx="5" fill="var(--bg-elevated)" stroke="var(--accent-cyan)" strokeWidth="2" className="animate-glow" />
+                <text x="60" y="20" fill="var(--accent-cyan)" fontSize="9" textAnchor="middle" fontWeight="600">InfluentPumpType</text>
+              </g>
+
+              {/* Instance arrow */}
+              <line x1="590" y1="35" x2="640" y2="35" stroke="var(--accent-cyan)" strokeWidth="1.5" strokeDasharray="4 2" />
+              <text x="615" y="28" fill="var(--text-muted)" fontSize="6" textAnchor="middle">instance of</text>
+
+              {/* Instance */}
+              <g transform="translate(640, 20)">
+                <rect width="100" height="30" rx="5" fill="rgba(0,212,255,0.1)" stroke="var(--accent-cyan)" strokeWidth="2" />
+                <text x="50" y="15" fill="var(--accent-cyan)" fontSize="8" textAnchor="middle" fontWeight="600">IPS_PMP_001</text>
+                <text x="50" y="26" fill="var(--accent-green)" fontSize="7" textAnchor="middle">Running</text>
+              </g>
+
+              {/* Variables */}
+              <g transform="translate(640, 55)">
+                <rect width="100" height="35" rx="5" fill="var(--bg-dark)" stroke="var(--border-color)" />
+                <text x="10" y="12" fill="var(--text-muted)" fontSize="6">FlowRate: 2340.5</text>
+                <text x="10" y="22" fill="var(--text-muted)" fontSize="6">RPM: 1145</text>
+                <text x="10" y="32" fill="var(--text-muted)" fontSize="6">Power: 124.8 kW</text>
+              </g>
+            </svg>
+          </div>
+
+          <div className="highlight-box" style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+            <div style={{ flex: 1 }}>
+              <p style={{ margin: 0 }}><strong>PumpType (ObjectType)</strong> defines: 27 Variables (Speed, Pressure, Vibration...), 4 Methods (Start, Stop, SetSpeed, Reset), and 6 Alarm conditions</p>
+            </div>
+            <div style={{ display: 'flex', gap: '0.3rem' }}>
+              <span style={{ fontSize: '0.6rem', padding: '0.2rem 0.4rem', background: 'rgba(0,212,255,0.1)', border: '1px solid var(--accent-cyan)', borderRadius: '4px', color: 'var(--accent-cyan)' }}>Instance</span>
+              <span style={{ fontSize: '0.6rem', padding: '0.2rem 0.4rem', background: 'rgba(139,92,246,0.1)', border: '1px solid var(--accent-purple)', borderRadius: '4px', color: 'var(--accent-purple)' }}>Type</span>
+              <span style={{ fontSize: '0.6rem', padding: '0.2rem 0.4rem', background: 'rgba(100,116,139,0.1)', border: '1px solid var(--text-muted)', borderRadius: '4px', color: 'var(--text-muted)' }}>Meta</span>
+            </div>
           </div>
         </section>
 
@@ -1689,53 +1823,252 @@ export default function ArchitecturePage() {
           </div>
         </section>
 
-        {/* Slide 11: Network & Transport */}
-        <section className="slide" id="slide-11">
-          <div className="section-header">
-            <div className="section-number">SECTION 05 • 30–40 MINUTES</div>
-            <h2 className="section-title">Network & Transport</h2>
-            <p className="section-goal">Goal: Make security concrete and auditable</p>
+        {/* Slide 11: Network & Transport - Enhanced with Protocol Simulation */}
+        <section className="slide" id="slide-11" style={{ paddingTop: '60px' }}>
+          <div className="section-header" style={{ marginBottom: '0.8rem' }}>
+            <div className="section-number">SECTION 05 • NETWORK PROTOCOLS</div>
+            <h2 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              Network & Transport
+              <span className="live-badge animate-glow" style={{ fontSize: '0.7rem' }}>
+                <div className="pulse-dot" />
+                PROTOCOL SIMULATION
+              </span>
+            </h2>
           </div>
-          <div className="diagram-container">
-            <div className="diagram-title">UA TCP Message Flow (Handshake)</div>
-            <div style={{ height: '120px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <svg viewBox="0 0 400 100" style={{ maxWidth: '400px' }}>
-                <rect x="20" y="20" width="60" height="60" rx="5" fill="var(--bg-elevated)" stroke="var(--accent-cyan)" />
-                <text x="50" y="55" fill="var(--accent-cyan)" fontSize="8" textAnchor="middle">Client</text>
 
-                <rect x="320" y="20" width="60" height="60" rx="5" fill="var(--bg-elevated)" stroke="var(--accent-green)" />
-                <text x="350" y="55" fill="var(--accent-green)" fontSize="8" textAnchor="middle">Server</text>
-
-                <line x1="85" y1="40" x2="315" y2="40" stroke="var(--text-muted)" strokeWidth="1" strokeDasharray="4" />
-                <line x1="85" y1="60" x2="315" y2="60" stroke="var(--text-muted)" strokeWidth="1" strokeDasharray="4" />
-
+          {/* Three Protocol Comparison */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(3, 1fr)',
+            gap: '1rem',
+            marginBottom: '1rem'
+          }}>
+            {/* UA TCP - Client/Server */}
+            <div className="comm-model-card" style={{ borderColor: 'var(--accent-cyan)', padding: '1.2rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.8rem' }}>
+                <Cable size={22} style={{ color: 'var(--accent-cyan)' }} />
+                <h4 style={{ margin: 0, fontSize: '1.1rem', color: 'var(--accent-cyan)', fontWeight: 700 }}>UA TCP Binary</h4>
+              </div>
+              <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginBottom: '0.6rem' }}>
+                <span className="protocol-badge protocol-tcp" style={{ fontSize: '0.7rem', padding: '0.3rem 0.6rem' }}>TCP :4840</span>
+                <span className="protocol-badge" style={{ background: 'rgba(16,185,129,0.1)', borderColor: 'var(--accent-green)', color: 'var(--accent-green)', fontSize: '0.7rem', padding: '0.3rem 0.6rem' }}>Binary</span>
+              </div>
+              <div style={{ fontSize: '0.85rem', color: '#e2e8f0', lineHeight: 1.5 }}>
+                High-performance, stateful sessions, SecureChannel encryption
+              </div>
+              {/* Mini Animation */}
+              <svg width="100%" height="40" viewBox="0 0 200 40" style={{ marginTop: '0.6rem' }}>
+                <rect x="5" y="10" width="35" height="20" rx="4" fill="var(--bg-elevated)" stroke="var(--accent-cyan)" strokeWidth="1.5" />
+                <text x="22" y="23" fill="var(--accent-cyan)" fontSize="8" textAnchor="middle" fontWeight="600">Client</text>
+                <rect x="160" y="10" width="35" height="20" rx="4" fill="var(--bg-elevated)" stroke="var(--accent-green)" strokeWidth="1.5" />
+                <text x="178" y="23" fill="var(--accent-green)" fontSize="8" textAnchor="middle" fontWeight="600">Server</text>
+                <line x1="45" y1="20" x2="155" y2="20" stroke="var(--accent-cyan)" strokeWidth="2" strokeDasharray="6 3" className="connection-line" />
                 <circle r="4" fill="var(--accent-cyan)">
-                  <animateMotion dur="2s" repeatCount="indefinite" path="M85 40 L315 40" />
+                  <animate attributeName="cx" values="50;150;50" dur="2s" repeatCount="indefinite" />
+                  <animate attributeName="cy" values="20;20;20" dur="2s" repeatCount="indefinite" />
                 </circle>
-                <circle r="4" fill="var(--accent-green)">
-                  <animateMotion dur="2s" repeatCount="indefinite" path="M315 60 L85 60" />
+              </svg>
+            </div>
+
+            {/* WebSocket */}
+            <div className="comm-model-card" style={{ borderColor: 'var(--accent-purple)', padding: '1.2rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.8rem' }}>
+                <Wifi size={22} style={{ color: 'var(--accent-purple)' }} />
+                <h4 style={{ margin: 0, fontSize: '1.1rem', color: 'var(--accent-purple)', fontWeight: 700 }}>UA WebSocket</h4>
+              </div>
+              <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginBottom: '0.6rem' }}>
+                <span className="protocol-badge protocol-ws" style={{ fontSize: '0.7rem', padding: '0.3rem 0.6rem' }}>WSS :443</span>
+                <span className="protocol-badge" style={{ background: 'rgba(245,158,11,0.1)', borderColor: 'var(--accent-orange)', color: 'var(--accent-orange)', fontSize: '0.7rem', padding: '0.3rem 0.6rem' }}>JSON/Binary</span>
+              </div>
+              <div style={{ fontSize: '0.85rem', color: '#e2e8f0', lineHeight: 1.5 }}>
+                Browser-compatible, TLS encryption, firewall-friendly
+              </div>
+              <svg width="100%" height="40" viewBox="0 0 200 40" style={{ marginTop: '0.6rem' }}>
+                <rect x="5" y="10" width="35" height="20" rx="4" fill="var(--bg-elevated)" stroke="var(--accent-purple)" strokeWidth="1.5" />
+                <text x="22" y="23" fill="var(--accent-purple)" fontSize="7" textAnchor="middle" fontWeight="600">Browser</text>
+                <rect x="160" y="10" width="35" height="20" rx="4" fill="var(--bg-elevated)" stroke="var(--accent-green)" strokeWidth="1.5" />
+                <text x="178" y="23" fill="var(--accent-green)" fontSize="8" textAnchor="middle" fontWeight="600">Server</text>
+                <path d="M45 20 Q100 5 155 20" stroke="var(--accent-purple)" strokeWidth="2" fill="none" strokeDasharray="6 3" className="connection-line" />
+                <circle r="4" fill="var(--accent-purple)">
+                  <animateMotion dur="1.5s" repeatCount="indefinite" path="M45 20 Q100 5 155 20" />
+                </circle>
+              </svg>
+            </div>
+
+            {/* UDP PubSub */}
+            <div className="comm-model-card" style={{ borderColor: 'var(--accent-orange)', padding: '1.2rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.8rem' }}>
+                <Radio size={22} style={{ color: 'var(--accent-orange)' }} />
+                <h4 style={{ margin: 0, fontSize: '1.1rem', color: 'var(--accent-orange)', fontWeight: 700 }}>UADP Multicast</h4>
+              </div>
+              <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginBottom: '0.6rem' }}>
+                <span className="protocol-badge protocol-mqtt" style={{ fontSize: '0.7rem', padding: '0.3rem 0.6rem' }}>UDP :4840</span>
+                <span className="protocol-badge" style={{ background: 'rgba(139,92,246,0.1)', borderColor: 'var(--accent-purple)', color: 'var(--accent-purple)', fontSize: '0.7rem', padding: '0.3rem 0.6rem' }}>UADP</span>
+              </div>
+              <div style={{ fontSize: '0.85rem', color: '#e2e8f0', lineHeight: 1.5 }}>
+                Broker-less PubSub, deterministic latency, TSN-compatible
+              </div>
+              <svg width="100%" height="40" viewBox="0 0 200 40" style={{ marginTop: '0.6rem' }}>
+                <rect x="80" y="5" width="40" height="15" rx="4" fill="var(--bg-elevated)" stroke="var(--accent-orange)" strokeWidth="1.5" />
+                <text x="100" y="15" fill="var(--accent-orange)" fontSize="7" textAnchor="middle" fontWeight="600">Publisher</text>
+                {/* Multicast arrows */}
+                <line x1="100" y1="21" x2="40" y2="35" stroke="var(--accent-orange)" strokeWidth="1.5" opacity="0.7" />
+                <line x1="100" y1="21" x2="100" y2="35" stroke="var(--accent-orange)" strokeWidth="1.5" opacity="0.7" />
+                <line x1="100" y1="21" x2="160" y2="35" stroke="var(--accent-orange)" strokeWidth="1.5" opacity="0.7" />
+                <circle cx="40" cy="35" r="5" fill="var(--bg-elevated)" stroke="var(--accent-green)" strokeWidth="1.5" />
+                <circle cx="100" cy="35" r="5" fill="var(--bg-elevated)" stroke="var(--accent-green)" strokeWidth="1.5" />
+                <circle cx="160" cy="35" r="5" fill="var(--bg-elevated)" stroke="var(--accent-green)" strokeWidth="1.5" />
+                {/* Animated packets */}
+                <circle r="3" fill="var(--accent-orange)">
+                  <animate attributeName="cx" values="100;40" dur="1s" repeatCount="indefinite" />
+                  <animate attributeName="cy" values="21;35" dur="1s" repeatCount="indefinite" />
+                  <animate attributeName="opacity" values="1;0" dur="1s" repeatCount="indefinite" />
+                </circle>
+                <circle r="3" fill="var(--accent-orange)">
+                  <animate attributeName="cx" values="100;160" dur="1s" begin="0.3s" repeatCount="indefinite" />
+                  <animate attributeName="cy" values="21;35" dur="1s" begin="0.3s" repeatCount="indefinite" />
+                  <animate attributeName="opacity" values="1;0" dur="1s" begin="0.3s" repeatCount="indefinite" />
                 </circle>
               </svg>
             </div>
           </div>
-          <div className="packet-display">
-            <div className="packet hel"><div className="type">HEL</div><div className="desc">Hello</div></div>
-            <span className="packet-arrow">→</span>
-            <div className="packet ack"><div className="type">ACK</div><div className="desc">Acknowledge</div></div>
-            <span className="packet-arrow">→</span>
-            <div className="packet opn"><div className="type">OPN</div><div className="desc">Open Secure</div></div>
-            <span className="packet-arrow">→</span>
-            <div className="packet msg"><div className="type">MSG</div><div className="desc">Encrypted</div></div>
-            <span className="packet-arrow">→</span>
-            <div className="packet clo"><div className="type">CLO</div><div className="desc">Close</div></div>
-          </div>
-          <div className="highlight-box">
-            <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
-              <span className="live-badge" style={{ background: 'rgba(0,212,255,0.1)' }}>Binary Protocol</span>
-              <span className="live-badge" style={{ background: 'rgba(139,92,246,0.1)' }}>TLS/TCP</span>
-              <span className="live-badge" style={{ background: 'rgba(16,185,129,0.1)' }}>Port 4840</span>
+
+          {/* UA TCP Handshake Sequence - Interactive */}
+          <div className="diagram-container" style={{ padding: '1rem' }}>
+            <div className="diagram-title" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '1rem' }}>
+              <span style={{ color: '#f1f5f9', fontWeight: 600 }}>UA TCP Connection Sequence (OPC 10000-6)</span>
+              <span style={{ fontSize: '0.8rem', color: 'var(--accent-green)', fontFamily: 'JetBrains Mono' }}>opc.tcp://localhost:4840</span>
             </div>
-            <p style={{ marginTop: '0.6rem' }}><strong>UA TCP</strong> is a high-performance binary protocol designed for industrial networks, supporting chunking, security, and multiplexing over a single TCP connection.</p>
+            <svg viewBox="0 0 800 180" style={{ width: '100%', height: '180px' }}>
+              <defs>
+                <linearGradient id="clientGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="var(--accent-cyan)" stopOpacity="0.3" />
+                  <stop offset="100%" stopColor="var(--accent-cyan)" stopOpacity="0.1" />
+                </linearGradient>
+                <linearGradient id="serverGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="var(--accent-green)" stopOpacity="0.3" />
+                  <stop offset="100%" stopColor="var(--accent-green)" stopOpacity="0.1" />
+                </linearGradient>
+                <filter id="packetGlow">
+                  <feGaussianBlur stdDeviation="2" result="blur" />
+                  <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                </filter>
+              </defs>
+
+              {/* Client & Server columns */}
+              <rect x="40" y="10" width="90" height="160" rx="8" fill="url(#clientGrad)" stroke="var(--accent-cyan)" strokeWidth="2" />
+              <text x="85" y="32" fill="var(--accent-cyan)" fontSize="12" textAnchor="middle" fontWeight="700">OPC UA Client</text>
+              <text x="85" y="46" fill="#cbd5e1" fontSize="9" textAnchor="middle">192.168.1.100</text>
+
+              <rect x="670" y="10" width="90" height="160" rx="8" fill="url(#serverGrad)" stroke="var(--accent-green)" strokeWidth="2" />
+              <text x="715" y="32" fill="var(--accent-green)" fontSize="12" textAnchor="middle" fontWeight="700">OPC UA Server</text>
+              <text x="715" y="46" fill="#cbd5e1" fontSize="9" textAnchor="middle">:4840</text>
+
+              {/* Timeline */}
+              <line x1="85" y1="52" x2="85" y2="165" stroke="var(--accent-cyan)" strokeWidth="2" strokeDasharray="4 2" opacity="0.5" />
+              <line x1="715" y1="52" x2="715" y2="165" stroke="var(--accent-green)" strokeWidth="2" strokeDasharray="4 2" opacity="0.5" />
+
+              {/* Step 1: HEL */}
+              <g>
+                <line x1="130" y1="60" x2="670" y2="60" stroke="var(--accent-cyan)" strokeWidth="2" markerEnd="url(#arrowRight)" />
+                <rect x="330" y="48" width="140" height="24" rx="5" fill="var(--bg-dark)" stroke="var(--accent-cyan)" strokeWidth="2" />
+                <text x="400" y="65" fill="var(--accent-cyan)" fontSize="11" textAnchor="middle" fontWeight="700">HEL (Hello)</text>
+                <text x="150" y="65" fill="#cbd5e1" fontSize="10" fontWeight="600">1.</text>
+                {/* Animated packet */}
+                <circle r="5" fill="var(--accent-cyan)" filter="url(#packetGlow)">
+                  <animate attributeName="cx" values="130;670" dur="3s" repeatCount="indefinite" />
+                  <animate attributeName="cy" values="60;60" dur="3s" repeatCount="indefinite" />
+                  <animate attributeName="opacity" values="1;1;0" keyTimes="0;0.9;1" dur="3s" repeatCount="indefinite" />
+                </circle>
+              </g>
+
+              {/* Step 2: ACK */}
+              <g>
+                <line x1="670" y1="82" x2="130" y2="82" stroke="var(--accent-green)" strokeWidth="2" markerStart="url(#arrowLeft)" />
+                <rect x="315" y="70" width="170" height="24" rx="5" fill="var(--bg-dark)" stroke="var(--accent-green)" strokeWidth="2" />
+                <text x="400" y="87" fill="var(--accent-green)" fontSize="11" textAnchor="middle" fontWeight="700">ACK (Acknowledge)</text>
+                <text x="685" y="87" fill="#cbd5e1" fontSize="10" fontWeight="600">2.</text>
+                <circle r="5" fill="var(--accent-green)" filter="url(#packetGlow)">
+                  <animate attributeName="cx" values="670;130" dur="3s" begin="0.5s" repeatCount="indefinite" />
+                  <animate attributeName="cy" values="82;82" dur="3s" begin="0.5s" repeatCount="indefinite" />
+                  <animate attributeName="opacity" values="1;1;0" keyTimes="0;0.9;1" dur="3s" begin="0.5s" repeatCount="indefinite" />
+                </circle>
+              </g>
+
+              {/* Step 3: OPN (SecureChannel) */}
+              <g>
+                <line x1="130" y1="104" x2="670" y2="104" stroke="var(--accent-orange)" strokeWidth="2" />
+                <rect x="290" y="92" width="220" height="24" rx="5" fill="var(--bg-dark)" stroke="var(--accent-orange)" strokeWidth="2" />
+                <text x="400" y="109" fill="var(--accent-orange)" fontSize="11" textAnchor="middle" fontWeight="700">OPN (OpenSecureChannel)</text>
+                <text x="150" y="109" fill="#cbd5e1" fontSize="10" fontWeight="600">3.</text>
+                <circle r="5" fill="var(--accent-orange)" filter="url(#packetGlow)">
+                  <animate attributeName="cx" values="130;670" dur="3s" begin="1s" repeatCount="indefinite" />
+                  <animate attributeName="cy" values="104;104" dur="3s" begin="1s" repeatCount="indefinite" />
+                  <animate attributeName="opacity" values="1;1;0" keyTimes="0;0.9;1" dur="3s" begin="1s" repeatCount="indefinite" />
+                </circle>
+              </g>
+
+              {/* Step 4: MSG (Encrypted) */}
+              <g>
+                <rect x="140" y="120" width="520" height="26" rx="5" fill="rgba(139,92,246,0.15)" stroke="var(--accent-purple)" strokeWidth="1.5" strokeDasharray="4 2" />
+                <text x="400" y="138" fill="#e2e8f0" fontSize="10" textAnchor="middle" fontWeight="600">MSG (CreateSession → ActivateSession → Browse/Read/Subscribe)</text>
+                <text x="150" y="138" fill="#cbd5e1" fontSize="10" fontWeight="600">4.</text>
+                {/* Bidirectional animated packets */}
+                <circle r="4" fill="var(--accent-purple)">
+                  <animate attributeName="cx" values="150;650;150" dur="2s" begin="1.5s" repeatCount="indefinite" />
+                  <animate attributeName="cy" values="133;133;133" dur="2s" begin="1.5s" repeatCount="indefinite" />
+                </circle>
+              </g>
+
+              {/* Step 5: CLO */}
+              <g>
+                <line x1="130" y1="158" x2="670" y2="158" stroke="var(--accent-red)" strokeWidth="2" />
+                <rect x="305" y="146" width="190" height="24" rx="5" fill="var(--bg-dark)" stroke="var(--accent-red)" strokeWidth="2" />
+                <text x="400" y="163" fill="var(--accent-red)" fontSize="11" textAnchor="middle" fontWeight="700">CLO (CloseSecureChannel)</text>
+                <text x="150" y="163" fill="#cbd5e1" fontSize="10" fontWeight="600">5.</text>
+              </g>
+
+              {/* Legend */}
+              <g transform="translate(510, 12)">
+                <rect width="160" height="35" rx="5" fill="var(--bg-dark)" stroke="var(--border-color)" strokeWidth="1.5" />
+                <circle cx="18" cy="12" r="5" fill="var(--accent-cyan)" />
+                <text x="30" y="16" fill="#e2e8f0" fontSize="8" fontWeight="500">Request</text>
+                <circle cx="95" cy="12" r="5" fill="var(--accent-green)" />
+                <text x="107" y="16" fill="#e2e8f0" fontSize="8" fontWeight="500">Response</text>
+                <text x="80" y="29" fill="var(--accent-purple)" fontSize="8" textAnchor="middle" fontWeight="500">Encrypted Channel</text>
+              </g>
+            </svg>
+          </div>
+
+          {/* Packet Structure Details */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(5, 1fr)',
+            gap: '0.6rem'
+          }}>
+            {[
+              { type: 'HEL', color: 'var(--accent-cyan)', fields: ['MessageType', 'ProtocolVersion', 'BufferSize', 'EndpointUrl'], size: '32-256 B' },
+              { type: 'ACK', color: 'var(--accent-green)', fields: ['MessageType', 'ProtocolVersion', 'BufferSize', 'MaxMsgSize'], size: '28 B' },
+              { type: 'OPN', color: 'var(--accent-orange)', fields: ['SecurityPolicy', 'ClientNonce', 'Lifetime', 'Certificate'], size: '~2 KB' },
+              { type: 'MSG', color: 'var(--accent-purple)', fields: ['SequenceNum', 'RequestId', 'ServiceId', 'Encrypted'], size: 'Variable' },
+              { type: 'CLO', color: 'var(--accent-red)', fields: ['TokenId', 'SequenceNum', 'RequestId'], size: '24 B' },
+            ].map((pkt, i) => (
+              <div key={i} className="content-card animate-fade-in" style={{
+                padding: '0.8rem',
+                borderColor: pkt.color,
+                animationDelay: `${i * 0.1}s`
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
+                  <span style={{ fontFamily: 'JetBrains Mono', fontWeight: 700, color: pkt.color, fontSize: '1.1rem' }}>{pkt.type}</span>
+                  <span style={{ fontSize: '0.7rem', color: '#cbd5e1', fontWeight: 500 }}>{pkt.size}</span>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                  {pkt.fields.map((field, j) => (
+                    <span key={j} style={{ fontSize: '0.7rem', color: '#e2e8f0', fontFamily: 'JetBrains Mono' }}>• {field}</span>
+                  ))}
+                </div>
+              </div>
+            ))}
           </div>
         </section>
 
@@ -1894,58 +2227,195 @@ export default function ArchitecturePage() {
           </div>
         </section>
 
-        {/* Slide 15: Information Modeling Mechanics */}
-        <section className="slide" id="slide-15">
-          <div className="section-header">
+        {/* Slide 15: Information Modeling Mechanics - Enhanced with real types.yaml */}
+        <section className="slide" id="slide-15" style={{ paddingTop: '60px' }}>
+          <div className="section-header" style={{ marginBottom: '0.8rem' }}>
             <div className="section-number">SECTION 08 • INFORMATION MODELING</div>
-            <h2 className="section-title">From Blueprint to Reality</h2>
-            <p className="section-goal">Goal: Show how YAML/JSON becomes live objects</p>
+            <h2 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              From Blueprint to Reality
+              <span className="live-badge" style={{ fontSize: '0.7rem', background: 'rgba(139,92,246,0.1)', borderColor: 'var(--accent-purple)', color: 'var(--accent-purple)' }}>
+                types.yaml → OPC UA
+              </span>
+            </h2>
           </div>
-          <div className="two-column" style={{ gridTemplateColumns: '1fr 1fr' }}>
-            <div className="content-card">
-              <h3><Database size={16} /> 1. The Blueprint (YAML)</h3>
-              <div className="code-block" style={{ fontSize: '0.65rem', maxHeight: '250px', overflowY: 'auto' }}>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.8rem', marginBottom: '1rem' }}>
+            {/* Type Definition */}
+            <div className="content-card animate-fade-in" style={{ borderColor: 'var(--accent-purple)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.6rem' }}>
+                <Database size={16} style={{ color: 'var(--accent-purple)' }} />
+                <h4 style={{ margin: 0, fontSize: '0.85rem', color: 'var(--accent-purple)' }}>1. Type Definition</h4>
+              </div>
+              <div style={{ fontSize: '0.55rem', color: 'var(--text-muted)', marginBottom: '0.4rem' }}>types.yaml</div>
+              <div className="code-block" style={{ fontSize: '0.6rem', maxHeight: '200px', overflowY: 'auto', padding: '0.6rem' }}>
                 <span className="keyword">PumpType</span>:<br />
                 &nbsp;&nbsp;type: <span className="string">ObjectType</span><br />
                 &nbsp;&nbsp;base: <span className="string">AssetType</span><br />
+                &nbsp;&nbsp;description: <span className="string">"Centrifugal pump"</span><br />
                 &nbsp;&nbsp;components:<br />
                 &nbsp;&nbsp;&nbsp;&nbsp;<span className="keyword">FlowRate</span>:<br />
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;type: <span className="string">AnalogItemType</span><br />
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dataType: <span className="string">Double</span><br />
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;engineeringUnits: <span className="string">m³/h</span><br />
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;euRange: {'{'}low: <span className="number">0</span>, high: <span className="number">5000</span>{'}'}<br />
                 &nbsp;&nbsp;&nbsp;&nbsp;<span className="keyword">RPM</span>:<br />
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;type: <span className="string">AnalogItemType</span>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;type: <span className="string">AnalogItemType</span><br />
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;euRange: {'{'}low: <span className="number">0</span>, high: <span className="number">1800</span>{'}'}<br />
+                &nbsp;&nbsp;&nbsp;&nbsp;<span className="keyword">PowerConsumption</span>:<br />
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;engineeringUnits: <span className="string">kW</span><br />
+                &nbsp;&nbsp;methods:<br />
+                &nbsp;&nbsp;&nbsp;&nbsp;<span className="keyword">StartPump</span>, <span className="keyword">StopPump</span>, <span className="keyword">SetSpeed</span>
               </div>
-              <p style={{ fontSize: '0.75rem', marginTop: '0.5rem', color: 'var(--text-muted)' }}>
-                Defined in <code>types.yaml</code> and <code>assets.json</code>
-              </p>
             </div>
-            <div className="content-card">
-              <h3><RefreshCw size={16} /> 2. Live Instance (OPC UA)</h3>
-              <div style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-color)', borderRadius: '6px', padding: '1rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                  <div style={{ width: '8px', height: '8px', background: 'var(--accent-green)', borderRadius: '50%' }} />
-                  <span style={{ fontSize: '0.8rem', fontWeight: 600 }}>Pump_01 : PumpType</span>
-                </div>
-                <div style={{ paddingLeft: '1rem', borderLeft: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                  <div style={{ fontSize: '0.75rem' }}>
-                    <span style={{ color: 'var(--text-muted)' }}>FlowRate:</span> <span style={{ color: 'var(--accent-cyan)' }}>{(Object.values(pumpData)[0]?.flow_rate || 0).toFixed(1)} m³/h</span>
-                  </div>
-                  <div style={{ fontSize: '0.75rem' }}>
-                    <span style={{ color: 'var(--text-muted)' }}>RPM:</span> <span style={{ color: 'var(--accent-cyan)' }}>{(Object.values(pumpData)[0]?.rpm || 0).toFixed(0)}</span>
-                  </div>
-                </div>
+
+            {/* Asset Instance */}
+            <div className="content-card animate-fade-in" style={{ borderColor: 'var(--accent-orange)', animationDelay: '0.1s' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.6rem' }}>
+                <Layers size={16} style={{ color: 'var(--accent-orange)' }} />
+                <h4 style={{ margin: 0, fontSize: '0.85rem', color: 'var(--accent-orange)' }}>2. Asset Instance</h4>
               </div>
-              <div style={{ marginTop: '1rem' }}>
-                <button className="btn-action" onClick={() => fetchPumps()}>
-                  <RefreshCw size={12} style={{ marginRight: '4px', verticalAlign: 'middle' }} />
-                  Refresh Server Cache
+              <div style={{ fontSize: '0.55rem', color: 'var(--text-muted)', marginBottom: '0.4rem' }}>assets.json</div>
+              <div className="code-block" style={{ fontSize: '0.6rem', maxHeight: '200px', overflowY: 'auto', padding: '0.6rem' }}>
+                {'{'}<br />
+                &nbsp;&nbsp;<span className="keyword">"id"</span>: <span className="string">"IPS_PMP_001"</span>,<br />
+                &nbsp;&nbsp;<span className="keyword">"name"</span>: <span className="string">"Influent Pump 1"</span>,<br />
+                &nbsp;&nbsp;<span className="keyword">"type"</span>: <span className="string">"InfluentPumpType"</span>,<br />
+                &nbsp;&nbsp;<span className="keyword">"parent"</span>: <span className="string">"S00630"</span>,<br />
+                &nbsp;&nbsp;<span className="keyword">"simulate"</span>: <span className="number">true</span>,<br />
+                &nbsp;&nbsp;<span className="keyword">"properties"</span>: {'{'}<br />
+                &nbsp;&nbsp;&nbsp;&nbsp;<span className="keyword">"Manufacturer"</span>: <span className="string">"Flygt"</span>,<br />
+                &nbsp;&nbsp;&nbsp;&nbsp;<span className="keyword">"Model"</span>: <span className="string">"CP3300.900"</span><br />
+                &nbsp;&nbsp;{'}'},<br />
+                &nbsp;&nbsp;<span className="keyword">"designSpecs"</span>: {'{'}<br />
+                &nbsp;&nbsp;&nbsp;&nbsp;<span className="keyword">"DesignFlow"</span>: <span className="number">2500.0</span>,<br />
+                &nbsp;&nbsp;&nbsp;&nbsp;<span className="keyword">"MaxRPM"</span>: <span className="number">1180</span><br />
+                &nbsp;&nbsp;{'}'}<br />
+                {'}'}
+              </div>
+            </div>
+
+            {/* Live OPC UA Instance */}
+            <div className="content-card animate-fade-in" style={{ borderColor: 'var(--accent-green)', animationDelay: '0.2s' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.6rem' }}>
+                <Activity size={16} style={{ color: 'var(--accent-green)' }} />
+                <h4 style={{ margin: 0, fontSize: '0.85rem', color: 'var(--accent-green)' }}>3. Live OPC UA Node</h4>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.55rem', color: 'var(--text-muted)', marginBottom: '0.4rem' }}>
+                <span>ns=1;s=IPS_PMP_001</span>
+                <span className="live-badge" style={{ fontSize: '0.5rem' }}>
+                  <div className="pulse-dot" style={{ width: '4px', height: '4px' }} />
+                  LIVE
+                </span>
+              </div>
+              <div style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-color)', borderRadius: '6px', padding: '0.8rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.4rem' }}>
+                  <div style={{ width: '6px', height: '6px', background: 'var(--accent-green)', borderRadius: '50%' }} />
+                  <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>IPS_PMP_001 : InfluentPumpType</span>
+                </div>
+                <div style={{ paddingLeft: '0.8rem', borderLeft: '2px solid var(--accent-green)', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+                  <div style={{ fontSize: '0.65rem', display: 'flex', justifyContent: 'space-between' }}>
+                    <span style={{ color: 'var(--text-muted)' }}>FlowRate:</span>
+                    <span style={{ color: 'var(--accent-cyan)', fontFamily: 'JetBrains Mono' }}>{(Object.values(pumpData)[0]?.flow_rate || 2340.5).toFixed(1)} m³/h</span>
+                  </div>
+                  <div style={{ fontSize: '0.65rem', display: 'flex', justifyContent: 'space-between' }}>
+                    <span style={{ color: 'var(--text-muted)' }}>RPM:</span>
+                    <span style={{ color: 'var(--accent-cyan)', fontFamily: 'JetBrains Mono' }}>{(Object.values(pumpData)[0]?.rpm || 1145).toFixed(0)}</span>
+                  </div>
+                  <div style={{ fontSize: '0.65rem', display: 'flex', justifyContent: 'space-between' }}>
+                    <span style={{ color: 'var(--text-muted)' }}>Power:</span>
+                    <span style={{ color: 'var(--accent-orange)', fontFamily: 'JetBrains Mono' }}>{(Object.values(pumpData)[0]?.power_consumption || 124.8).toFixed(1)} kW</span>
+                  </div>
+                  <div style={{ fontSize: '0.65rem', display: 'flex', justifyContent: 'space-between' }}>
+                    <span style={{ color: 'var(--text-muted)' }}>Status:</span>
+                    <span style={{ color: Object.values(pumpData)[0]?.is_running ? 'var(--accent-green)' : 'var(--accent-red)', fontFamily: 'JetBrains Mono' }}>
+                      {Object.values(pumpData)[0]?.is_running ? 'RUNNING' : 'STOPPED'}
+                    </span>
+                  </div>
+                </div>
+                <button className="btn-action" style={{ marginTop: '0.6rem', padding: '0.3rem 0.6rem', fontSize: '0.65rem' }} onClick={() => fetchPumps()}>
+                  <RefreshCw size={10} style={{ marginRight: '3px' }} /> Refresh
                 </button>
               </div>
             </div>
           </div>
-          <div className="highlight-box">
-            <p><strong>Strong Typing:</strong> By defining a <code>PumpType</code>, every pump instance in the facility inherits the same sensors, methods, and metadata automatically, ensuring consistency across thousands of assets.</p>
+
+          {/* Asset Hierarchy Visualization */}
+          <div className="diagram-container" style={{ padding: '1rem' }}>
+            <div className="diagram-title">Asset Hierarchy (assets.json → OPC UA Address Space)</div>
+            <svg viewBox="0 0 900 120" style={{ width: '100%', height: '120px' }}>
+              {/* Plant Level */}
+              <g transform="translate(50, 20)">
+                <rect width="100" height="30" rx="5" fill="var(--bg-elevated)" stroke="var(--accent-purple)" strokeWidth="2" />
+                <text x="50" y="20" fill="var(--accent-purple)" fontSize="8" textAnchor="middle" fontWeight="600">RC_RockCreek</text>
+                <text x="50" y="40" fill="var(--text-muted)" fontSize="6" textAnchor="middle">Plant</text>
+              </g>
+
+              {/* Process Level */}
+              <g transform="translate(200, 20)">
+                <rect width="100" height="30" rx="5" fill="var(--bg-elevated)" stroke="var(--accent-cyan)" strokeWidth="2" />
+                <text x="50" y="20" fill="var(--accent-cyan)" fontSize="8" textAnchor="middle" fontWeight="600">P0041_Preliminary</text>
+                <text x="50" y="40" fill="var(--text-muted)" fontSize="6" textAnchor="middle">Process</text>
+              </g>
+
+              {/* System Level */}
+              <g transform="translate(350, 20)">
+                <rect width="120" height="30" rx="5" fill="var(--bg-elevated)" stroke="var(--accent-orange)" strokeWidth="2" />
+                <text x="60" y="20" fill="var(--accent-orange)" fontSize="8" textAnchor="middle" fontWeight="600">S00630_InfluentPumping</text>
+                <text x="60" y="40" fill="var(--text-muted)" fontSize="6" textAnchor="middle">System</text>
+              </g>
+
+              {/* Asset Level - Pumps */}
+              <g transform="translate(520, 10)">
+                <rect width="80" height="25" rx="4" fill="var(--bg-elevated)" stroke="var(--accent-green)" strokeWidth="2" className="animate-glow" />
+                <text x="40" y="17" fill="var(--accent-green)" fontSize="7" textAnchor="middle" fontWeight="600">IPS_PMP_001</text>
+              </g>
+              <g transform="translate(620, 10)">
+                <rect width="80" height="25" rx="4" fill="var(--bg-elevated)" stroke="var(--accent-green)" strokeWidth="1.5" />
+                <text x="40" y="17" fill="var(--accent-green)" fontSize="7" textAnchor="middle" fontWeight="600">IPS_PMP_002</text>
+              </g>
+              <g transform="translate(720, 10)">
+                <rect width="80" height="25" rx="4" fill="var(--bg-elevated)" stroke="var(--accent-green)" strokeWidth="1.5" />
+                <text x="40" y="17" fill="var(--accent-green)" fontSize="7" textAnchor="middle" fontWeight="600">IPS_PMP_003</text>
+              </g>
+              <g transform="translate(820, 10)">
+                <rect width="70" height="25" rx="4" fill="var(--bg-elevated)" stroke="var(--accent-pink)" strokeWidth="1.5" />
+                <text x="35" y="17" fill="var(--accent-pink)" fontSize="7" textAnchor="middle" fontWeight="600">IPS_WW_001</text>
+              </g>
+
+              {/* Connection lines */}
+              <line x1="150" y1="35" x2="200" y2="35" stroke="var(--text-muted)" strokeWidth="1" strokeDasharray="4 2" />
+              <line x1="300" y1="35" x2="350" y2="35" stroke="var(--text-muted)" strokeWidth="1" strokeDasharray="4 2" />
+              <line x1="470" y1="35" x2="520" y2="22" stroke="var(--text-muted)" strokeWidth="1" strokeDasharray="4 2" />
+              <line x1="470" y1="35" x2="620" y2="22" stroke="var(--text-muted)" strokeWidth="1" strokeDasharray="4 2" />
+              <line x1="470" y1="35" x2="720" y2="22" stroke="var(--text-muted)" strokeWidth="1" strokeDasharray="4 2" />
+              <line x1="470" y1="35" x2="820" y2="22" stroke="var(--text-muted)" strokeWidth="1" strokeDasharray="4 2" />
+
+              {/* Type inheritance */}
+              <g transform="translate(520, 50)">
+                <text x="0" y="10" fill="var(--text-muted)" fontSize="6">HasTypeDefinition ↓</text>
+                <rect x="0" y="15" width="80" height="20" rx="3" fill="rgba(139,92,246,0.1)" stroke="var(--accent-purple)" strokeWidth="1" strokeDasharray="3 2" />
+                <text x="40" y="28" fill="var(--accent-purple)" fontSize="6" textAnchor="middle">InfluentPumpType</text>
+              </g>
+
+              {/* Stats */}
+              <g transform="translate(650, 60)">
+                <rect width="240" height="50" rx="5" fill="var(--bg-dark)" stroke="var(--border-color)" />
+                <text x="10" y="18" fill="var(--text-muted)" fontSize="7">Asset Summary (assets.json):</text>
+                <text x="10" y="32" fill="var(--accent-cyan)" fontSize="7">• 7 InfluentPumpType • 4 PumpType</text>
+                <text x="10" y="44" fill="var(--accent-pink)" fontSize="7">• 7 ChamberType • 15 Simulated</text>
+              </g>
+            </svg>
+          </div>
+
+          <div className="highlight-box" style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+            <div style={{ flex: 1 }}>
+              <p style={{ margin: 0 }}><strong>Strong Typing:</strong> <code>PumpType</code> defines 27 sensor data points, 4 methods, and 6 alarm types. Every pump instance automatically inherits the complete schema.</p>
+            </div>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <span className="protocol-badge" style={{ background: 'rgba(139,92,246,0.1)', borderColor: 'var(--accent-purple)', color: 'var(--accent-purple)' }}>27 Data Points</span>
+              <span className="protocol-badge" style={{ background: 'rgba(16,185,129,0.1)', borderColor: 'var(--accent-green)', color: 'var(--accent-green)' }}>4 Methods</span>
+              <span className="protocol-badge" style={{ background: 'rgba(239,68,68,0.1)', borderColor: 'var(--accent-red)', color: 'var(--accent-red)' }}>6 Alarms</span>
+            </div>
           </div>
         </section>
 

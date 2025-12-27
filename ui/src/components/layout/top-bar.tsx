@@ -4,7 +4,7 @@
 
 import * as React from 'react';
 import useSWR from 'swr';
-import { Server, Database, Activity, Radio, Wifi, WifiOff } from 'lucide-react';
+import { Server, Database, Activity, Radio, Wifi, WifiOff, Zap } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { usePumpWebSocket } from '@/hooks/use-pump-websocket';
 import type { HealthStatus } from '@/lib/types';
@@ -50,6 +50,11 @@ export function TopBar() {
             icon={<Radio className="h-4 w-4" />}
             label="WebSocket"
             status={wsConnected ? 'online' : 'offline'}
+          />
+          <StatusIndicator
+            icon={<Zap className="h-4 w-4" />}
+            label="MQTT Pub/Sub"
+            status={health?.pubsub_status ? 'online' : 'offline'}
           />
         </div>
       </div>

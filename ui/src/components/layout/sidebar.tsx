@@ -63,6 +63,12 @@ const navItems: NavItem[] = [
     description: 'types.yaml',
   },
   {
+    href: '/pubsub',
+    label: 'Pub/Sub Explorer',
+    icon: <Zap className="h-5 w-5" />,
+    description: 'MQTT Stream',
+  },
+  {
     href: '/assets',
     label: 'Asset Instances',
     icon: <FolderTree className="h-5 w-5" />,

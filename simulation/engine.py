@@ -25,6 +25,7 @@ class SimulationEngine:
         self.chambers: Dict[str, ChamberSimulation] = {}
         self.is_running = False
         self.last_tick_time: Optional[datetime] = None
+        self.pubsub_manager = None
 
         # Timing
         self.interval_ms = 1000.0  # Default 1 second
@@ -36,6 +37,11 @@ class SimulationEngine:
         """Set callback for WebSocket broadcasting."""
         self._ws_broadcast_callback = callback
         _logger.info("WebSocket broadcast callback registered")
+
+    def set_pubsub_manager(self, pubsub_manager) -> None:
+        """Set the PubSub manager for MQTT broadcasting."""
+        self.pubsub_manager = pubsub_manager
+        _logger.info("PubSub manager registered for MQTT broadcasting")
 
     def add_pump(self, pump: PumpSimulation) -> None:
         """Add a pump simulation."""
@@ -148,6 +154,20 @@ class SimulationEngine:
                 await self._ws_broadcast_callback(all_states)
             except Exception as e:
                 _logger.debug(f"WebSocket broadcast error: {e}")
+
+        # Broadcast pump stats via MQTT (PubSub)
+        if self.pubsub_manager:
+            try:
+                states = self.get_all_pump_states()
+                for pump_id, state in states.items():
+                    # Add metadata for PubSub
+                    state['timestamp'] = datetime.now().isoformat()
+                    state['mode'] = self.mode_params.mode.name
+                    state['fault'] = "NONE" if not state.get('is_faulted') else self.mode_params.failure_config.failure_type.name
+                    
+                    self.pubsub_manager.publish_pump_telemetry(pump_id, state)
+            except Exception as e:
+                _logger.debug(f"PubSub broadcast error: {e}")
 
     def _update_failure_progression(self, dt: float) -> None:
         """Update failure progression over time."""

@@ -1044,12 +1044,19 @@ async def health_check():
     chamber_count = len([a for a in assets if a.get('type_name') == 'ChamberType'])
 
     is_running = state.get('status') == 'running'
+    
+    # Check PubSub status
+    engine = get_engine()
+    pubsub_running = False
+    if engine and hasattr(engine, 'pubsub_manager') and engine.pubsub_manager:
+        pubsub_running = engine.pubsub_manager.is_running
 
     return {
         "status": "healthy" if db and is_running else "degraded" if db else "unhealthy",
         "opcua_server": is_running,
         "database": db is not None,
         "simulation_running": is_running,
+        "pubsub_status": pubsub_running,
         "pump_count": pump_count,
         "chamber_count": chamber_count,
         "timestamp": datetime.utcnow().isoformat()

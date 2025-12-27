@@ -144,6 +144,18 @@ export default function ServicesPage() {
         { label: 'Time Accel', value: `${serverState?.time_acceleration || 1}x` },
       ],
     },
+    {
+      name: 'MQTT Pub/Sub',
+      description: 'Secondary OT communication (MQTT)',
+      status: health?.pubsub_status ? 'online' : 'offline',
+      icon: <Radio className="h-6 w-6" />,
+      endpoint: 'mqtt://localhost:1883',
+      details: [
+        { label: 'Protocol', value: 'MQTT v5.0' },
+        { label: 'Broker', value: 'Internal (amqtt)' },
+        { label: 'Port', value: '1883' },
+      ],
+    },
   ];
 
   const onlineCount = services.filter(s => s.status === 'online').length;
@@ -172,13 +184,12 @@ export default function ServicesPage() {
         <CardContent className="py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className={`rounded-full p-3 ${
-                onlineCount === services.length
-                  ? 'bg-green-100 dark:bg-green-950'
-                  : onlineCount > 0
+              <div className={`rounded-full p-3 ${onlineCount === services.length
+                ? 'bg-green-100 dark:bg-green-950'
+                : onlineCount > 0
                   ? 'bg-yellow-100 dark:bg-yellow-950'
                   : 'bg-red-100 dark:bg-red-950'
-              }`}>
+                }`}>
                 {onlineCount === services.length ? (
                   <CheckCircle2 className="h-8 w-8 text-green-600 dark:text-green-400" />
                 ) : onlineCount > 0 ? (
@@ -192,8 +203,8 @@ export default function ServicesPage() {
                   {onlineCount === services.length
                     ? 'All Systems Operational'
                     : onlineCount > 0
-                    ? 'Partial Service Disruption'
-                    : 'System Offline'}
+                      ? 'Partial Service Disruption'
+                      : 'System Offline'}
                 </h2>
                 <p className="text-zinc-500">
                   {onlineCount} of {services.length} services running
@@ -245,6 +256,11 @@ export default function ServicesPage() {
               icon={<Radio className="h-4 w-4" />}
               label="WebSocket"
               value="ws://localhost:8080/ws/pumps"
+            />
+            <InfoItem
+              icon={<Zap className="h-4 w-4" />}
+              label="MQTT Broker"
+              value="mqtt://localhost:1883"
             />
             <InfoItem
               icon={<HardDrive className="h-4 w-4" />}

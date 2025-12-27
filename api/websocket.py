@@ -89,6 +89,15 @@ class ConnectionManager:
             "timestamp": timestamp
         })
 
+    async def broadcast_pubsub(self, topic: str, payload: Dict[str, Any]):
+        """Broadcast a PubSub (MQTT-style) update to clients."""
+        await self.broadcast({
+            "type": "pubsub_update",
+            "topic": topic,
+            "payload": payload,
+            "timestamp": datetime.utcnow().isoformat()
+        })
+
     def get_pump_data(self, pump_id: str) -> Optional[Dict[str, Any]]:
         """Get current data for a specific pump."""
         return self.pump_data.get(pump_id)

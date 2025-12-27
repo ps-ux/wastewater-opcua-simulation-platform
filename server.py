@@ -40,6 +40,7 @@ from simulation.engine import SimulationEngine
 from simulation.pump import PumpSimulation
 from simulation.chamber import ChamberSimulation
 from simulation.modes import ModeParameters, SimulationMode, FailureType
+from simulation.pubsub import PubSubManager
 
 # Configure logging
 logging.basicConfig(
@@ -273,6 +274,15 @@ async def main():
 
     # Initialize simulation engine
     engine = SimulationEngine(mode_params)
+    
+    # Initialize PubSub Manager (Secondary OT Communication)
+    pubsub_manager = PubSubManager(host='0.0.0.0', port=1883)
+    try:
+        await pubsub_manager.start()
+        engine.set_pubsub_manager(pubsub_manager)
+    except Exception as e:
+        _logger.error(f"Could not start MQTT PubSub: {e}")
+        _logger.info("Continuing without MQTT PubSub support")
 
     # Initialize alarm manager
     alarm_manager = AlarmManager(server, idx)
@@ -360,6 +370,49 @@ async def main():
         # Wire up WebSocket broadcast callback
         async def ws_broadcast(all_states):
             await ws_manager.update_all_pumps(all_states)
+            
+            # Also simulate PubSub flow by broadcasting MQTT-style packets
+            for pump_id, state in all_states.items():
+                # Telemetry Topic
+                telemetry_topic = f"plant/pumps/{pump_id}/telemetry"
+                telemetry_payload = {
+                    "metrics": {
+                        "flow_rate": state.get('flow_rate'),
+                        "discharge_pressure": state.get('discharge_pressure'),
+                        "suction_pressure": state.get('suction_pressure'),
+                        "rpm": state.get('rpm'),
+                        "power_consumption": state.get('power_consumption'),
+                        "efficiency": state.get('efficiency'),
+                        "motor_temp": state.get('motor_temp'),
+                        "vibration_level": state.get('vibration_de_h')
+                    },
+                    "state": {
+                        "is_running": state.get('is_running'),
+                        "is_faulted": state.get('is_faulted'),
+                        "mode": state.get('mode')
+                    }
+                }
+                await ws_manager.broadcast_pubsub(telemetry_topic, telemetry_payload)
+
+                # Maintenance/Lifecycle Topic (published less frequently or on change)
+                if state.get('runtime_hours', 0) % 10 < 1: # Pseudo-frequency
+                    maint_topic = f"plant/pumps/{pump_id}/maintenance"
+                    maint_payload = {
+                        "runtime_hours": state.get('runtime_hours'),
+                        "start_count": state.get('start_count'),
+                        "last_start": state.get('timestamp')
+                    }
+                    await ws_manager.broadcast_pubsub(maint_topic, maint_payload)
+
+            # System Analytics Topic
+            avg_efficiency = sum(p.get('efficiency', 0) for p in all_states.values()) / len(all_states) if all_states else 0
+            analytics_topic = "plant/system/analytics"
+            analytics_payload = {
+                "system_efficiency": avg_efficiency,
+                "active_pumps": len([p for p in all_states.values() if p.get('is_running')]),
+                "total_flow": sum(p.get('flow_rate', 0) for p in all_states.values())
+            }
+            await ws_manager.broadcast_pubsub(analytics_topic, analytics_payload)
 
         engine.set_ws_broadcast_callback(ws_broadcast)
         _logger.info("WebSocket broadcast callback registered")
@@ -399,6 +452,10 @@ async def main():
     # Cleanup
     if api_task:
         api_task.cancel()
+
+    # Stop PubSub Manager
+    if pubsub_manager:
+        await pubsub_manager.stop()
 
     # Update database
     total_runtime = sum(p.runtime_hours for p in engine.pumps.values())
