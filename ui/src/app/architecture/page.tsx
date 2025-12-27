@@ -1175,19 +1175,7 @@ export default function ArchitecturePage() {
               </div>
             ))}
           </div>
-          <div style={{
-            textAlign: 'center',
-            marginTop: '2rem',
-            padding: '1rem',
-            background: 'linear-gradient(135deg, rgba(0, 212, 255, 0.05), rgba(16, 185, 129, 0.05))',
-            borderRadius: '12px',
-            border: '1px dashed var(--border-color)'
-          }}>
-            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: 0 }}>
-              <span style={{ color: 'var(--accent-cyan)' }}>Click any topic</span> to navigate directly •
-              Use <span style={{ fontFamily: 'JetBrains Mono', background: 'var(--bg-elevated)', padding: '0.1rem 0.4rem', borderRadius: '4px' }}>← →</span> keys to navigate
-            </p>
-          </div>
+
         </section>
 
         {/* Slide 3: Historical Challenges */}

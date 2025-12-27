@@ -1,72 +1,72 @@
 "use client";
 
-import { useEffect, useState, useRef } from 'react';
-import { usePubSubStore, PubSubMessage } from '@/stores/pubsub-store';
+import { useEffect, useState } from 'react';
+import { usePubSubStore } from '@/stores/pubsub-store';
 import { usePumpWebSocket } from '@/hooks/use-pump-websocket';
 import {
     Radio,
     Database,
     Server,
     Cloud,
-    ArrowRight,
-    MessageSquare,
     Activity,
     ShieldCheck,
     Clock,
-    Terminal,
     BarChart3,
     Search,
-    Filter,
-    Trash2
+    Trash2,
+    CheckCircle2,
+    XCircle,
+    Zap
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import {
-    LineChart,
-    Line,
+    AreaChart,
+    Area,
     XAxis,
     YAxis,
     CartesianGrid,
     Tooltip,
-    ResponsiveContainer,
-    AreaChart,
-    Area
+    ResponsiveContainer
 } from 'recharts';
 
 export default function PubSubPage() {
-    const { messages, topics, subscriptions, clearMessages, toggleSubscription } = usePubSubStore();
-    const { isConnected } = usePumpWebSocket();
-    const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
-    const [filterText, setFilterText] = useState('');
-    const logEndRef = useRef<HTMLDivElement>(null);
+    const { latestMessagesByTopic, topics, subscriptions, clearMessages, toggleSubscription } = usePubSubStore();
+    const [lastSync, setLastSync] = useState<string>('');
+    const { isConnected } = usePumpWebSocket(); // This establishes the WebSocket connection
+    const [performanceData, setPerformanceData] = useState<Array<{ time: number; latency: number; throughput: number }>>([]);
 
-    // Auto-scroll log
+    // Update last sync time on client
     useEffect(() => {
-        logEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [messages]);
+        setLastSync(new Date().toLocaleTimeString());
+        const syncInterval = setInterval(() => {
+            setLastSync(new Date().toLocaleTimeString());
+        }, 1000);
+        return () => clearInterval(syncInterval);
+    }, []);
 
-    const filteredMessages = messages.filter(msg => {
-        const matchesTopic = selectedTopic ? msg.topic === selectedTopic : true;
-        const matchesFilter = filterText ? JSON.stringify(msg.payload).toLowerCase().includes(filterText.toLowerCase()) : true;
-        return matchesTopic && matchesFilter;
-    });
+    // Update performance metrics
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setPerformanceData(prev => {
+                const newData = [...prev, {
+                    time: prev.length,
+                    latency: 10 + Math.random() * 15,
+                    throughput: 400 + Math.random() * 200
+                }].slice(-20);
+                return newData;
+            });
+        }, 1000);
+        return () => clearInterval(interval);
+    }, []);
 
-    // Performance data simulation
-    const performanceData = Array.from({ length: 20 }).map((_, i) => ({
-        time: i,
-        latency: 10 + Math.random() * 15,
-        throughput: 400 + Math.random() * 200
-    }));
+    // Get subscribed topics data
+    const subscribedTopicsData = Object.entries(latestMessagesByTopic)
+        .filter(([topic]) => subscriptions.includes(topic) || subscriptions.includes('#'))
+        .map(([topic, message]) => ({ topic, message }));
 
     return (
         <div className="min-h-screen bg-[#0a0a0a] text-white p-6 font-sans">
             <style jsx global>{`
-        @keyframes pulse-glow {
-          0%, 100% { opacity: 0.5; transform: scale(1); }
-          50% { opacity: 1; transform: scale(1.1); }
-        }
-        .animate-pulse-glow {
-          animation: pulse-glow 2s ease-in-out infinite;
-        }
         .glass-panel {
           background: rgba(20, 20, 20, 0.7);
           backdrop-filter: blur(12px);
@@ -98,7 +98,7 @@ export default function PubSubPage() {
                         <Radio className="text-orange-500 animate-pulse" size={32} />
                         Enterprise Pub/Sub Analytics
                     </h1>
-                    <p className="text-gray-400 mt-1">Cross-Platform MQTT Broker Performance & Telemetry Stream</p>
+                    <p className="text-gray-400 mt-1">MQTT Broker - Real-time Telemetry Monitoring</p>
                 </div>
                 <div className="flex items-center gap-4">
                     <div className={`flex items-center gap-2 px-4 py-2 rounded-full border ${isConnected ? 'bg-green-500/10 border-green-500/30 text-green-400' : 'bg-red-500/10 border-red-500/30 text-red-400'}`}>
@@ -108,7 +108,7 @@ export default function PubSubPage() {
                     <button
                         onClick={clearMessages}
                         className="p-2 hover:bg-white/10 rounded-lg transition-colors text-gray-400 hover:text-white"
-                        title="Clear Stream"
+                        title="Clear Data"
                     >
                         <Trash2 size={20} />
                     </button>
@@ -118,7 +118,7 @@ export default function PubSubPage() {
             {/* Main Grid */}
             <div className="grid grid-cols-12 gap-6">
 
-                {/* Left column: Network Flow Diagram */}
+                {/* Left column: Topology & Charts */}
                 <div className="col-span-12 lg:col-span-8 flex flex-col gap-6">
 
                     {/* Architecture Visualization */}
@@ -128,7 +128,7 @@ export default function PubSubPage() {
                                 <ShieldCheck className="text-blue-500" size={20} />
                                 Network Topology: Semantic Fan-out
                             </h2>
-                            <span className="text-xs text-blue-400 code-font">PROTOCOL: MQTT v5.0 (Binary over WS)</span>
+                            <span className="text-xs text-blue-400 code-font">PROTOCOL: MQTT v5.0</span>
                         </div>
 
                         <div className="relative h-64 flex items-center justify-between px-10">
@@ -141,10 +141,10 @@ export default function PubSubPage() {
                                 <span className="text-[10px] text-gray-500 code-font">OPC-UA Source</span>
                             </div>
 
-                            {/* Data Flow Line 1 */}
+                            {/* Data Flow Line */}
                             <div className="flex-1 px-4 relative">
                                 <div className="h-[2px] w-full bg-gradient-to-r from-blue-500 to-orange-500 opacity-30" />
-                                <div className="absolute top-1/2 left-0 w-3 h-3 bg-blue-500 rounded-full -translate-y-1/2 blur-[2px] animate-[dot-flow_2s_linear_infinite]" />
+                                <div className="absolute top-1/2 left-0 w-3 h-3 bg-blue-500 rounded-full -translate-y-1/2 blur-[2px] animate-pulse" />
                             </div>
 
                             {/* MQTT Broker Node */}
@@ -174,7 +174,7 @@ export default function PubSubPage() {
                                 {[
                                     { icon: <Activity size={20} />, label: 'Analytics' },
                                     { icon: <Database size={20} />, label: 'Historian' },
-                                    { icon: <Terminal size={20} />, label: 'Enterprise HMI' }
+                                    { icon: <Zap size={20} />, label: 'Dashboard' }
                                 ].map((sub, i) => (
                                     <div key={i} className="flex items-center gap-3">
                                         <div className="w-10 h-10 glass-panel flex items-center justify-center border-green-500/30 text-green-500">
@@ -247,10 +247,10 @@ export default function PubSubPage() {
                     {/* Summary Stats */}
                     <div className="grid grid-cols-4 gap-4">
                         {[
-                            { label: 'Total Messages', value: messages.length, color: 'text-white' },
-                            { label: 'Active Topics', value: topics.length, color: 'text-orange-500' },
-                            { label: 'Avg Latency', value: '1.2ms', color: 'text-green-500' },
-                            { label: 'Drop Rate', value: '0.00%', color: 'text-blue-500' }
+                            { label: 'Active Subscriptions', value: subscriptions.length, color: 'text-orange-500' },
+                            { label: 'Available Topics', value: topics.length, color: 'text-blue-500' },
+                            { label: 'Avg Latency', value: '12ms', color: 'text-green-500' },
+                            { label: 'QoS Level', value: 'QoS 1', color: 'text-purple-500' }
                         ].map((stat, i) => (
                             <div key={i} className="glass-panel p-4 text-center">
                                 <div className="text-xs text-gray-500 mb-1">{stat.label}</div>
@@ -258,121 +258,148 @@ export default function PubSubPage() {
                             </div>
                         ))}
                     </div>
+
+                    {/* Live Data Table */}
+                    <section className="glass-panel flex flex-col overflow-hidden">
+                        <div className="p-4 border-b border-white/10 flex justify-between items-center bg-white/2">
+                            <h3 className="text-sm font-bold flex items-center gap-2">
+                                <Database size={16} className="text-green-400" />
+                                Live Data Monitor - Subscribed Topics
+                            </h3>
+                            <div className="flex items-center gap-2">
+                                <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                                <span className="text-[10px] text-green-500 code-font">STREAMING</span>
+                            </div>
+                        </div>
+
+                        <div className="overflow-x-auto">
+                            {subscribedTopicsData.length === 0 ? (
+                                <div className="p-12 text-center text-gray-600">
+                                    <Radio className="mx-auto mb-4 opacity-50" size={48} />
+                                    <p className="text-sm">No active subscriptions</p>
+                                    <p className="text-xs mt-2">Subscribe to topics from the panel on the right to see live data</p>
+                                </div>
+                            ) : (
+                                <table className="w-full code-font text-xs">
+                                    <thead className="bg-white/5 sticky top-0">
+                                        <tr>
+                                            <th className="text-left p-3 font-bold text-gray-400 uppercase tracking-wider">Topic</th>
+                                            <th className="text-left p-3 font-bold text-gray-400 uppercase tracking-wider">Metric</th>
+                                            <th className="text-right p-3 font-bold text-gray-400 uppercase tracking-wider">Value</th>
+                                            <th className="text-right p-3 font-bold text-gray-400 uppercase tracking-wider">Last Updated</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {subscribedTopicsData.map(({ topic, message }) => {
+                                            const payload = message.payload;
+                                            const rows: Array<{ key: string; value: any }> = [];
+
+                                            // Flatten nested payload
+                                            Object.entries(payload).forEach(([key, val]) => {
+                                                if (typeof val === 'object' && val !== null) {
+                                                    Object.entries(val).forEach(([subKey, subVal]) => {
+                                                        rows.push({ key: `${key}.${subKey}`, value: subVal });
+                                                    });
+                                                } else {
+                                                    rows.push({ key, value: val });
+                                                }
+                                            });
+
+                                            return rows.map((row, idx) => (
+                                                <tr key={`${topic}-${row.key}`} className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                                                    {idx === 0 && (
+                                                        <td rowSpan={rows.length} className="p-3 align-top border-r border-white/10">
+                                                            <div className="flex items-center gap-2">
+                                                                <div className={`w-2 h-2 rounded-full ${topic.includes('telemetry') ? 'bg-orange-500' : 'bg-blue-500'} animate-pulse`} />
+                                                                <span className={topic.includes('telemetry') ? 'text-orange-400' : 'text-blue-400'}>{topic}</span>
+                                                            </div>
+                                                        </td>
+                                                    )}
+                                                    <td className="p-3 text-gray-400">{row.key}</td>
+                                                    <td className="p-3 text-right font-mono text-white">
+                                                        {typeof row.value === 'number' ? row.value.toFixed(2) : String(row.value)}
+                                                    </td>
+                                                    {idx === 0 && (
+                                                        <td rowSpan={rows.length} className="p-3 text-right text-gray-500 align-top border-l border-white/10">
+                                                            {new Date(message.timestamp).toLocaleTimeString()}
+                                                        </td>
+                                                    )}
+                                                </tr>
+                                            ));
+                                        })}
+                                    </tbody>
+                                </table>
+                            )}
+                        </div>
+                    </section>
                 </div>
 
-                {/* Right column: Message Stream */}
+                {/* Right column: Topic Subscription Panel */}
                 <div className="col-span-12 lg:col-span-4 flex flex-col gap-6">
 
                     {/* Topic Navigator */}
                     <section className="glass-panel p-4 flex flex-col gap-4">
                         <h3 className="text-sm font-bold flex items-center gap-2">
                             <Search size={16} className="text-orange-400" />
-                            Topic Explorer
+                            Topic Subscription Manager
                         </h3>
-                        <div className="space-y-1">
-                            <button
-                                onClick={() => toggleSubscription('#')}
-                                className={`w-full text-left px-3 py-2 rounded-md transition-all text-xs code-font flex justify-between items-center ${subscriptions.includes('#') ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30' : 'text-gray-400 hover:bg-white/5'}`}
-                            >
-                                <span># (Global Wildcard)</span>
-                                {subscriptions.includes('#') && <Badge className="text-[8px] bg-orange-500">Live</Badge>}
-                            </button>
-                            {topics.map(topic => (
-                                <button
-                                    key={topic}
-                                    onClick={() => toggleSubscription(topic)}
-                                    className={`w-full text-left px-3 py-2 rounded-md transition-all text-xs code-font flex justify-between items-center group ${subscriptions.includes(topic) ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' : 'text-gray-400 hover:bg-white/5'}`}
-                                >
-                                    <span className="truncate mr-2">{topic}</span>
-                                    {subscriptions.includes(topic) ? (
-                                        <Badge className="text-[8px] bg-blue-500">Subscribed</Badge>
-                                    ) : (
-                                        <span className="text-[8px] opacity-0 group-hover:opacity-100 transition-opacity">Subscribe</span>
-                                    )}
-                                </button>
-                            ))}
-                        </div>
-                    </section>
-
-                    {/* Quick Filters */}
-                    <section className="glass-panel p-4 flex flex-col gap-3">
-                        <h3 className="text-sm font-bold flex items-center gap-2">
-                            <Filter size={16} className="text-blue-400" />
-                            Pre-defined Filters
-                        </h3>
-                        <div className="flex gap-2 flex-wrap">
-                            {['telemetry', 'maintenance', 'analytics'].map(term => (
-                                <button
-                                    key={term}
-                                    onClick={() => setFilterText(term)}
-                                    className="px-2 py-1 bg-white/5 hover:bg-white/10 rounded text-[10px] uppercase tracking-wider text-gray-400"
-                                >
-                                    {term}
-                                </button>
-                            ))}
-                            <button
-                                onClick={() => setFilterText('')}
-                                className="px-2 py-1 bg-white/10 hover:bg-white/20 rounded text-[10px] uppercase tracking-wider text-gray-200"
-                            >
-                                Reset
-                            </button>
-                        </div>
-                    </section>
-
-                    {/* Console Log */}
-                    <section className="glass-panel flex-1 flex flex-col overflow-hidden min-h-[500px]">
-                        <div className="p-4 border-b border-white/10 flex justify-between items-center bg-white/2">
-                            <h3 className="text-sm font-bold flex items-center gap-2">
-                                <Terminal size={16} className="text-green-400" />
-                                Inbound Message Terminal
-                            </h3>
-                            <div className="flex items-center gap-2">
-                                <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                                <span className="text-[10px] text-green-500 code-font">LISTENING</span>
-                            </div>
-                        </div>
-
-                        <div className="p-4 border-b border-white/10 bg-black/40">
-                            <div className="relative">
-                                <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={12} />
-                                <input
-                                    type="text"
-                                    placeholder="Filter payload..."
-                                    value={filterText}
-                                    onChange={(e) => setFilterText(e.target.value)}
-                                    className="w-full bg-white/5 border border-white/10 rounded px-8 py-1.5 text-xs code-font focus:outline-none focus:border-orange-500/50"
-                                />
-                            </div>
-                        </div>
-
-                        <div className="flex-1 overflow-y-auto p-4 space-y-3 code-font text-xs">
-                            {filteredMessages.length === 0 ? (
-                                <div className="h-full flex items-center justify-center text-gray-600 italic">
-                                    Waiting for publication...
+                        <p className="text-xs text-gray-500">Click to subscribe/unsubscribe to topics</p>
+                        <div className="space-y-1 max-h-[600px] overflow-y-auto">
+                            {topics.length === 0 ? (
+                                <div className="text-center py-8 text-gray-600 text-xs">
+                                    <Clock className="mx-auto mb-2 opacity-50" size={32} />
+                                    <p>Waiting for topics...</p>
                                 </div>
                             ) : (
-                                filteredMessages.map((msg) => (
-                                    <div key={msg.id} className={`group border-l-2 pl-3 py-1 transition-colors ${msg.topic.includes('telemetry') ? 'border-orange-500/30 hover:border-orange-500' : 'border-blue-500/30 hover:border-blue-500'}`}>
-                                        <div className="flex justify-between items-center mb-1">
-                                            <span className={`${msg.topic.includes('telemetry') ? 'text-orange-400' : 'text-blue-400'} font-bold`}>{msg.topic}</span>
-                                            <span className="text-gray-600 text-[10px]">{new Date(msg.timestamp).toLocaleTimeString()}</span>
-                                        </div>
-                                        <div className="bg-white/5 p-2 rounded border border-white/5 text-gray-300 overflow-x-auto whitespace-pre">
-                                            <div className="flex flex-col gap-1">
-                                                {Object.entries(msg.payload).map(([key, val]) => (
-                                                    <div key={key} className="flex gap-2">
-                                                        <span className="text-zinc-500 font-bold uppercase text-[9px]">{key}:</span>
-                                                        <span className="text-zinc-300">
-                                                            {typeof val === 'object' ? JSON.stringify(val) : String(val)}
-                                                        </span>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))
+                                topics.map(topic => {
+                                    const isSubscribed = subscriptions.includes(topic);
+                                    return (
+                                        <button
+                                            key={topic}
+                                            onClick={() => toggleSubscription(topic)}
+                                            className={`w-full text-left px-3 py-2.5 rounded-md transition-all text-xs code-font flex justify-between items-center group ${isSubscribed ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' : 'text-gray-400 hover:bg-white/5 border border-transparent'}`}
+                                        >
+                                            <span className="truncate mr-2 flex items-center gap-2">
+                                                {isSubscribed ? (
+                                                    <CheckCircle2 size={14} className="text-green-500" />
+                                                ) : (
+                                                    <XCircle size={14} className="text-gray-600" />
+                                                )}
+                                                {topic}
+                                            </span>
+                                            {isSubscribed ? (
+                                                <Badge className="text-[8px] bg-blue-500">Active</Badge>
+                                            ) : (
+                                                <span className="text-[8px] opacity-0 group-hover:opacity-100 transition-opacity">Click to subscribe</span>
+                                            )}
+                                        </button>
+                                    );
+                                })
                             )}
-                            <div ref={logEndRef} />
+                        </div>
+                    </section>
+
+                    {/* Subscription Info */}
+                    <section className="glass-panel p-4">
+                        <h3 className="text-sm font-bold mb-3 flex items-center gap-2">
+                            <Activity size={16} className="text-purple-400" />
+                            Subscription Status
+                        </h3>
+                        <div className="space-y-2 text-xs">
+                            <div className="flex justify-between">
+                                <span className="text-gray-500">Active Subscriptions:</span>
+                                <span className="text-white font-bold">{subscriptions.length}</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span className="text-gray-500">Available Topics:</span>
+                                <span className="text-white font-bold">{topics.length}</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span className="text-gray-500">Connection:</span>
+                                <span className={isConnected ? 'text-green-500 font-bold' : 'text-red-500 font-bold'}>
+                                    {isConnected ? 'Connected' : 'Disconnected'}
+                                </span>
+                            </div>
                         </div>
                     </section>
                 </div>
@@ -384,11 +411,7 @@ export default function PubSubPage() {
                 <div className="flex items-center gap-6">
                     <div className="flex items-center gap-2">
                         <Clock size={14} />
-                        <span>Last Sync: {new Date().toLocaleTimeString()}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <MessageSquare size={14} />
-                        <span>Active Connections: 1 Client, 3 Subscribers</span>
+                        <span>Last Sync: {lastSync || 'Loading...'}</span>
                     </div>
                 </div>
                 <div className="uppercase tracking-widest opacity-50">

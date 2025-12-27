@@ -23,12 +23,19 @@ export const usePubSubStore = create<PubSubStore>((set) => ({
     topics: [],
     subscriptions: [], // Start with no subscriptions - user must manually subscribe
     addMessage: (topic, payload) => set((state) => {
-        // Only add message if it matches a subscription
+        // Always track topics, even if not subscribed
+        const newTopics = state.topics.includes(topic)
+            ? state.topics
+            : [...state.topics, topic].sort();
+
+        // Only store message data if subscribed
         const isSubscribed = state.subscriptions.includes('#') ||
             state.subscriptions.includes(topic) ||
             state.subscriptions.some(sub => sub.endsWith('/#') && topic.startsWith(sub.slice(0, -2)));
 
-        if (!isSubscribed) return state;
+        if (!isSubscribed) {
+            return { topics: newTopics };
+        }
 
         const newMessage: PubSubMessage = {
             id: Math.random().toString(36).substring(7),
@@ -45,11 +52,6 @@ export const usePubSubStore = create<PubSubStore>((set) => ({
             ...state.latestMessagesByTopic,
             [topic]: newMessage
         };
-
-        // Update unique topics
-        const newTopics = state.topics.includes(topic)
-            ? state.topics
-            : [...state.topics, topic].sort();
 
         return {
             messages: newMessages,
