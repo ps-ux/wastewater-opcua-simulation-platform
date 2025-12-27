@@ -52,6 +52,7 @@ export const useServerStore = create<ServerStore>((set, get) => ({
           opcua_server: false,
           database: false,
           simulation_running: false,
+          pubsub_status: false,
           pump_count: 0,
           chamber_count: 0
         }

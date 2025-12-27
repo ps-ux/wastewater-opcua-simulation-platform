@@ -729,6 +729,142 @@ export default function ArchitecturePage() {
           100% { transform: scale(2); opacity: 0; }
         }
 
+        @keyframes shake {
+          0%, 100% { transform: translateX(0); }
+          10%, 30%, 50%, 70%, 90% { transform: translateX(-2px); }
+          20%, 40%, 60%, 80% { transform: translateX(2px); }
+        }
+
+        @keyframes glitch {
+          0%, 100% { clip-path: inset(0 0 0 0); transform: translate(0); }
+          20% { clip-path: inset(20% 0 60% 0); transform: translate(-2px, 2px); }
+          40% { clip-path: inset(40% 0 40% 0); transform: translate(2px, -1px); }
+          60% { clip-path: inset(60% 0 20% 0); transform: translate(-1px, 1px); }
+          80% { clip-path: inset(80% 0 0 0); transform: translate(1px, -2px); }
+        }
+
+        @keyframes flicker {
+          0%, 100% { opacity: 1; }
+          5% { opacity: 0.8; }
+          10% { opacity: 1; }
+          15% { opacity: 0.6; }
+          20% { opacity: 1; }
+          50% { opacity: 0.9; }
+          55% { opacity: 1; }
+        }
+
+        @keyframes typewriter {
+          from { width: 0; }
+          to { width: 100%; }
+        }
+
+        @keyframes brokenLine {
+          0%, 100% { stroke-dashoffset: 0; opacity: 0.5; }
+          50% { stroke-dashoffset: 10; opacity: 0.2; }
+        }
+
+        @keyframes questionMark {
+          0%, 100% { opacity: 0.4; transform: scale(1) rotate(0deg); }
+          25% { opacity: 1; transform: scale(1.2) rotate(5deg); }
+          50% { opacity: 0.6; transform: scale(0.9) rotate(-5deg); }
+          75% { opacity: 0.9; transform: scale(1.1) rotate(3deg); }
+        }
+
+        @keyframes protocolFloat {
+          0%, 100% { transform: translateY(0) rotate(-2deg); }
+          50% { transform: translateY(-8px) rotate(2deg); }
+        }
+
+        @keyframes staticNoise {
+          0% { background-position: 0 0; }
+          10% { background-position: -5% -5%; }
+          20% { background-position: 10% 5%; }
+          30% { background-position: -15% 10%; }
+          40% { background-position: 5% -10%; }
+          50% { background-position: -10% 15%; }
+          60% { background-position: 15% 5%; }
+          70% { background-position: 0% 10%; }
+          80% { background-position: 3% -5%; }
+          90% { background-position: -5% 0%; }
+          100% { background-position: 0 0; }
+        }
+
+        .protocol-island {
+          background: var(--bg-elevated);
+          border: 2px dashed var(--border-color);
+          border-radius: 12px;
+          padding: 1rem;
+          position: relative;
+          animation: protocolFloat 4s ease-in-out infinite;
+          transition: all 0.3s;
+        }
+
+        .protocol-island:hover {
+          border-color: var(--accent-red);
+          animation-play-state: paused;
+        }
+
+        .protocol-island::after {
+          content: '?';
+          position: absolute;
+          top: -10px;
+          right: -10px;
+          width: 24px;
+          height: 24px;
+          background: var(--accent-red);
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: bold;
+          font-size: 0.9rem;
+          color: white;
+          animation: questionMark 2s ease-in-out infinite;
+        }
+
+        .chaos-code-block {
+          background: linear-gradient(135deg, rgba(17, 24, 39, 0.95), rgba(26, 34, 52, 0.9));
+          border: 1px solid rgba(239, 68, 68, 0.3);
+          border-radius: 10px;
+          padding: 1rem;
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 0.85rem;
+          position: relative;
+          overflow: hidden;
+        }
+
+        .chaos-code-block::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background:
+            repeating-linear-gradient(
+              0deg,
+              transparent,
+              transparent 2px,
+              rgba(239, 68, 68, 0.03) 2px,
+              rgba(239, 68, 68, 0.03) 4px
+            );
+          animation: staticNoise 0.5s steps(10) infinite;
+          pointer-events: none;
+        }
+
+        .chaos-line {
+          animation: flicker 3s ease-in-out infinite;
+        }
+
+        .chaos-line:nth-child(2) { animation-delay: 0.5s; }
+        .chaos-line:nth-child(3) { animation-delay: 1s; }
+        .chaos-line:nth-child(4) { animation-delay: 1.5s; }
+
+        .broken-connection {
+          stroke-dasharray: 5 5;
+          animation: brokenLine 1.5s ease-in-out infinite;
+        }
+
         .animate-fade-in {
           animation: fadeInUp 0.6s ease-out forwards;
         }
@@ -1182,28 +1318,233 @@ export default function ArchitecturePage() {
         <section className="slide" id="slide-3">
           <div className="section-header">
             <div className="section-number">SECTION 01 • 0–5 MINUTES</div>
-            <h2 className="section-title">Industrial Reality Before OPC UA</h2>
+            <h2 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              Industrial Reality Before OPC UA
+              <span style={{
+                fontSize: '0.7rem',
+                background: 'rgba(239, 68, 68, 0.15)',
+                color: '#ef4444',
+                padding: '0.3rem 0.6rem',
+                borderRadius: '6px',
+                fontWeight: 500,
+                animation: 'shake 0.5s ease-in-out infinite'
+              }}>CHAOS</span>
+            </h2>
             <p className="section-goal">Goal: Establish why OPC UA exists</p>
           </div>
-          <div className="content-grid">
-            <div className="content-card">
-              <h3><span className="icon">⚠</span> Historical Challenges</h3>
-              <ul>
-                <li>Vendor lock-in (each PLC spoke its own language)</li>
-                <li>Proprietary & undocumented protocols</li>
-                <li>Flat tag lists with no semantics</li>
-                <li>Security added externally (if at all)</li>
-              </ul>
-            </div>
-            <div className="content-card">
-              <h3><span className="icon">🏭</span> Wastewater Reality</h3>
-              <div className="code-block">
-                <span className="comment">// PLC 1 (Siemens)</span><br />
-                DB12.DBW34 = <span className="number">1450</span> <span className="comment">// What is this?</span><br /><br />
-                <span className="comment">// PLC 2 (Allen-Bradley)</span><br />
-                <span className="number">40001</span> = <span className="number">75.3</span> <span className="comment">// Tank level?</span>
+
+          {/* Tower of Babel Visualization */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginTop: '1rem' }}>
+
+            {/* Left: Protocol Islands Diagram */}
+            <div className="diagram-container" style={{ position: 'relative', overflow: 'visible' }}>
+              <div className="diagram-title" style={{ marginBottom: '1rem' }}>
+                <span style={{ color: 'var(--accent-red)' }}>🗼</span> Tower of Babel: Industrial Protocols
+              </div>
+
+              <svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" style={{ width: '100%', height: 'auto' }}>
+                <defs>
+                  <filter id="chaos-glow">
+                    <feGaussianBlur stdDeviation="2" result="blur" />
+                    <feFlood floodColor="#ef4444" floodOpacity="0.5" />
+                    <feComposite in2="blur" operator="in" />
+                    <feMerge>
+                      <feMergeNode />
+                      <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                  </filter>
+                </defs>
+
+                {/* Broken connection lines with X marks */}
+                <g className="broken-connection" style={{ opacity: 0.4 }}>
+                  <line x1="100" y1="80" x2="300" y2="80" stroke="#ef4444" strokeWidth="2" />
+                  <line x1="100" y1="150" x2="300" y2="220" stroke="#ef4444" strokeWidth="2" />
+                  <line x1="300" y1="150" x2="100" y2="220" stroke="#ef4444" strokeWidth="2" />
+                  {/* X marks on broken connections */}
+                  <g transform="translate(200, 80)">
+                    <line x1="-8" y1="-8" x2="8" y2="8" stroke="#ef4444" strokeWidth="3" />
+                    <line x1="8" y1="-8" x2="-8" y2="8" stroke="#ef4444" strokeWidth="3" />
+                  </g>
+                  <g transform="translate(200, 185)">
+                    <line x1="-8" y1="-8" x2="8" y2="8" stroke="#ef4444" strokeWidth="3" />
+                    <line x1="8" y1="-8" x2="-8" y2="8" stroke="#ef4444" strokeWidth="3" />
+                  </g>
+                </g>
+
+                {/* Protocol Islands */}
+                {[
+                  { x: 50, y: 30, protocol: 'S7', vendor: 'Siemens', color: '#00b4a0' },
+                  { x: 250, y: 30, protocol: 'EtherNet/IP', vendor: 'Rockwell', color: '#e31937' },
+                  { x: 50, y: 120, protocol: 'Modbus', vendor: 'Modicon', color: '#f59e0b' },
+                  { x: 250, y: 120, protocol: 'Profibus', vendor: 'DIN/ISO', color: '#8b5cf6' },
+                  { x: 50, y: 210, protocol: 'DeviceNet', vendor: 'ODVA', color: '#ec4899' },
+                  { x: 250, y: 210, protocol: 'BACnet', vendor: 'ASHRAE', color: '#3b82f6' },
+                ].map((island, idx) => (
+                  <g key={idx} style={{ animation: `protocolFloat ${3 + idx * 0.5}s ease-in-out infinite`, animationDelay: `${idx * 0.3}s` }}>
+                    <rect
+                      x={island.x}
+                      y={island.y}
+                      width="100"
+                      height="60"
+                      rx="8"
+                      fill="rgba(17, 24, 39, 0.9)"
+                      stroke={island.color}
+                      strokeWidth="2"
+                      strokeDasharray="5 3"
+                    />
+                    <text x={island.x + 50} y={island.y + 25} textAnchor="middle" fill={island.color} fontSize="12" fontWeight="bold">
+                      {island.protocol}
+                    </text>
+                    <text x={island.x + 50} y={island.y + 45} textAnchor="middle" fill="#94a3b8" fontSize="9">
+                      {island.vendor}
+                    </text>
+                    {/* Question mark */}
+                    <circle cx={island.x + 95} cy={island.y + 5} r="10" fill="#ef4444">
+                      <animate attributeName="opacity" values="0.4;1;0.4" dur="2s" repeatCount="indefinite" begin={`${idx * 0.2}s`} />
+                    </circle>
+                    <text x={island.x + 95} y={island.y + 10} textAnchor="middle" fill="white" fontSize="12" fontWeight="bold">?</text>
+                  </g>
+                ))}
+
+                {/* Confusion clouds */}
+                <g style={{ opacity: 0.6 }}>
+                  <text x="200" y="105" textAnchor="middle" fill="#ef4444" fontSize="20" style={{ animation: 'pulse 1s infinite' }}>✗</text>
+                  <text x="145" y="185" textAnchor="middle" fill="#ef4444" fontSize="16" style={{ animation: 'pulse 1.5s infinite' }}>✗</text>
+                  <text x="255" y="185" textAnchor="middle" fill="#ef4444" fontSize="16" style={{ animation: 'pulse 1.2s infinite' }}>✗</text>
+                </g>
+              </svg>
+
+              <div style={{
+                textAlign: 'center',
+                marginTop: '0.5rem',
+                fontSize: '0.85rem',
+                color: 'var(--accent-red)',
+                fontWeight: 500
+              }}>
+                Every vendor spoke a different language
               </div>
             </div>
+
+            {/* Right: Challenges + Cryptic Code */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              {/* Historical Challenges Card */}
+              <div className="content-card" style={{ borderColor: 'rgba(239, 68, 68, 0.3)' }}>
+                <h3 style={{ color: 'var(--accent-red)' }}>
+                  <span className="icon" style={{ background: 'rgba(239, 68, 68, 0.1)' }}>⚠</span>
+                  Historical Challenges
+                </h3>
+                <ul style={{ margin: 0 }}>
+                  {[
+                    { text: 'Vendor lock-in', sub: 'each PLC spoke its own language' },
+                    { text: 'Proprietary protocols', sub: 'undocumented & closed source' },
+                    { text: 'Flat tag lists', sub: 'no semantics or context' },
+                    { text: 'No security', sub: 'added externally, if at all' },
+                  ].map((item, idx) => (
+                    <li key={idx} style={{
+                      animation: 'fadeInUp 0.5s ease-out forwards',
+                      animationDelay: `${idx * 0.15}s`,
+                      opacity: 0,
+                      animationFillMode: 'forwards'
+                    }}>
+                      <strong style={{ color: 'var(--text-primary)' }}>{item.text}</strong>
+                      <span style={{ color: 'var(--text-muted)', marginLeft: '0.3rem' }}>— {item.sub}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Wastewater Reality - Cryptic Code */}
+              <div className="content-card" style={{ borderColor: 'rgba(245, 158, 11, 0.3)' }}>
+                <h3 style={{ color: 'var(--accent-orange)' }}>
+                  <span className="icon" style={{ background: 'rgba(245, 158, 11, 0.1)' }}>🏭</span>
+                  Wastewater Reality: What Does This Mean?
+                </h3>
+                <div className="chaos-code-block">
+                  <div className="chaos-line" style={{ marginBottom: '0.5rem' }}>
+                    <span style={{ color: '#6b7280' }}>// PLC 1 (Siemens S7-1500)</span>
+                  </div>
+                  <div className="chaos-line" style={{ marginBottom: '0.5rem' }}>
+                    <span style={{ color: '#00b4a0' }}>DB12.DBW34</span>
+                    <span style={{ color: '#94a3b8' }}> = </span>
+                    <span style={{ color: '#10b981' }}>1450</span>
+                    <span style={{
+                      color: '#ef4444',
+                      marginLeft: '0.5rem',
+                      animation: 'pulse 1.5s infinite'
+                    }}>← ???</span>
+                  </div>
+                  <div className="chaos-line" style={{ marginBottom: '0.5rem' }}>
+                    <span style={{ color: '#6b7280' }}>// PLC 2 (Allen-Bradley)</span>
+                  </div>
+                  <div className="chaos-line" style={{ marginBottom: '0.5rem' }}>
+                    <span style={{ color: '#e31937' }}>N7:42</span>
+                    <span style={{ color: '#94a3b8' }}> = </span>
+                    <span style={{ color: '#10b981' }}>75.3</span>
+                    <span style={{
+                      color: '#ef4444',
+                      marginLeft: '0.5rem',
+                      animation: 'pulse 1.8s infinite'
+                    }}>← Tank level? RPM?</span>
+                  </div>
+                  <div className="chaos-line">
+                    <span style={{ color: '#6b7280' }}>// PLC 3 (Modbus)</span>
+                  </div>
+                  <div className="chaos-line">
+                    <span style={{ color: '#f59e0b' }}>40001</span>
+                    <span style={{ color: '#94a3b8' }}> = </span>
+                    <span style={{ color: '#10b981' }}>0x05A4</span>
+                    <span style={{
+                      color: '#ef4444',
+                      marginLeft: '0.5rem',
+                      animation: 'pulse 2s infinite'
+                    }}>← No documentation!</span>
+                  </div>
+                </div>
+
+                <div style={{
+                  marginTop: '0.75rem',
+                  padding: '0.6rem',
+                  background: 'rgba(239, 68, 68, 0.1)',
+                  borderRadius: '8px',
+                  borderLeft: '3px solid var(--accent-red)',
+                  fontSize: '0.85rem',
+                  color: 'var(--text-secondary)'
+                }}>
+                  <strong style={{ color: 'var(--accent-red)' }}>Integration nightmare:</strong> Custom middleware for every vendor pair.
+                  Hours of guesswork to understand legacy data.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom summary bar */}
+          <div style={{
+            marginTop: '1.5rem',
+            display: 'grid',
+            gridTemplateColumns: 'repeat(4, 1fr)',
+            gap: '0.75rem'
+          }}>
+            {[
+              { icon: '🔒', label: 'Vendor Lock-in', color: '#ef4444' },
+              { icon: '📋', label: 'No Standards', color: '#f59e0b' },
+              { icon: '🔌', label: 'Integration Hell', color: '#ec4899' },
+              { icon: '🛡️', label: 'Zero Security', color: '#8b5cf6' },
+            ].map((item, idx) => (
+              <div key={idx} style={{
+                background: 'var(--bg-card)',
+                border: `1px solid ${item.color}33`,
+                borderRadius: '10px',
+                padding: '0.75rem',
+                textAlign: 'center',
+                animation: 'fadeInUp 0.4s ease-out forwards',
+                animationDelay: `${0.5 + idx * 0.1}s`,
+                opacity: 0,
+                animationFillMode: 'forwards'
+              }}>
+                <div style={{ fontSize: '1.5rem', marginBottom: '0.25rem' }}>{item.icon}</div>
+                <div style={{ fontSize: '0.8rem', color: item.color, fontWeight: 600 }}>{item.label}</div>
+              </div>
+            ))}
           </div>
         </section>
 
