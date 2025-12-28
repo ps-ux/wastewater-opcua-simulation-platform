@@ -6425,8 +6425,8 @@ export default function ArchitecturePage() {
               {/* FastAPI */}
               <g transform="translate(255, 40)">
                 <rect width="120" height="70" rx="8" fill={theme === 'business' ? '#fefce8' : 'rgba(245,158,11,0.15)'} stroke="var(--accent-orange)" strokeWidth="2" />
-                <text x="60" y="25" fill="var(--accent-orange)" fontSize="10" textAnchor="middle" fontWeight="700">FastAPI Backend</text>
-                <text x="60" y="40" fill={theme === 'business' ? '#b45309' : '#fde047'} fontSize="8" textAnchor="middle">Python + asyncua</text>
+                <text x="60" y="25" fill="var(--accent-orange)" fontSize="10" textAnchor="middle" fontWeight="700">Rest API</text>
+                <text x="60" y="40" fill={theme === 'business' ? '#b45309' : '#fde047'} fontSize="8" textAnchor="middle">asyncua</text>
                 <rect x="15" y="48" width="90" height="16" rx="4" fill={theme === 'business' ? '#fef3c7' : 'rgba(245,158,11,0.2)'} />
                 <text x="60" y="60" fill="var(--accent-orange)" fontSize="7" textAnchor="middle">OPC UA Client Lib</text>
               </g>
@@ -6447,7 +6447,7 @@ export default function ArchitecturePage() {
               <g transform="translate(495, 30)">
                 <rect width="140" height="90" rx="8" fill={theme === 'business' ? '#f0fdf4' : 'rgba(16,185,129,0.15)'} stroke="var(--accent-green)" strokeWidth="2" />
                 <text x="70" y="22" fill="var(--accent-green)" fontSize="10" textAnchor="middle" fontWeight="700">OPC UA Server</text>
-                <text x="70" y="36" fill={theme === 'business' ? '#059669' : '#6ee7b7'} fontSize="8" textAnchor="middle">Python asyncua</text>
+                <text x="70" y="36" fill={theme === 'business' ? '#059669' : '#6ee7b7'} fontSize="8" textAnchor="middle">asyncua</text>
                 <rect x="10" y="44" width="55" height="38" rx="4" fill={theme === 'business' ? '#dcfce7' : 'rgba(16,185,129,0.2)'} />
                 <text x="37" y="58" fill="var(--accent-green)" fontSize="7" textAnchor="middle" fontWeight="600">Address</text>
                 <text x="37" y="70" fill="var(--accent-green)" fontSize="7" textAnchor="middle" fontWeight="600">Space</text>
