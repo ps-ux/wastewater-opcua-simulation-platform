@@ -1836,6 +1836,9 @@ export default function ArchitecturePage() {
           <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
             A Practical OPC UA Client–Server Demonstration Using <b>Rock Creek</b> Wastewater Treatment Pump Model
           </p>
+          <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontStyle: 'italic', marginTop: '0.5rem' }}>
+            OPC UA is <span style={{ color: 'var(--accent-cyan)' }}>industry-agnostic</span> — wastewater treatment is used for brevity.
+          </p>
           <div className="title-meta">
             <div className="meta-item">
               <div className="label">Spec</div>
