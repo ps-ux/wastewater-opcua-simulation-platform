@@ -5850,14 +5850,14 @@ export default function ArchitecturePage() {
 
               {/* Client Actor */}
               <g transform="translate(80, 15)">
-                <rect x="-40" y="0" width="80" height="45" rx="8" fill={theme === 'business' ? '#e0f2fe' : 'rgba(0,212,255,0.15)'} stroke="var(--accent-cyan)" strokeWidth="2" />
+                <rect x="-60" y="0" width="110" height="45" rx="8" fill={theme === 'business' ? '#e0f2fe' : 'rgba(0,212,255,0.15)'} stroke="var(--accent-cyan)" strokeWidth="2" />
                 <text x="0" y="20" fill="var(--accent-cyan)" fontSize="12" textAnchor="middle" fontWeight="700">OPC UA Client</text>
                 <text x="0" y="35" fill={theme === 'business' ? '#0284c7' : '#67e8f9'} fontSize="9" textAnchor="middle">SCADA / HMI</text>
               </g>
 
               {/* Server Actor */}
               <g transform="translate(820, 15)">
-                <rect x="-40" y="0" width="80" height="45" rx="8" fill={theme === 'business' ? '#dcfce7' : 'rgba(16,185,129,0.15)'} stroke="var(--accent-green)" strokeWidth="2" />
+                <rect x="-60" y="0" width="110" height="45" rx="8" fill={theme === 'business' ? '#dcfce7' : 'rgba(16,185,129,0.15)'} stroke="var(--accent-green)" strokeWidth="2" />
                 <text x="0" y="20" fill="var(--accent-green)" fontSize="12" textAnchor="middle" fontWeight="700">OPC UA Server</text>
                 <text x="0" y="35" fill={theme === 'business' ? '#059669' : '#6ee7b7'} fontSize="9" textAnchor="middle">Pump Controller</text>
               </g>

@@ -22,10 +22,12 @@ import {
   Box,
   Thermometer,
   FolderTree,
+  Info,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { DesignSpecsModal } from '@/components/pumps/design-specs-modal';
 import Link from 'next/link';
 import { usePumpStore } from '@/stores/pump-store';
 import { usePumpWebSocket } from '@/hooks/use-pump-websocket';
@@ -292,6 +294,7 @@ function PumpControlCard({ pump, browsePath, displayName, onStart, onStop, isLoa
           <div className="flex-1">
             <div className="flex items-center gap-2">
               <CardTitle className="text-lg">{displayName || pump.name}</CardTitle>
+              <DesignSpecsModal pumpId={pump.id} pumpName={pump.name} variant="icon" />
               {getStatusBadge()}
             </div>
             <p className="mt-1 font-mono text-xs text-zinc-400">{pump.id}</p>

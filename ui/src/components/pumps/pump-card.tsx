@@ -16,6 +16,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { DesignSpecsModal } from './design-specs-modal';
 import type { PumpData } from '@/lib/types';
 
 interface PumpCardProps {
@@ -55,6 +56,9 @@ export function PumpCard({ pump, browsePath, displayName, onSelect, onStart, onS
             <p className="font-mono text-xs text-zinc-400">{pump.id}</p>
           </div>
           <div className="flex items-center gap-2">
+            <div onClick={(e) => e.stopPropagation()}>
+              <DesignSpecsModal pumpId={pump.id} pumpName={pump.name} variant="icon" />
+            </div>
             {hasAlarms && (
               <AlertTriangle className="h-4 w-4 text-yellow-500" />
             )}
