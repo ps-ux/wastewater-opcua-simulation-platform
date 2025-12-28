@@ -4560,8 +4560,8 @@ export default function ArchitecturePage() {
                   OPC UA Time-Weighted Average Formula
                 </div>
 
-                {/* Main Formula using SVG for proper math rendering */}
-                <svg viewBox="0 0 340 90" style={{ width: '100%', height: '90px' }}>
+                {/* Main Formula using SVG for proper math rendering - IEC 62541-13 format */}
+                <svg viewBox="0 0 340 100" style={{ width: '100%', height: '100px' }}>
                   <defs>
                     <linearGradient id="formulaGrad" x1="0%" y1="0%" x2="100%" y2="0%">
                       <stop offset="0%" stopColor="#ec4899" />
@@ -4570,48 +4570,51 @@ export default function ArchitecturePage() {
                   </defs>
 
                   {/* x-bar (Average) - x with overline */}
-                  <g transform="translate(15, 45)">
+                  <g transform="translate(15, 50)">
                     <text x="0" y="0" fill={theme === 'business' ? '#0f172a' : '#f1f5f9'} fontSize="24" fontWeight="600" fontStyle="italic" fontFamily="Times New Roman, serif">x</text>
                     <line x1="-2" y1="-18" x2="16" y2="-18" stroke={theme === 'business' ? '#0f172a' : '#f1f5f9'} strokeWidth="2.5" />
                   </g>
 
                   {/* Equals sign */}
-                  <text x="45" y="45" fill={theme === 'business' ? '#64748b' : '#94a3b8'} fontSize="22" fontFamily="Times New Roman, serif">=</text>
+                  <text x="45" y="50" fill={theme === 'business' ? '#64748b' : '#94a3b8'} fontSize="22" fontFamily="Times New Roman, serif">=</text>
 
                   {/* Fraction */}
-                  <g transform="translate(150, 45)">
-                    {/* Numerator: Σ(xᵢ · Δtᵢ) */}
-                    <g transform="translate(0, -18)">
-                      <text x="0" y="0" fill="#ec4899" fontSize="22" fontFamily="Times New Roman, serif">Σ</text>
-                      <text x="20" y="0" fill={theme === 'business' ? '#0f172a' : '#f1f5f9'} fontSize="18" fontFamily="Times New Roman, serif">(</text>
+                  <g transform="translate(80, 50)">
+                    {/* Numerator: Σ from i=1 to n of (xᵢ · Δtᵢ) */}
+                    <g transform="translate(0, -20)">
+                      {/* Sigma with limits */}
+                      <text x="0" y="0" fill="#ec4899" fontSize="28" fontFamily="Times New Roman, serif">Σ</text>
+                      {/* n above sigma */}
+                      <text x="7" y="-18" fill={theme === 'business' ? '#0f172a' : '#f1f5f9'} fontSize="12" fontStyle="italic" fontFamily="Times New Roman, serif">n</text>
+                      {/* i=1 below sigma */}
+                      <text x="2" y="18" fill={theme === 'business' ? '#0f172a' : '#f1f5f9'} fontSize="10" fontStyle="italic" fontFamily="Times New Roman, serif">i=1</text>
+
+                      {/* xᵢ · Δtᵢ */}
                       <text x="30" y="0" fill={theme === 'business' ? '#0f172a' : '#f1f5f9'} fontSize="18" fontStyle="italic" fontFamily="Times New Roman, serif">x</text>
                       <text x="42" y="5" fill={theme === 'business' ? '#0f172a' : '#f1f5f9'} fontSize="12" fontStyle="italic" fontFamily="Times New Roman, serif">i</text>
-                      <text x="52" y="0" fill={theme === 'business' ? '#0f172a' : '#f1f5f9'} fontSize="18" fontFamily="Times New Roman, serif">·</text>
-                      <text x="64" y="0" fill={theme === 'business' ? '#0f172a' : '#f1f5f9'} fontSize="18" fontFamily="Times New Roman, serif">Δ</text>
-                      <text x="80" y="0" fill={theme === 'business' ? '#0f172a' : '#f1f5f9'} fontSize="18" fontStyle="italic" fontFamily="Times New Roman, serif">t</text>
-                      <text x="90" y="5" fill={theme === 'business' ? '#0f172a' : '#f1f5f9'} fontSize="12" fontStyle="italic" fontFamily="Times New Roman, serif">i</text>
-                      <text x="98" y="0" fill={theme === 'business' ? '#0f172a' : '#f1f5f9'} fontSize="18" fontFamily="Times New Roman, serif">)</text>
+                      <text x="54" y="0" fill={theme === 'business' ? '#0f172a' : '#f1f5f9'} fontSize="18" fontFamily="Times New Roman, serif">·</text>
+                      <text x="68" y="0" fill={theme === 'business' ? '#0f172a' : '#f1f5f9'} fontSize="18" fontFamily="Times New Roman, serif">Δ</text>
+                      <text x="84" y="0" fill={theme === 'business' ? '#0f172a' : '#f1f5f9'} fontSize="18" fontStyle="italic" fontFamily="Times New Roman, serif">t</text>
+                      <text x="94" y="5" fill={theme === 'business' ? '#0f172a' : '#f1f5f9'} fontSize="12" fontStyle="italic" fontFamily="Times New Roman, serif">i</text>
                     </g>
 
                     {/* Fraction bar - prominent horizontal line */}
-                    <rect x="-10" y="-2" width="125" height="4" fill="#ec4899" rx="1" />
+                    <rect x="-5" y="-2" width="115" height="3" fill={theme === 'business' ? '#0f172a' : '#f1f5f9'} rx="1" />
 
-                    {/* Denominator: Σ(Δtᵢ) */}
-                    <g transform="translate(20, 22)">
-                      <text x="0" y="0" fill="#ec4899" fontSize="22" fontFamily="Times New Roman, serif">Σ</text>
-                      <text x="20" y="0" fill={theme === 'business' ? '#0f172a' : '#f1f5f9'} fontSize="18" fontFamily="Times New Roman, serif">(</text>
+                    {/* Denominator: Σ from i=1 to n of Δtᵢ */}
+                    <g transform="translate(10, 28)">
+                      {/* Sigma with limits */}
+                      <text x="0" y="0" fill="#ec4899" fontSize="28" fontFamily="Times New Roman, serif">Σ</text>
+                      {/* n above sigma */}
+                      <text x="7" y="-18" fill={theme === 'business' ? '#0f172a' : '#f1f5f9'} fontSize="12" fontStyle="italic" fontFamily="Times New Roman, serif">n</text>
+                      {/* i=1 below sigma */}
+                      <text x="2" y="18" fill={theme === 'business' ? '#0f172a' : '#f1f5f9'} fontSize="10" fontStyle="italic" fontFamily="Times New Roman, serif">i=1</text>
+
+                      {/* Δtᵢ */}
                       <text x="30" y="0" fill={theme === 'business' ? '#0f172a' : '#f1f5f9'} fontSize="18" fontFamily="Times New Roman, serif">Δ</text>
                       <text x="46" y="0" fill={theme === 'business' ? '#0f172a' : '#f1f5f9'} fontSize="18" fontStyle="italic" fontFamily="Times New Roman, serif">t</text>
                       <text x="56" y="5" fill={theme === 'business' ? '#0f172a' : '#f1f5f9'} fontSize="12" fontStyle="italic" fontFamily="Times New Roman, serif">i</text>
-                      <text x="64" y="0" fill={theme === 'business' ? '#0f172a' : '#f1f5f9'} fontSize="18" fontFamily="Times New Roman, serif">)</text>
                     </g>
-                  </g>
-
-                  {/* Annotation bracket */}
-                  <g transform="translate(280, 45)">
-                    <text x="0" y="5" fill={theme === 'business' ? '#94a3b8' : '#64748b'} fontSize="50" fontWeight="200" fontFamily="Times New Roman, serif">{'}'}</text>
-                    <text x="22" y="-8" fill={theme === 'business' ? '#475569' : 'var(--text-secondary)'} fontSize="10" fontStyle="italic">time</text>
-                    <text x="22" y="6" fill={theme === 'business' ? '#475569' : 'var(--text-secondary)'} fontSize="10" fontStyle="italic">weighted</text>
                   </g>
                 </svg>
 
