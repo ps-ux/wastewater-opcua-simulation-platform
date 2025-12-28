@@ -24,6 +24,12 @@ export default function ArchitecturePage() {
   const [showKeyboardHints, setShowKeyboardHints] = useState<boolean>(true);
   const [showServerStatus, setShowServerStatus] = useState<boolean>(true);
   const [focusedBox, setFocusedBox] = useState<string | null>(null);
+  const [opcLogs, setOpcLogs] = useState<Array<{ type: string; message: string; timestamp: string }>>([]);
+
+  const addOpcLog = useCallback((type: string, message: string) => {
+    const timestamp = new Date().toISOString().split('T')[1].split('.')[0];
+    setOpcLogs(prev => [...prev, { type, message, timestamp }]);
+  }, []);
 
   const toggleTheme = useCallback(() => {
     setTheme(prev => prev === 'dark' ? 'business' : 'dark');
@@ -6317,8 +6323,15 @@ export default function ArchitecturePage() {
                   className="control-button"
                   onClick={() => {
                     const pump = Object.keys(pumpData)[0];
+                    const pumpName = Object.values(pumpData)[0]?.name || 'IPS_PMP_001';
                     if (pump) {
+                      addOpcLog('COMMAND', `call ns=1;s=${pumpName}.StartPump()`);
+                      addOpcLog('INFO', `Invoking Method: StartPump on NodeId: ns=1;s=${pumpName}`);
                       usePumpStore.getState().startPump(pump);
+                      setTimeout(() => {
+                        addOpcLog('SUCCESS', `Method call returned: StatusCode=Good, OutputArguments=[]`);
+                        addOpcLog('NOTIFICATION', `${pumpName}.IsRunning changed: false → true`);
+                      }, 100);
                     }
                   }}
                   disabled={Object.values(pumpData)[0]?.is_running}
@@ -6330,8 +6343,15 @@ export default function ArchitecturePage() {
                   className="control-button stop"
                   onClick={() => {
                     const pump = Object.keys(pumpData)[0];
+                    const pumpName = Object.values(pumpData)[0]?.name || 'IPS_PMP_001';
                     if (pump) {
+                      addOpcLog('COMMAND', `call ns=1;s=${pumpName}.StopPump()`);
+                      addOpcLog('INFO', `Invoking Method: StopPump on NodeId: ns=1;s=${pumpName}`);
                       usePumpStore.getState().stopPump(pump);
+                      setTimeout(() => {
+                        addOpcLog('SUCCESS', `Method call returned: StatusCode=Good, OutputArguments=[]`);
+                        addOpcLog('NOTIFICATION', `${pumpName}.IsRunning changed: true → false`);
+                      }, 100);
                     }
                   }}
                   disabled={!Object.values(pumpData)[0]?.is_running}
@@ -6349,60 +6369,60 @@ export default function ArchitecturePage() {
                 <div className="demo-terminal-dot" style={{ background: '#ffbd2e' }} />
                 <div className="demo-terminal-dot" style={{ background: '#27ca40' }} />
                 <span style={{ marginLeft: '12px', fontSize: '0.75rem', color: '#8b949e' }}>OPC UA Communication Log</span>
+                {opcLogs.length > 0 && (
+                  <button
+                    onClick={() => setOpcLogs([])}
+                    style={{
+                      marginLeft: 'auto',
+                      background: 'transparent',
+                      border: '1px solid #8b949e',
+                      color: '#8b949e',
+                      padding: '2px 8px',
+                      borderRadius: '4px',
+                      fontSize: '0.65rem',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Clear
+                  </button>
+                )}
               </div>
-              <div className="demo-terminal-body">
-                <div className="demo-terminal-line">
-                  <span className="demo-terminal-prompt">$</span>
-                  <span style={{ color: 'var(--accent-cyan)' }}>opcua-client connect opc.tcp://localhost:4840</span>
-                </div>
-                <div className="demo-terminal-line">
-                  <span style={{ color: '#8b949e' }}>[INFO]</span>
-                  <span className="demo-terminal-output">Establishing SecureChannel with SecurityPolicy: Aes256_Sha256_RsaPss</span>
-                </div>
-                <div className="demo-terminal-line">
-                  <span style={{ color: 'var(--accent-green)' }}>[SUCCESS]</span>
-                  <span className="demo-terminal-output">SecureChannel established, TokenId: 1</span>
-                </div>
-                <div className="demo-terminal-line">
-                  <span style={{ color: '#8b949e' }}>[INFO]</span>
-                  <span className="demo-terminal-output">Creating session...</span>
-                </div>
-                <div className="demo-terminal-line">
-                  <span style={{ color: 'var(--accent-green)' }}>[SUCCESS]</span>
-                  <span className="demo-terminal-output">Session activated, SessionId: ns=1;i=42</span>
-                </div>
-                <div className="demo-terminal-line" style={{ marginTop: '8px' }}>
-                  <span className="demo-terminal-prompt">$</span>
-                  <span style={{ color: 'var(--accent-cyan)' }}>read ns=1;s=IPS_PMP_001.FlowRate</span>
-                </div>
-                <div className="demo-terminal-line">
-                  <span style={{ color: 'var(--accent-purple)' }}>[READ]</span>
-                  <span className="demo-terminal-output">NodeId: ns=1;s=IPS_PMP_001.FlowRate</span>
-                </div>
-                <div className="demo-terminal-line">
-                  <span style={{ color: 'var(--accent-green)' }}>[RESPONSE]</span>
-                  <span className="demo-terminal-output">
-                    Value: <span style={{ color: 'var(--accent-cyan)', fontWeight: 600 }}>{(Object.values(pumpData)[0]?.flow_rate || 2340.5).toFixed(2)}</span> |
-                    Status: <span style={{ color: 'var(--accent-green)', fontWeight: 600 }}>Good</span> |
-                    Time: {currentTime || '00:00:00'}
-                  </span>
-                </div>
-                <div className="demo-terminal-line" style={{ marginTop: '8px' }}>
-                  <span className="demo-terminal-prompt">$</span>
-                  <span style={{ color: 'var(--accent-orange)' }}>subscribe ns=1;s=IPS_PMP_001.* --interval=1000ms</span>
-                </div>
-                <div className="demo-terminal-line">
-                  <span style={{ color: 'var(--accent-green)' }}>[SUBSCRIBED]</span>
-                  <span className="demo-terminal-output">MonitoredItem created for 27 variables, PublishingInterval: 1000ms</span>
-                </div>
-                <div className="demo-terminal-line">
-                  <span style={{ color: '#8b949e' }}>[NOTIFICATION]</span>
-                  <span className="demo-terminal-output">
-                    RPM: <span style={{ color: 'var(--accent-orange)' }}>{(Object.values(pumpData)[0]?.rpm || 1145).toFixed(0)}</span> |
-                    Power: <span style={{ color: 'var(--accent-green)' }}>{(Object.values(pumpData)[0]?.power_consumption || 124.8).toFixed(1)} kW</span> |
-                    PF: <span style={{ color: 'var(--accent-purple)' }}>{(Object.values(pumpData)[0]?.power_factor || 0.85).toFixed(2)}</span>
-                  </span>
-                </div>
+              <div className="demo-terminal-body" style={{ minHeight: '200px', maxHeight: '280px', overflowY: 'auto' }}>
+                {opcLogs.length === 0 ? (
+                  <div style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    height: '180px',
+                    color: '#8b949e',
+                    fontSize: '0.8rem'
+                  }}>
+                    <Radio size={32} style={{ marginBottom: '0.8rem', opacity: 0.5 }} />
+                    <div>No OPC UA activity yet</div>
+                    <div style={{ fontSize: '0.7rem', marginTop: '0.3rem', opacity: 0.7 }}>
+                      Click <strong>Start Pump</strong> or <strong>Stop Pump</strong> to see real-time communication
+                    </div>
+                  </div>
+                ) : (
+                  opcLogs.map((log, index) => (
+                    <div key={index} className="demo-terminal-line">
+                      <span style={{
+                        color: log.type === 'COMMAND' ? 'var(--accent-cyan)' :
+                               log.type === 'SUCCESS' ? 'var(--accent-green)' :
+                               log.type === 'NOTIFICATION' ? 'var(--accent-purple)' :
+                               log.type === 'ERROR' ? 'var(--accent-red)' : '#8b949e',
+                        fontWeight: 600,
+                        minWidth: '100px',
+                        display: 'inline-block'
+                      }}>
+                        {log.type === 'COMMAND' ? '$ ' : `[${log.type}] `}
+                      </span>
+                      <span className="demo-terminal-output">{log.message}</span>
+                      <span style={{ color: '#8b949e', fontSize: '0.7rem', marginLeft: '8px' }}>{log.timestamp}</span>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           </div>
@@ -6415,7 +6435,7 @@ export default function ArchitecturePage() {
               <g transform="translate(50, 50)">
                 <rect width="100" height="50" rx="8" fill={theme === 'business' ? '#f0f9ff' : 'rgba(0,212,255,0.15)'} stroke="var(--accent-cyan)" strokeWidth="2" className="animate-glow" />
                 <text x="50" y="25" fill="var(--accent-cyan)" fontSize="10" textAnchor="middle" fontWeight="700">This Dashboard</text>
-                <text x="50" y="40" fill={theme === 'business' ? '#0284c7' : '#67e8f9'} fontSize="8" textAnchor="middle">React + WebSocket</text>
+                <text x="50" y="40" fill={theme === 'business' ? '#0284c7' : '#67e8f9'} fontSize="8" textAnchor="middle">UI + WebSocket</text>
               </g>
 
               {/* Arrow to API */}
@@ -6562,7 +6582,7 @@ export default function ArchitecturePage() {
               {[
                 { scenario: 'Control a pump', solution: 'Client-Server + Write', protocol: 'TCP :4840', color: 'var(--accent-cyan)' },
                 { scenario: 'Dashboard monitoring', solution: 'Client-Server + Subscribe', protocol: 'WebSocket', color: 'var(--accent-purple)' },
-                { scenario: 'Cloud analytics', solution: 'PubSub + MQTT', protocol: 'MQTT :8883', color: 'var(--accent-orange)' },
+                { scenario: 'Analytics', solution: 'PubSub + MQTT', protocol: 'MQTT :8883', color: 'var(--accent-orange)' },
                 { scenario: 'Historical trends', solution: 'HistoryRead + Aggregates', protocol: 'TCP :4840', color: 'var(--accent-green)' },
               ].map((item, i) => (
                 <div key={i} style={{
