@@ -1939,8 +1939,8 @@ export default function ArchitecturePage() {
               { num: '03', title: 'Core Concepts', desc: 'Client–Server & PubSub Architectures', icon: <ArrowLeftRight size={18} />, color: 'var(--accent-green)', slides: [7, 15, 17] },
               { num: '04', title: 'Services & Data Access', desc: 'Browse, Read, Subscribe, Call, History', icon: <Activity size={18} />, color: 'var(--accent-orange)', slides: [11] },
               { num: '05', title: 'Network & Security', desc: 'Transport, SecureChannel & RBAC', icon: <ShieldCheck size={18} />, color: 'var(--accent-pink)', slides: [6, 12, 8, 13, 14] },
-              { num: '06', title: 'Deep Dive: Communication', desc: 'Message Sequence & Session Flow', icon: <Radio size={18} />, color: 'var(--accent-green)', slides: [19] },
-              { num: '07', title: 'Future Directions', desc: 'TSN, 5G, OPC UA FX & Beyond', icon: <Globe size={18} />, color: 'var(--accent-cyan)', slides: [18] },
+              { num: '06', title: 'Future Directions', desc: 'TSN, 5G, OPC UA FX & Beyond', icon: <Globe size={18} />, color: 'var(--accent-cyan)', slides: [18] },
+              { num: '07', title: 'Deep Dive: Communication', desc: 'Message Sequence & Session Flow', icon: <Radio size={18} />, color: 'var(--accent-green)', slides: [19] },
               { num: '08', title: 'Live Demo', desc: 'Interactive Pump Control & Real-time Data', icon: <Play size={18} />, color: 'var(--accent-orange)', slides: [20] },
             ].map((item, i) => (
               <div
@@ -2953,27 +2953,197 @@ export default function ArchitecturePage() {
               </div>
             </div>
           </div>
-          <div className="diagram-container" style={{ textAlign: 'center' }}>
-            <div className="diagram-title">Hierarchical Reference Model</div>
-            <svg viewBox="0 0 600 120" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="300" cy="30" r="20" fill="none" stroke="var(--accent-cyan)" strokeWidth="2" />
-              <text x="300" y="34" fill="var(--accent-cyan)" fontSize="8" textAnchor="middle">Objects</text>
+          {/* Two-Column: Hierarchical Model & Namespace */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '0.8rem' }}>
+            {/* Left: Hierarchical Reference Model */}
+            <div className="diagram-container" style={{ textAlign: 'center', padding: '0.8rem' }}>
+              <div className="diagram-title">Hierarchical Reference Model</div>
+              <svg viewBox="0 0 300 130" xmlns="http://www.w3.org/2000/svg" style={{ width: '100%', height: '130px' }}>
+                {/* Root Objects folder */}
+                <g transform="translate(150, 15)">
+                  <circle r="18" fill="none" stroke="var(--accent-cyan)" strokeWidth="2" />
+                  <text y="4" fill="var(--accent-cyan)" fontSize="8" textAnchor="middle" fontWeight="600">Objects</text>
+                </g>
 
-              <line x1="300" y1="50" x2="200" y2="90" stroke="var(--text-muted)" strokeWidth="1" strokeDasharray="4" />
-              <line x1="300" y1="50" x2="400" y2="90" stroke="var(--text-muted)" strokeWidth="1" strokeDasharray="4" />
+                {/* Connecting lines */}
+                <line x1="150" y1="33" x2="75" y2="65" stroke="var(--accent-purple)" strokeWidth="1.5" strokeDasharray="4 2" />
+                <line x1="150" y1="33" x2="225" y2="65" stroke="var(--accent-purple)" strokeWidth="1.5" strokeDasharray="4 2" />
 
-              <rect x="170" y="90" width="60" height="20" rx="3" fill="var(--bg-elevated)" stroke="var(--accent-green)" />
-              <text x="200" y="103" fill="var(--accent-green)" fontSize="7" textAnchor="middle">Pump_1</text>
+                {/* Reference labels */}
+                <text x="100" y="52" fill="var(--accent-purple)" fontSize="6" transform="rotate(-25,100,52)">Organizes</text>
+                <text x="200" y="52" fill="var(--accent-purple)" fontSize="6" transform="rotate(25,200,52)">Organizes</text>
 
-              <rect x="370" y="90" width="60" height="20" rx="3" fill="var(--bg-elevated)" stroke="var(--accent-green)" />
-              <text x="400" y="103" fill="var(--accent-green)" fontSize="7" textAnchor="middle">Pump_2</text>
+                {/* Pump_1 */}
+                <g transform="translate(75, 75)">
+                  <rect x="-30" y="-10" width="60" height="24" rx="4" fill={theme === 'business' ? '#ecfdf5' : 'var(--bg-elevated)'} stroke="var(--accent-green)" strokeWidth="2" />
+                  <text y="4" fill="var(--accent-green)" fontSize="8" textAnchor="middle" fontWeight="600">Pump_1</text>
+                </g>
 
-              <text x="250" y="70" fill="var(--text-muted)" fontSize="6" transform="rotate(-22,250,70)">Organizes</text>
-              <text x="350" y="70" fill="var(--text-muted)" fontSize="6" transform="rotate(22,350,70)">Organizes</text>
-            </svg>
+                {/* Pump_2 */}
+                <g transform="translate(225, 75)">
+                  <rect x="-30" y="-10" width="60" height="24" rx="4" fill={theme === 'business' ? '#ecfdf5' : 'var(--bg-elevated)'} stroke="var(--accent-green)" strokeWidth="2" />
+                  <text y="4" fill="var(--accent-green)" fontSize="8" textAnchor="middle" fontWeight="600">Pump_2</text>
+                </g>
+
+                {/* HasComponent lines to variables */}
+                <line x1="75" y1="89" x2="75" y2="105" stroke="var(--accent-orange)" strokeWidth="1" />
+                <line x1="225" y1="89" x2="225" y2="105" stroke="var(--accent-orange)" strokeWidth="1" />
+
+                {/* Variables */}
+                <g transform="translate(75, 115)">
+                  <rect x="-25" y="-8" width="50" height="16" rx="3" fill={theme === 'business' ? '#fffbeb' : 'var(--bg-dark)'} stroke="var(--accent-orange)" strokeWidth="1" />
+                  <text y="3" fill="var(--accent-orange)" fontSize="6" textAnchor="middle">FlowRate</text>
+                </g>
+                <g transform="translate(225, 115)">
+                  <rect x="-25" y="-8" width="50" height="16" rx="3" fill={theme === 'business' ? '#fffbeb' : 'var(--bg-dark)'} stroke="var(--accent-orange)" strokeWidth="1" />
+                  <text y="3" fill="var(--accent-orange)" fontSize="6" textAnchor="middle">FlowRate</text>
+                </g>
+
+                {/* HasComponent label */}
+                <text x="55" y="100" fill="var(--accent-orange)" fontSize="5">HasComponent</text>
+              </svg>
+              <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', marginTop: '0.3rem' }}>
+                <span style={{ fontSize: '0.6rem', padding: '0.15rem 0.4rem', background: 'rgba(139,92,246,0.1)', borderRadius: '4px', color: 'var(--accent-purple)' }}>Organizes</span>
+                <span style={{ fontSize: '0.6rem', padding: '0.15rem 0.4rem', background: 'rgba(249,115,22,0.1)', borderRadius: '4px', color: 'var(--accent-orange)' }}>HasComponent</span>
+                <span style={{ fontSize: '0.6rem', padding: '0.15rem 0.4rem', background: 'rgba(0,212,255,0.1)', borderRadius: '4px', color: 'var(--accent-cyan)' }}>HasTypeDefinition</span>
+              </div>
+            </div>
+
+            {/* Right: Namespace & NodeId */}
+            <div className="diagram-container animate-fade-in" style={{ padding: '0.8rem', borderColor: 'var(--accent-orange)' }}>
+              <div className="diagram-title" style={{ color: 'var(--accent-orange)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Globe size={14} />
+                Namespace & NodeId
+                <span style={{ fontSize: '0.6rem', color: 'var(--text-muted)', fontWeight: 400 }}>(OPC 10000-3 §8)</span>
+              </div>
+
+              {/* NodeId Structure */}
+              <div style={{
+                background: theme === 'business' ? '#fffbeb' : 'var(--bg-dark)',
+                borderRadius: '8px',
+                padding: '0.5rem 0.6rem',
+                marginBottom: '0.5rem',
+                border: '1px dashed var(--accent-orange)'
+              }}>
+                <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>Every Node has a unique <strong>NodeId</strong>:</div>
+                <div style={{
+                  fontFamily: 'JetBrains Mono',
+                  fontSize: '0.9rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.2rem',
+                  flexWrap: 'wrap'
+                }}>
+                  <span style={{
+                    background: 'rgba(249,115,22,0.25)',
+                    padding: '0.2rem 0.4rem',
+                    borderRadius: '4px',
+                    color: 'var(--accent-orange)',
+                    fontWeight: 700
+                  }}>ns=1</span>
+                  <span style={{ color: 'var(--text-muted)', fontWeight: 700 }}>;</span>
+                  <span style={{
+                    background: 'rgba(0,212,255,0.15)',
+                    padding: '0.2rem 0.4rem',
+                    borderRadius: '4px',
+                    color: 'var(--accent-cyan)',
+                    fontWeight: 600
+                  }}>s=IPS_PMP_001</span>
+                </div>
+                <div style={{ display: 'flex', gap: '0.8rem', marginTop: '0.3rem', fontSize: '0.6rem' }}>
+                  <span style={{ color: 'var(--accent-orange)' }}>↑ Namespace Index</span>
+                  <span style={{ color: 'var(--accent-cyan)' }}>↑ Identifier</span>
+                </div>
+              </div>
+
+              {/* Identifier Types */}
+              <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', marginBottom: '0.3rem' }}>
+                <strong>Identifier Types</strong> (4 formats):
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.3rem', marginBottom: '0.5rem' }}>
+                {[
+                  { prefix: 'i=', name: 'Numeric', example: 'i=2258', color: 'var(--accent-green)' },
+                  { prefix: 's=', name: 'String', example: 's=Pump_01', color: 'var(--accent-cyan)' },
+                  { prefix: 'g=', name: 'GUID', example: 'g=09f8...', color: 'var(--accent-purple)' },
+                  { prefix: 'b=', name: 'Opaque', example: 'b=M/RG...', color: 'var(--accent-pink)' },
+                ].map((id, i) => (
+                  <div key={i} style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.3rem',
+                    padding: '0.2rem 0.4rem',
+                    background: theme === 'business' ? '#f8fafc' : 'var(--bg-elevated)',
+                    borderRadius: '4px',
+                    borderLeft: `3px solid ${id.color}`
+                  }}>
+                    <code style={{
+                      fontFamily: 'JetBrains Mono',
+                      fontSize: '0.7rem',
+                      fontWeight: 700,
+                      color: id.color
+                    }}>{id.prefix}</code>
+                    <span style={{ fontSize: '0.6rem', color: 'var(--text-secondary)' }}>{id.name}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Namespace Array */}
+              <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>
+                <strong>NamespaceArray</strong> (Server maintains):
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+                {[
+                  { idx: 0, uri: 'http://opcfoundation.org/UA/', desc: 'Base', color: 'var(--text-muted)' },
+                  { idx: 1, uri: 'urn:wastewater:server', desc: 'App', color: 'var(--accent-green)' },
+                ].map((ns, i) => (
+                  <div
+                    key={i}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.3rem',
+                      padding: '0.2rem 0.35rem',
+                      background: theme === 'business' ? '#f8fafc' : 'var(--bg-elevated)',
+                      borderRadius: '4px',
+                      borderLeft: `3px solid ${ns.color}`
+                    }}
+                  >
+                    <span style={{
+                      fontFamily: 'JetBrains Mono',
+                      fontSize: '0.65rem',
+                      fontWeight: 700,
+                      color: 'var(--accent-orange)',
+                      minWidth: '18px'
+                    }}>[{ns.idx}]</span>
+                    <span style={{
+                      fontFamily: 'JetBrains Mono',
+                      fontSize: '0.55rem',
+                      color: theme === 'business' ? '#475569' : 'var(--text-secondary)',
+                      flex: 1,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap'
+                    }}>{ns.uri}</span>
+                    <span style={{
+                      fontSize: '0.5rem',
+                      padding: '0.1rem 0.25rem',
+                      background: `${ns.color}20`,
+                      borderRadius: '3px',
+                      color: ns.color,
+                      fontWeight: 600
+                    }}>{ns.desc}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
+
           <div className="highlight-box">
-            <p><strong>Address Space</strong> is a graph-based model where nodes represent assets and references represent their relationships (e.g., <em>HasComponent, Organizes, HasTypeDefinition</em>).</p>
+            <p style={{ margin: 0 }}>
+              <strong>Address Space</strong> is a graph where <strong style={{ color: 'var(--accent-green)' }}>Nodes</strong> (Objects, Variables, Methods) are linked by <strong style={{ color: 'var(--accent-purple)' }}>References</strong> (Organizes, HasComponent).
+              Each Node has a globally unique <strong style={{ color: 'var(--accent-orange)' }}>NodeId = NamespaceIndex + Identifier</strong>.
+              Index 0 is reserved for OPC UA base types.
+            </p>
           </div>
         </section>
 
@@ -3279,7 +3449,35 @@ export default function ArchitecturePage() {
 
           {/* Asset Hierarchy Visualization */}
           <div className="diagram-container" style={{ padding: '1rem' }}>
-            <div className="diagram-title">Asset Hierarchy (assets → OPC UA Address Space)</div>
+            <div className="diagram-title">
+              Asset Hierarchy (
+              <a
+                href="http://localhost:3000/assets"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  color: 'var(--accent-purple)',
+                  textDecoration: 'none',
+                  padding: '0.15rem 0.4rem',
+                  background: 'rgba(139, 92, 246, 0.15)',
+                  borderRadius: '4px',
+                  border: '1px solid var(--accent-purple)',
+                  transition: 'all 0.2s ease',
+                  cursor: 'pointer'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'rgba(139, 92, 246, 0.3)';
+                  e.currentTarget.style.transform = 'scale(1.05)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'rgba(139, 92, 246, 0.15)';
+                  e.currentTarget.style.transform = 'scale(1)';
+                }}
+              >
+                assets
+              </a>
+              {' → OPC UA Address Space)'}
+            </div>
             <svg viewBox="0 0 900 120" style={{ width: '100%', height: '120px' }}>
               {/* Plant Level */}
               <g transform="translate(50, 20)">
@@ -3903,16 +4101,84 @@ export default function ArchitecturePage() {
             <div className="section-number">SECTION 03 • COMMUNICATION MODELS</div>
             <h2 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
               Client-Server vs Pub/Sub
-              <span className="live-badge animate-morph-glow" style={{ fontSize: '0.7rem' }}>
-                <div className="pulse-dot" />
-                TWO PARADIGMS
-              </span>
+
             </h2>
-            <p className="section-goal">Understanding when to use each communication model</p>
           </div>
 
+          {/* Zoom Overlay for Slide 11 */}
+          {focusedBox && (
+            <div className="zoom-overlay" onClick={() => setFocusedBox(null)}>
+              <div className="zoom-content" onClick={(e) => e.stopPropagation()} style={{ border: '2px solid var(--accent-cyan)' }}>
+                <button className="zoom-close-btn" onClick={() => setFocusedBox(null)}>×</button>
+
+                {focusedBox === 'diagram' && (
+                  <div style={{ width: '85vw', maxWidth: '1200px' }}>
+                    <h3 style={{ color: 'var(--accent-cyan)', marginBottom: '1rem', fontSize: '1.5rem' }}>Client-Server vs Pub/Sub Architecture</h3>
+                    <svg viewBox="0 0 900 280" style={{ width: '100%', height: 'auto' }}>
+                      <defs>
+                        <linearGradient id="csGradZ" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stopColor="var(--accent-cyan)" stopOpacity="0.2" /><stop offset="100%" stopColor="var(--accent-cyan)" stopOpacity="0.05" /></linearGradient>
+                        <linearGradient id="psGradZ" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stopColor="var(--accent-orange)" stopOpacity="0.05" /><stop offset="100%" stopColor="var(--accent-orange)" stopOpacity="0.2" /></linearGradient>
+                      </defs>
+                      <line x1="450" y1="10" x2="450" y2="270" stroke="var(--border-color)" strokeWidth="3" strokeDasharray="10 5" />
+                      <text x="450" y="145" fill="var(--text-muted)" fontSize="20" textAnchor="middle" fontWeight="700">VS</text>
+                      <g><rect x="20" y="10" width="400" height="260" rx="12" fill="url(#csGradZ)" /><text x="220" y="50" fill="var(--accent-cyan)" fontSize="26" textAnchor="middle" fontWeight="700">CLIENT-SERVER</text><g transform="translate(60, 80)"><rect width="120" height="70" rx="10" fill="var(--bg-elevated)" stroke="var(--accent-cyan)" strokeWidth="3" /><text x="60" y="32" fill="var(--accent-cyan)" fontSize="18" textAnchor="middle" fontWeight="600">CLIENT</text><text x="60" y="54" fill="var(--accent-cyan)" fontSize="12" textAnchor="middle" opacity="0.7">SCADA / HMI</text></g><g transform="translate(240, 80)"><rect width="120" height="70" rx="10" fill="var(--bg-elevated)" stroke="var(--accent-green)" strokeWidth="3" /><text x="60" y="32" fill="var(--accent-green)" fontSize="18" textAnchor="middle" fontWeight="600">SERVER</text><text x="60" y="54" fill="var(--accent-green)" fontSize="12" textAnchor="middle" opacity="0.7">OPC UA</text></g><line x1="185" y1="105" x2="235" y2="105" stroke="var(--accent-cyan)" strokeWidth="3" /><text x="210" y="95" fill="var(--accent-cyan)" fontSize="14" textAnchor="middle" fontWeight="600">Request →</text><line x1="235" y1="125" x2="185" y2="125" stroke="var(--accent-green)" strokeWidth="3" /><text x="210" y="145" fill="var(--accent-green)" fontSize="14" textAnchor="middle" fontWeight="600">← Response</text><g transform="translate(40, 170)"><rect width="340" height="85" rx="8" fill="var(--bg-dark)" stroke="var(--border-color)" strokeWidth="2" /><text x="170" y="30" fill="var(--accent-cyan)" fontSize="16" textAnchor="middle" fontWeight="700">BIDIRECTIONAL • STATEFUL • 1:1</text><text x="170" y="52" fill="var(--text-secondary)" fontSize="14" textAnchor="middle">Session maintains context, authentication</text><text x="170" y="74" fill="var(--text-muted)" fontSize="12" textAnchor="middle">Read • Write • Subscribe • Browse • Call Methods</text></g></g>
+                      <g><rect x="480" y="10" width="400" height="260" rx="12" fill="url(#psGradZ)" /><text x="680" y="50" fill="var(--accent-orange)" fontSize="26" textAnchor="middle" fontWeight="700">PUB/SUB</text><g transform="translate(510, 80)"><rect width="100" height="60" rx="8" fill="var(--bg-elevated)" stroke="var(--accent-orange)" strokeWidth="3" /><text x="50" y="28" fill="var(--accent-orange)" fontSize="16" textAnchor="middle" fontWeight="600">PUBLISHER</text><text x="50" y="48" fill="var(--accent-orange)" fontSize="11" textAnchor="middle" opacity="0.7">Server/PLC</text></g><g transform="translate(660, 75)"><rect width="80" height="70" rx="8" fill="rgba(139,92,246,0.2)" stroke="var(--accent-purple)" strokeWidth="2" strokeDasharray="6 3" /><text x="40" y="28" fill="var(--accent-purple)" fontSize="14" textAnchor="middle" fontWeight="600">BROKER</text><text x="40" y="45" fill="var(--accent-purple)" fontSize="10" textAnchor="middle" opacity="0.7">(optional)</text><text x="40" y="60" fill="var(--accent-purple)" fontSize="10" textAnchor="middle" opacity="0.7">MQTT/AMQP</text></g><g transform="translate(790, 60)"><rect width="70" height="38" rx="5" fill="var(--bg-elevated)" stroke="var(--accent-green)" strokeWidth="2" /><text x="35" y="25" fill="var(--accent-green)" fontSize="13" textAnchor="middle" fontWeight="600">SUB 1</text></g><g transform="translate(790, 105)"><rect width="70" height="38" rx="5" fill="var(--bg-elevated)" stroke="var(--accent-green)" strokeWidth="2" /><text x="35" y="25" fill="var(--accent-green)" fontSize="13" textAnchor="middle" fontWeight="600">SUB 2</text></g><line x1="615" y1="110" x2="655" y2="110" stroke="var(--accent-orange)" strokeWidth="3" /><line x1="745" y1="79" x2="785" y2="79" stroke="var(--accent-orange)" strokeWidth="2" /><line x1="745" y1="124" x2="785" y2="124" stroke="var(--accent-orange)" strokeWidth="2" /><g transform="translate(500, 170)"><rect width="360" height="85" rx="8" fill="var(--bg-dark)" stroke="var(--border-color)" strokeWidth="2" /><text x="180" y="30" fill="var(--accent-orange)" fontSize="16" textAnchor="middle" fontWeight="700">UNIDIRECTIONAL • STATELESS • 1:N</text><text x="180" y="52" fill="var(--text-secondary)" fontSize="14" textAnchor="middle">Decoupled publishers and subscribers</text><text x="180" y="74" fill="var(--text-muted)" fontSize="12" textAnchor="middle">Telemetry • Analytics • Cloud • Historians</text></g></g>
+                    </svg>
+                  </div>
+                )}
+
+                {focusedBox === 'communication' && (
+                  <div style={{ width: '500px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}><ArrowLeftRight size={32} style={{ color: 'var(--accent-purple)' }} /><h3 style={{ margin: 0, fontSize: '1.8rem', color: 'var(--accent-purple)' }}>Communication Patterns</h3></div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                      <div style={{ background: 'rgba(0,212,255,0.1)', padding: '1.5rem', borderRadius: '12px', borderLeft: '6px solid var(--accent-cyan)' }}><div style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--accent-cyan)', marginBottom: '0.8rem' }}>Client-Server</div><div style={{ fontSize: '1.1rem', color: 'var(--text-secondary)', lineHeight: 1.8 }}><strong>Request → Response</strong><br />TCP connection maintained throughout session<br />Session-based state preserves context<br />Supports subscriptions for real-time updates</div></div>
+                      <div style={{ background: 'rgba(245,158,11,0.1)', padding: '1.5rem', borderRadius: '12px', borderLeft: '6px solid var(--accent-orange)' }}><div style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--accent-orange)', marginBottom: '0.8rem' }}>Pub/Sub</div><div style={{ fontSize: '1.1rem', color: 'var(--text-secondary)', lineHeight: 1.8 }}><strong>Publish → Broadcast</strong><br />UDP multicast or broker-based routing<br />No connection state between parties<br />Fire-and-forget semantics</div></div>
+                    </div>
+                  </div>
+                )}
+
+                {focusedBox === 'encoding' && (
+                  <div style={{ width: '550px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}><Database size={32} style={{ color: 'var(--accent-green)' }} /><h3 style={{ margin: 0, fontSize: '1.8rem', color: 'var(--accent-green)' }}>Message Encoding</h3></div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                      <div style={{ background: 'rgba(0,212,255,0.1)', padding: '1.5rem', borderRadius: '12px', borderLeft: '6px solid var(--accent-cyan)' }}><div style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--accent-cyan)', marginBottom: '1rem' }}>Client-Server Encodings</div><div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.8rem', marginBottom: '1rem' }}><span style={{ fontSize: '1rem', padding: '0.5rem 1rem', background: 'var(--accent-cyan)', color: 'white', borderRadius: '6px', fontWeight: 600 }}>UA Binary</span><span style={{ fontSize: '1rem', padding: '0.5rem 1rem', background: 'var(--accent-green)', color: 'white', borderRadius: '6px', fontWeight: 600 }}>XML</span><span style={{ fontSize: '1rem', padding: '0.5rem 1rem', background: 'var(--accent-purple)', color: 'white', borderRadius: '6px', fontWeight: 600 }}>JSON</span></div><div style={{ fontSize: '1rem', color: 'var(--text-muted)' }}>Service-oriented messages with full request/response headers</div></div>
+                      <div style={{ background: 'rgba(245,158,11,0.1)', padding: '1.5rem', borderRadius: '12px', borderLeft: '6px solid var(--accent-orange)' }}><div style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--accent-orange)', marginBottom: '1rem' }}>Pub/Sub Encodings</div><div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.8rem', marginBottom: '1rem' }}><span style={{ fontSize: '1rem', padding: '0.5rem 1rem', background: 'var(--accent-orange)', color: 'white', borderRadius: '6px', fontWeight: 600 }}>UADP Binary</span><span style={{ fontSize: '1rem', padding: '0.5rem 1rem', background: 'var(--accent-green)', color: 'white', borderRadius: '6px', fontWeight: 600 }}>JSON</span></div><div style={{ fontSize: '1rem', color: 'var(--text-muted)' }}>Compact NetworkMessages optimized for bandwidth</div></div>
+                    </div>
+                  </div>
+                )}
+
+                {focusedBox === 'purpose' && (
+                  <div style={{ width: '500px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}><Zap size={32} style={{ color: 'var(--accent-pink)' }} /><h3 style={{ margin: 0, fontSize: '1.8rem', color: 'var(--accent-pink)' }}>Purpose & Use Cases</h3></div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                      <div style={{ background: 'rgba(0,212,255,0.1)', padding: '1.5rem', borderRadius: '12px', borderLeft: '6px solid var(--accent-cyan)' }}><div style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--accent-cyan)', marginBottom: '0.8rem' }}>Client-Server</div><div style={{ fontSize: '1.1rem', color: 'var(--text-secondary)', lineHeight: 1.8 }}><strong>Interactive Control & Monitoring</strong><br />Write values to actuators<br />Call methods on devices<br />Browse and discover address space</div></div>
+                      <div style={{ background: 'rgba(245,158,11,0.1)', padding: '1.5rem', borderRadius: '12px', borderLeft: '6px solid var(--accent-orange)' }}><div style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--accent-orange)', marginBottom: '0.8rem' }}>Pub/Sub</div><div style={{ fontSize: '1.1rem', color: 'var(--text-secondary)', lineHeight: 1.8 }}><strong>Massive Scale Telemetry</strong><br />Cloud data ingestion (Azure IoT, AWS)<br />Analytics & ML pipelines<br />Edge-to-cloud streaming</div></div>
+                    </div>
+                  </div>
+                )}
+
+                {focusedBox === 'cs-message' && (
+                  <div style={{ width: '650px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}><Cable size={32} style={{ color: 'var(--accent-cyan)' }} /><h3 style={{ margin: 0, fontSize: '1.8rem', color: 'var(--accent-cyan)' }}>Client-Server: Service Request</h3></div>
+                    <div className="code-block" style={{ fontSize: '1.1rem', padding: '1.5rem', lineHeight: 1.8 }}><span className="comment">// ReadRequest Message</span><br />{'{'}<br />&nbsp;&nbsp;<span className="keyword">"RequestHeader"</span>: {'{'}<br />&nbsp;&nbsp;&nbsp;&nbsp;<span className="string">"AuthenticationToken"</span>: <span className="number">"session-42"</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span className="string">"Timestamp"</span>: <span className="string">"2025-01-15T10:30:00Z"</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span className="string">"RequestHandle"</span>: <span className="number">12345</span><br />&nbsp;&nbsp;{'}'},<br />&nbsp;&nbsp;<span className="keyword">"NodesToRead"</span>: [{'{'}<br />&nbsp;&nbsp;&nbsp;&nbsp;<span className="string">"NodeId"</span>: <span className="string">"ns=1;s=Pump_01.FlowRate"</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span className="string">"AttributeId"</span>: <span className="number">13</span> <span className="comment">// Value</span><br />&nbsp;&nbsp;{'}'}]<br />{'}'}</div>
+                  </div>
+                )}
+
+                {focusedBox === 'ps-message' && (
+                  <div style={{ width: '650px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}><Radio size={32} style={{ color: 'var(--accent-orange)' }} /><h3 style={{ margin: 0, fontSize: '1.8rem', color: 'var(--accent-orange)' }}>Pub/Sub: NetworkMessage</h3></div>
+                    <div className="code-block" style={{ fontSize: '1.1rem', padding: '1.5rem', lineHeight: 1.8 }}><span className="comment">// UADP NetworkMessage (compact)</span><br />{'{'}<br />&nbsp;&nbsp;<span className="keyword">"PublisherId"</span>: <span className="string">"Pump_Station_01"</span>,<br />&nbsp;&nbsp;<span className="keyword">"DataSetWriterId"</span>: <span className="number">1</span>,<br />&nbsp;&nbsp;<span className="keyword">"SequenceNumber"</span>: <span className="number">12847</span>,<br />&nbsp;&nbsp;<span className="keyword">"Payload"</span>: {'{'}<br />&nbsp;&nbsp;&nbsp;&nbsp;<span className="string">"FlowRate"</span>: <span className="number">2340.5</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span className="string">"RPM"</span>: <span className="number">1145</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span className="string">"Power"</span>: <span className="number">124.8</span><br />&nbsp;&nbsp;{'}'}<br />{'}'}</div>
+                  </div>
+                )}
+
+                <div className="zoom-hint"><span className="kbd">ESC</span> or click outside to close</div>
+              </div>
+            </div>
+          )}
+
           {/* Main Animated Comparison Diagram */}
-          <div className="diagram-container" style={{ padding: '1rem', marginBottom: '1rem' }}>
+          <div className="diagram-container zoomable-box" style={{ padding: '1rem', marginBottom: '1rem', position: 'relative' }} onClick={() => setFocusedBox('diagram')}>
+            <span className="click-to-zoom-hint">Click to zoom</span>
             <svg viewBox="0 0 900 200" style={{ width: '100%', height: '200px' }}>
               <defs>
                 {/* Client-Server gradient */}
@@ -4059,7 +4325,8 @@ export default function ArchitecturePage() {
           {/* Detailed Comparison Table */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.8rem', marginBottom: '1rem' }}>
             {/* Communication Pattern */}
-            <div className="content-card animate-fade-in" style={{ padding: '1rem', borderColor: 'var(--accent-purple)' }}>
+            <div className="content-card zoomable-box animate-fade-in" style={{ padding: '1rem', borderColor: 'var(--accent-purple)', position: 'relative' }} onClick={() => setFocusedBox('communication')}>
+              <span className="click-to-zoom-hint">Click to zoom</span>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.8rem' }}>
                 <ArrowLeftRight size={20} style={{ color: 'var(--accent-purple)' }} />
                 <h4 style={{ margin: 0, fontSize: '0.95rem', color: 'var(--accent-purple)', fontWeight: 700 }}>Communication</h4>
@@ -4086,7 +4353,8 @@ export default function ArchitecturePage() {
             </div>
 
             {/* Message Encoding */}
-            <div className="content-card animate-fade-in" style={{ padding: '1rem', borderColor: 'var(--accent-green)', animationDelay: '0.1s' }}>
+            <div className="content-card zoomable-box animate-fade-in" style={{ padding: '1rem', borderColor: 'var(--accent-green)', animationDelay: '0.1s', position: 'relative' }} onClick={() => setFocusedBox('encoding')}>
+              <span className="click-to-zoom-hint">Click to zoom</span>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.8rem' }}>
                 <Database size={20} style={{ color: 'var(--accent-green)' }} />
                 <h4 style={{ margin: 0, fontSize: '0.95rem', color: 'var(--accent-green)', fontWeight: 700 }}>Message Encoding</h4>
@@ -4114,7 +4382,8 @@ export default function ArchitecturePage() {
             </div>
 
             {/* Purpose & Use Cases */}
-            <div className="content-card animate-fade-in" style={{ padding: '1rem', borderColor: 'var(--accent-pink)', animationDelay: '0.2s' }}>
+            <div className="content-card zoomable-box animate-fade-in" style={{ padding: '1rem', borderColor: 'var(--accent-pink)', animationDelay: '0.2s', position: 'relative' }} onClick={() => setFocusedBox('purpose')}>
+              <span className="click-to-zoom-hint">Click to zoom</span>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.8rem' }}>
                 <Zap size={20} style={{ color: 'var(--accent-pink)' }} />
                 <h4 style={{ margin: 0, fontSize: '0.95rem', color: 'var(--accent-pink)', fontWeight: 700 }}>Purpose</h4>
@@ -4143,10 +4412,11 @@ export default function ArchitecturePage() {
 
           {/* Visual Message Format Comparison */}
           <div className="diagram-container" style={{ padding: '1rem' }}>
-            <div className="diagram-title" style={{ marginBottom: '0.8rem' }}>Message Structure Comparison</div>
+            <div className="diagram-title" style={{ marginBottom: '0.8rem' }}>Message Structure Comparison (click to zoom)</div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
               {/* Client-Server Message */}
-              <div>
+              <div className="zoomable-box" style={{ position: 'relative', borderRadius: '8px' }} onClick={() => setFocusedBox('cs-message')}>
+                <span className="click-to-zoom-hint">Click to zoom</span>
                 <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--accent-cyan)', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <Cable size={14} /> Client-Server: Service Request
                 </div>
@@ -4166,7 +4436,8 @@ export default function ArchitecturePage() {
               </div>
 
               {/* PubSub Message */}
-              <div>
+              <div className="zoomable-box" style={{ position: 'relative', borderRadius: '8px' }} onClick={() => setFocusedBox('ps-message')}>
+                <span className="click-to-zoom-hint">Click to zoom</span>
                 <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--accent-orange)', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <Radio size={14} /> Pub/Sub: NetworkMessage
                 </div>
@@ -5766,11 +6037,188 @@ export default function ArchitecturePage() {
           </div>
         </section>
 
+        {/* Slide 19: Deep Dive - Communication Model */}
+        <section className="slide" id="slide-19" style={{ paddingTop: '60px' }}>
+          <div className="section-header" style={{ marginBottom: '0.8rem' }}>
+            <div className="section-number">DEEP DIVE • COMMUNICATION MODEL</div>
+            <h2 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              Message Sequence in Detail
+              <span className="live-badge animate-morph-glow" style={{ fontSize: '0.7rem' }}>
+                <div className="pulse-dot" />
+                INTERACTIVE
+              </span>
+            </h2>
+            <p className="section-goal">Understanding the complete request/response lifecycle</p>
+          </div>
+
+          {/* Interactive Message Sequence Diagram */}
+          <div className="sequence-diagram" style={{ marginBottom: '1rem' }}>
+            <svg viewBox="0 0 900 320" style={{ width: '100%', height: '320px' }}>
+              <defs>
+                <linearGradient id="clientLifeline" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="var(--accent-cyan)" stopOpacity="1" />
+                  <stop offset="100%" stopColor="var(--accent-cyan)" stopOpacity="0.3" />
+                </linearGradient>
+                <linearGradient id="serverLifeline" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="var(--accent-green)" stopOpacity="1" />
+                  <stop offset="100%" stopColor="var(--accent-green)" stopOpacity="0.3" />
+                </linearGradient>
+                <filter id="msgGlow">
+                  <feGaussianBlur stdDeviation="3" result="blur" />
+                  <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                </filter>
+                <marker id="arrowCyan" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                  <path d="M0,0 L0,6 L9,3 z" fill="var(--accent-cyan)" />
+                </marker>
+                <marker id="arrowGreen" markerWidth="10" markerHeight="10" refX="0" refY="3" orient="auto">
+                  <path d="M9,0 L9,6 L0,3 z" fill="var(--accent-green)" />
+                </marker>
+              </defs>
+
+              {/* Client Actor */}
+              <g transform="translate(80, 15)">
+                <rect x="-40" y="0" width="80" height="45" rx="8" fill={theme === 'business' ? '#e0f2fe' : 'rgba(0,212,255,0.15)'} stroke="var(--accent-cyan)" strokeWidth="2" />
+                <text x="0" y="20" fill="var(--accent-cyan)" fontSize="12" textAnchor="middle" fontWeight="700">OPC UA Client</text>
+                <text x="0" y="35" fill={theme === 'business' ? '#0284c7' : '#67e8f9'} fontSize="9" textAnchor="middle">SCADA / HMI</text>
+              </g>
+
+              {/* Server Actor */}
+              <g transform="translate(820, 15)">
+                <rect x="-40" y="0" width="80" height="45" rx="8" fill={theme === 'business' ? '#dcfce7' : 'rgba(16,185,129,0.15)'} stroke="var(--accent-green)" strokeWidth="2" />
+                <text x="0" y="20" fill="var(--accent-green)" fontSize="12" textAnchor="middle" fontWeight="700">OPC UA Server</text>
+                <text x="0" y="35" fill={theme === 'business' ? '#059669' : '#6ee7b7'} fontSize="9" textAnchor="middle">Pump Controller</text>
+              </g>
+
+              {/* Lifelines */}
+              <line x1="80" y1="65" x2="80" y2="310" stroke="url(#clientLifeline)" strokeWidth="3" className="sequence-lifeline" />
+              <line x1="820" y1="65" x2="820" y2="310" stroke="url(#serverLifeline)" strokeWidth="3" className="sequence-lifeline" />
+
+              {/* Message 1: CreateSessionRequest */}
+              <g className="sequence-message" style={{ cursor: 'pointer' }}>
+                <line x1="90" y1="85" x2="810" y2="85" stroke="var(--accent-cyan)" strokeWidth="2" markerEnd="url(#arrowCyan)" />
+                <rect x="350" y="72" width="200" height="26" rx="5" fill={theme === 'business' ? '#f0f9ff' : 'var(--bg-dark)'} stroke="var(--accent-cyan)" strokeWidth="1.5" />
+                <text x="450" y="90" fill="var(--accent-cyan)" fontSize="11" textAnchor="middle" fontWeight="600">CreateSessionRequest</text>
+                <text x="100" y="78" fill={theme === 'business' ? '#64748b' : '#94a3b8'} fontSize="9">1.</text>
+                {/* Animated packet */}
+                <circle r="6" fill="var(--accent-cyan)" filter="url(#msgGlow)">
+                  <animate attributeName="cx" values="90;810" dur="2s" repeatCount="indefinite" />
+                  <animate attributeName="cy" values="85;85" dur="2s" repeatCount="indefinite" />
+                  <animate attributeName="opacity" values="1;1;0" keyTimes="0;0.9;1" dur="2s" repeatCount="indefinite" />
+                </circle>
+              </g>
+
+              {/* Message 2: CreateSessionResponse */}
+              <g className="sequence-message" style={{ cursor: 'pointer' }}>
+                <line x1="810" y1="115" x2="90" y2="115" stroke="var(--accent-green)" strokeWidth="2" markerEnd="url(#arrowGreen)" />
+                <rect x="330" y="102" width="240" height="26" rx="5" fill={theme === 'business' ? '#f0fdf4' : 'var(--bg-dark)'} stroke="var(--accent-green)" strokeWidth="1.5" />
+                <text x="450" y="120" fill="var(--accent-green)" fontSize="11" textAnchor="middle" fontWeight="600">CreateSessionResponse (SessionId, Nonce)</text>
+                <text x="830" y="108" fill={theme === 'business' ? '#64748b' : '#94a3b8'} fontSize="9">2.</text>
+                <circle r="6" fill="var(--accent-green)" filter="url(#msgGlow)">
+                  <animate attributeName="cx" values="810;90" dur="2s" begin="0.5s" repeatCount="indefinite" />
+                  <animate attributeName="cy" values="115;115" dur="2s" begin="0.5s" repeatCount="indefinite" />
+                  <animate attributeName="opacity" values="1;1;0" keyTimes="0;0.9;1" dur="2s" begin="0.5s" repeatCount="indefinite" />
+                </circle>
+              </g>
+
+              {/* Message 3: ActivateSessionRequest */}
+              <g className="sequence-message" style={{ cursor: 'pointer' }}>
+                <line x1="90" y1="150" x2="810" y2="150" stroke="var(--accent-orange)" strokeWidth="2" markerEnd="url(#arrowCyan)" />
+                <rect x="310" y="137" width="280" height="26" rx="5" fill={theme === 'business' ? '#fffbeb' : 'var(--bg-dark)'} stroke="var(--accent-orange)" strokeWidth="1.5" />
+                <text x="450" y="155" fill="var(--accent-orange)" fontSize="11" textAnchor="middle" fontWeight="600">ActivateSessionRequest (Credentials, Signature)</text>
+                <text x="100" y="143" fill={theme === 'business' ? '#64748b' : '#94a3b8'} fontSize="9">3.</text>
+                <circle r="6" fill="var(--accent-orange)" filter="url(#msgGlow)">
+                  <animate attributeName="cx" values="90;810" dur="2s" begin="1s" repeatCount="indefinite" />
+                  <animate attributeName="cy" values="150;150" dur="2s" begin="1s" repeatCount="indefinite" />
+                  <animate attributeName="opacity" values="1;1;0" keyTimes="0;0.9;1" dur="2s" begin="1s" repeatCount="indefinite" />
+                </circle>
+              </g>
+
+              {/* Message 4: ActivateSessionResponse */}
+              <g className="sequence-message" style={{ cursor: 'pointer' }}>
+                <line x1="810" y1="180" x2="90" y2="180" stroke="var(--accent-green)" strokeWidth="2" markerEnd="url(#arrowGreen)" />
+                <rect x="350" y="167" width="200" height="26" rx="5" fill={theme === 'business' ? '#f0fdf4' : 'var(--bg-dark)'} stroke="var(--accent-green)" strokeWidth="1.5" />
+                <text x="450" y="185" fill="var(--accent-green)" fontSize="11" textAnchor="middle" fontWeight="600">ActivateSessionResponse ✓</text>
+                <text x="830" y="173" fill={theme === 'business' ? '#64748b' : '#94a3b8'} fontSize="9">4.</text>
+              </g>
+
+              {/* Secure Channel Box */}
+              <rect x="70" y="200" width="760" height="90" rx="8" fill="rgba(139,92,246,0.1)" stroke="var(--accent-purple)" strokeWidth="2" strokeDasharray="8 4" />
+              <text x="450" y="218" fill="var(--accent-purple)" fontSize="10" textAnchor="middle" fontWeight="600">ENCRYPTED SESSION ESTABLISHED</text>
+
+              {/* Message 5: ReadRequest (inside secure channel) */}
+              <g className="sequence-message" style={{ cursor: 'pointer' }}>
+                <line x1="90" y1="240" x2="810" y2="240" stroke="var(--accent-cyan)" strokeWidth="2" markerEnd="url(#arrowCyan)" />
+                <rect x="330" y="227" width="240" height="26" rx="5" fill="var(--accent-purple)" fillOpacity="0.2" stroke="var(--accent-cyan)" strokeWidth="1.5" />
+                <text x="450" y="245" fill="var(--accent-cyan)" fontSize="11" textAnchor="middle" fontWeight="600">ReadRequest (ns=1;s=Pump_01.FlowRate)</text>
+                <text x="100" y="233" fill={theme === 'business' ? '#64748b' : '#94a3b8'} fontSize="9">5.</text>
+                <circle r="6" fill="var(--accent-cyan)" filter="url(#msgGlow)">
+                  <animate attributeName="cx" values="90;810" dur="1.5s" begin="1.5s" repeatCount="indefinite" />
+                  <animate attributeName="cy" values="240;240" dur="1.5s" begin="1.5s" repeatCount="indefinite" />
+                  <animate attributeName="opacity" values="1;1;0" keyTimes="0;0.9;1" dur="1.5s" begin="1.5s" repeatCount="indefinite" />
+                </circle>
+              </g>
+
+              {/* Message 6: ReadResponse (inside secure channel) */}
+              <g className="sequence-message" style={{ cursor: 'pointer' }}>
+                <line x1="810" y1="270" x2="90" y2="270" stroke="var(--accent-green)" strokeWidth="2" markerEnd="url(#arrowGreen)" />
+                <rect x="300" y="257" width="300" height="26" rx="5" fill="var(--accent-purple)" fillOpacity="0.2" stroke="var(--accent-green)" strokeWidth="1.5" />
+                <text x="450" y="275" fill="var(--accent-green)" fontSize="11" textAnchor="middle" fontWeight="600">ReadResponse (Value: 2340.5, Status: Good, Timestamp)</text>
+                <text x="830" y="263" fill={theme === 'business' ? '#64748b' : '#94a3b8'} fontSize="9">6.</text>
+                <circle r="6" fill="var(--accent-green)" filter="url(#msgGlow)">
+                  <animate attributeName="cx" values="810;90" dur="1.5s" begin="2s" repeatCount="indefinite" />
+                  <animate attributeName="cy" values="270;270" dur="1.5s" begin="2s" repeatCount="indefinite" />
+                  <animate attributeName="opacity" values="1;1;0" keyTimes="0;0.9;1" dur="1.5s" begin="2s" repeatCount="indefinite" />
+                </circle>
+              </g>
+
+              {/* Time annotations */}
+              <g transform="translate(20, 85)">
+                <text fill={theme === 'business' ? '#64748b' : '#94a3b8'} fontSize="8" textAnchor="end">t₀</text>
+              </g>
+              <g transform="translate(20, 180)">
+                <text fill={theme === 'business' ? '#64748b' : '#94a3b8'} fontSize="8" textAnchor="end">t₁</text>
+              </g>
+              <g transform="translate(20, 270)">
+                <text fill={theme === 'business' ? '#64748b' : '#94a3b8'} fontSize="8" textAnchor="end">t₂</text>
+              </g>
+            </svg>
+          </div>
+
+          {/* Key Insights */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.8rem' }}>
+            {[
+              { step: '1-2', title: 'Session Creation', desc: 'Server allocates resources, generates nonces for crypto', color: 'var(--accent-cyan)', icon: '🔗' },
+              { step: '3-4', title: 'Authentication', desc: 'Client proves identity via signature over server nonce', color: 'var(--accent-orange)', icon: '🔐' },
+              { step: '5-6', title: 'Data Exchange', desc: 'All messages encrypted with session keys', color: 'var(--accent-purple)', icon: '📨' },
+              { step: 'Always', title: 'Quality Metadata', desc: 'Every response includes StatusCode + Timestamp', color: 'var(--accent-green)', icon: '✅' },
+            ].map((item, i) => (
+              <div key={i} className="content-card animate-fade-in" style={{
+                padding: '1rem',
+                borderColor: item.color,
+                animationDelay: `${i * 0.1}s`
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                  <span style={{ fontSize: '1.3rem' }}>{item.icon}</span>
+                  <span style={{ fontSize: '0.7rem', padding: '0.2rem 0.4rem', background: `${item.color}20`, borderRadius: '4px', color: item.color, fontFamily: 'JetBrains Mono', fontWeight: 600 }}>Step {item.step}</span>
+                </div>
+                <div style={{ fontSize: '0.9rem', fontWeight: 700, color: item.color, marginBottom: '0.3rem' }}>{item.title}</div>
+                <div style={{ fontSize: '0.75rem', color: theme === 'business' ? '#475569' : 'var(--text-secondary)', lineHeight: 1.4 }}>{item.desc}</div>
+              </div>
+            ))}
+          </div>
+
+          <div className="highlight-box" style={{ marginTop: '1rem' }}>
+            <p style={{ margin: 0 }}>
+              <strong>Key Insight:</strong> OPC UA's session model provides <strong style={{ color: 'var(--accent-purple)' }}>mutual authentication</strong> — both client and server verify each other's identity before any data is exchanged.
+              This prevents man-in-the-middle attacks and ensures audit trails are attributable to real users.
+            </p>
+          </div>
+        </section>
 
         {/* Slide 20: Live Demo */}
         <section className="slide" id="slide-20" style={{ paddingTop: '60px' }}>
           <div className="section-header" style={{ marginBottom: '0.8rem' }}>
-            <div className="section-number">Section 08: LIVE DEMO • INTERACTIVE</div>
+            <div className="section-number">SECTION 08 • LIVE DEMO</div>
             <h2 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
               Live Pump Control Demo
               <span className="live-badge animate-heartbeat" style={{ fontSize: '0.7rem', background: 'rgba(16,185,129,0.1)', borderColor: 'var(--accent-green)' }}>
@@ -6033,7 +6481,7 @@ export default function ArchitecturePage() {
           </div>
         </section>
 
-        {/* Slide 21:Takeaways */}
+        {/* Slide 21: Key Takeaways */}
         <section className="slide" id="slide-21" style={{ paddingTop: '60px' }}>
           <div className="section-header" style={{ marginBottom: '1rem' }}>
             <div className="section-number">SUMMARY • KEY TAKEAWAYS</div>
@@ -6130,7 +6578,7 @@ export default function ArchitecturePage() {
           </div>
         </section>
 
-        {/* Slide 22: Final Thoughts */}
+        {/* Slide 22: Conclusion */}
         <section className="slide title-slide" id="slide-22">
           <div className="quote" style={{ fontSize: '1.3rem', border: 'none', background: 'none' }}>
             <strong style={{ fontSize: '1.5rem' }}>OPC UA is not about moving data.</strong><br /><br />
