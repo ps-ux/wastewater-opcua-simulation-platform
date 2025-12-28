@@ -17,9 +17,9 @@
 6. [Slide 6: Address Space - Heart of OPC UA](#slide-6-address-space---heart-of-opc-ua)
 7. [Slide 7: 8 NodeClasses](#slide-7-8-nodeclasses)
 8. [Slide 8: From Blueprint to Reality](#slide-8-from-blueprint-to-reality)
-9. [Slide 9: Client-Server vs Pub/Sub](#slide-9-client-server-vs-pubsub)
+9. [Slide 9: Communication Models Core Concepts](#slide-9-communication-models-core-concepts)
 10. [Slide 10: Cross-Platform Interoperability](#slide-10-cross-platform-interoperability)
-11. [Slide 11: Communication Models Comparison](#slide-11-communication-models-comparison)
+11. [Slide 11: Client-Server vs Pub/Sub Comparison](#slide-11-client-server-vs-pubsub-comparison)
 12. [Slide 12: Services & Data Access](#slide-12-services--data-access)
 13. [Slide 13: Purdue Model - Network Architecture](#slide-13-purdue-model---network-architecture)
 14. [Slide 14: Network & Transport Protocols](#slide-14-network--transport-protocols)
@@ -387,25 +387,28 @@ IPS_PMP_001 : InfluentPumpType
 
 ---
 
-## Slide 9: Client-Server vs Pub/Sub
+## Slide 9: Communication Models Core Concepts
 
 **ID:** `slide-9`
-**Section:** SECTION 03 - 5-12 MINUTES
-**Badge:** LIVE COMPARISON
+**Section:** SECTION 03 • 5–12 MINUTES
+**Title:** Core Concepts
+**Badge:** LIVE COMPARISON (animated)
 **Goal:** Build foundational mental model
 
 ### Content
 
-#### Two-Column Comparison
+#### Two-Column Layout with Animated SVG Diagrams
 
-**Client-Server Model**
+**Client-Server Model Card**
 - Badge: INTERACTIVE
-- Diagram: Client ↔ Server with bidirectional arrows
-- Animated request/response packets
-- SESSION state indicator
+- Animated SVG Diagram:
+  - CLIENT box (SCADA) ↔ SERVER box (OPC UA)
+  - Animated READ request packet (cyan) moving Client → Server
+  - Animated DATA response packet (green) moving Server → Client
+  - SESSION state indicator with pulsing status light
 - Label: "Bidirectional • Stateful • 1:1 Connection"
 
-Features:
+Key Characteristics (2x2 grid):
 | Icon | Feature |
 |------|---------|
 | 🔄 | Interactive control |
@@ -413,13 +416,15 @@ Features:
 | ↔️ | Bidirectional |
 | 🖥️ | SCADA, HMI |
 
-**Publish-Subscribe Model**
+**Publish-Subscribe Model Card**
 - Badge: SCALABLE
-- Diagram: Publisher → Broker → Multiple Subscribers
-- Animated broadcast waves
+- Animated SVG Diagram:
+  - PUBLISHER box → BROKER (optional, dashed) → Multiple SUBSCRIBER boxes
+  - Animated broadcast waves emanating from publisher
+  - Topic label showing data flow path
 - Label: "Unidirectional • Stateless • 1:N Distribution"
 
-Features:
+Key Characteristics (2x2 grid):
 | Icon | Feature |
 |------|---------|
 | 📡 | One-to-many distribution |
@@ -464,42 +469,92 @@ Features:
 
 ---
 
-## Slide 11: Communication Models Comparison
+## Slide 11: Client-Server vs Pub/Sub Comparison
 
 **ID:** `slide-11`
-**Section:** SECTION 03 - COMMUNICATION MODELS
-**Interactive:** Click-to-zoom on all elements
+**Section:** SECTION 03 • COMMUNICATION MODELS
+**Title:** Client-Server vs Pub/Sub
+**Interactive:** Click-to-zoom on all elements (6 zoomable sections)
+**Goal:** Deep dive comparison of both communication paradigms
 
 ### Content
 
-#### Main Comparison Diagram (900x200 SVG)
-- Left side: CLIENT-SERVER (cyan gradient)
-- Right side: PUB/SUB (orange gradient)
-- Center: "VS" divider
+#### Main Comparison Diagram (Zoomable - 900x200 SVG)
+- Left side: CLIENT-SERVER (cyan gradient background)
+  - CLIENT box ↔ SERVER box with animated request/response packets
+  - Label: "BIDIRECTIONAL • STATEFUL • 1:1"
+- Right side: PUB/SUB (orange gradient background)
+  - PUBLISHER → BROKER (optional/dashed) → Multiple SUBSCRIBERs
+  - Label: "UNIDIRECTIONAL • STATELESS • 1:N"
+- Center: "VS" divider line
 
-#### Three Comparison Cards (Zoomable)
+#### Six Click-to-Zoom Overlay Sections
 
-**1. Communication Pattern**
+**1. Architecture Diagram** (`focusedBox === 'diagram'`)
+- Full-width expanded view of the comparison diagram
+- Detailed labels for each component
+- Shows: Read • Write • Subscribe • Browse • Call Methods (Client-Server)
+- Shows: Telemetry • Analytics • Cloud • Historians (Pub/Sub)
+
+**2. Communication Patterns** (`focusedBox === 'communication'`)
 | Aspect | Client-Server | Pub/Sub |
 |--------|---------------|---------|
 | Direction | Request → Response | Publish → Broadcast |
-| Transport | TCP connection | UDP multicast or broker |
-| State | Session-based | Stateless |
+| Transport | TCP connection maintained | UDP multicast or broker-based |
+| State | Session-based, preserves context | No connection state |
+| Updates | Supports subscriptions | Fire-and-forget semantics |
 
-**2. Message Encoding**
+**3. Message Encoding** (`focusedBox === 'encoding'`)
 | Client-Server | Pub/Sub |
 |---------------|---------|
 | UA Binary | UADP Binary |
 | XML | JSON |
 | JSON | - |
+| Service-oriented with full headers | Compact NetworkMessages |
 
-**3. Purpose & Use Cases**
+**4. Purpose & Use Cases** (`focusedBox === 'purpose'`)
 | Client-Server | Pub/Sub |
 |---------------|---------|
-| Interactive control | Massive scale telemetry |
-| Write values to actuators | Cloud data ingestion |
+| Interactive Control & Monitoring | Massive Scale Telemetry |
+| Write values to actuators | Cloud data ingestion (Azure IoT, AWS) |
 | Call methods on devices | Analytics & ML pipelines |
-| Browse and discover | Edge-to-cloud streaming |
+| Browse and discover address space | Edge-to-cloud streaming |
+
+**5. Client-Server Message Example** (`focusedBox === 'cs-message'`)
+```json
+// ReadRequest Message
+{
+  "RequestHeader": {
+    "AuthenticationToken": "session-42",
+    "Timestamp": "2025-01-15T10:30:00Z",
+    "RequestHandle": 12345
+  },
+  "NodesToRead": [{
+    "NodeId": "ns=1;s=Pump_01.FlowRate",
+    "AttributeId": 13  // Value
+  }]
+}
+```
+
+**6. Pub/Sub Message Example** (`focusedBox === 'ps-message'`)
+```json
+// UADP NetworkMessage (compact)
+{
+  "PublisherId": "Pump_Station_01",
+  "DataSetWriterId": 1,
+  "SequenceNumber": 12847,
+  "Payload": {
+    "FlowRate": 2340.5,
+    "RPM": 1145,
+    "Power": 124.8
+  }
+}
+```
+
+#### Interaction
+- Click any card/diagram to open full-screen zoom overlay
+- Press ESC or click outside to close
+- "Click to zoom" hint displayed on hover
 
 ---
 

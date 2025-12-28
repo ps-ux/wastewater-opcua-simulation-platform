@@ -4,6 +4,7 @@
 
 import * as React from 'react';
 import { useEffect, useState, useCallback, useRef } from 'react';
+import Link from 'next/link';
 import { usePumpStore } from '@/stores/pump-store';
 import { usePumpWebSocket } from '@/hooks/use-pump-websocket';
 import { Server, Zap, Activity, Info, Play, RefreshCw, Layers, ShieldCheck, Database, LayoutGrid, Monitor, Smartphone, Globe, Laptop, Cloud, Radio, ArrowLeftRight, Wifi, Cable, MessageSquare, Sun, Moon, Lock, User, AlertTriangle, Shield } from 'lucide-react';
@@ -3344,9 +3345,11 @@ export default function ArchitecturePage() {
             <div className="section-number">SECTION 02 • INFORMATION MODELING</div>
             <h2 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
               From Blueprint to Reality
-              <span className="live-badge" style={{ fontSize: '0.7rem', background: 'rgba(139,92,246,0.1)', borderColor: 'var(--accent-purple)', color: 'var(--accent-purple)' }}>
-                types → OPC UA
-              </span>
+              <Link href="/types">
+                <span className="live-badge" style={{ fontSize: '0.7rem', background: 'rgba(139,92,246,0.1)', borderColor: 'var(--accent-purple)', color: 'var(--accent-purple)', cursor: 'pointer' }}>
+                  types → OPC UA
+                </span>
+              </Link>
             </h2>
           </div>
 

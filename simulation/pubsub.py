@@ -45,7 +45,7 @@ class PubSubManager:
             _logger.info(f"MQTT Broker started on {self.host}:{self.port}")
             
             # Start Publisher Client
-            self.client = mqtt.Client(client_id="PumpSimPublisher", protocol=mqtt.MQTTv5)
+            self.client = mqtt.Client(client_id="PumpSimPublisher", protocol=mqtt.MQTTv311)
             self.client.connect("127.0.0.1", self.port, 60)
             self.client.loop_start()
             
