@@ -60,7 +60,7 @@ const navItems: NavItem[] = [
     href: '/types',
     label: 'Type Definitions',
     icon: <GitBranch className="h-5 w-5" />,
-    description: 'types.yaml',
+    description: 'types',
   },
   {
     href: '/pubsub',
@@ -72,7 +72,7 @@ const navItems: NavItem[] = [
     href: '/assets',
     label: 'Asset Instances',
     icon: <FolderTree className="h-5 w-5" />,
-    description: 'assets.json',
+    description: 'assets',
   },
   {
     href: '/architecture',

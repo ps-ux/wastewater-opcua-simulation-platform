@@ -8,7 +8,7 @@ import { usePumpStore } from '@/stores/pump-store';
 import { usePumpWebSocket } from '@/hooks/use-pump-websocket';
 import { Server, Zap, Activity, Info, Play, RefreshCw, Layers, ShieldCheck, Database, LayoutGrid, Monitor, Smartphone, Globe, Laptop, Cloud, Radio, ArrowLeftRight, Wifi, Cable, MessageSquare, Sun, Moon, Lock, User, AlertTriangle, Shield } from 'lucide-react';
 
-const TOTAL_SLIDES = 19;
+const TOTAL_SLIDES = 22;
 
 type Theme = 'dark' | 'business';
 
@@ -19,12 +19,26 @@ export default function ArchitecturePage() {
   const [simStatus, setSimStatus] = useState<string>("");
   const [commModel, setCommModel] = useState<string>("");
   const [theme, setTheme] = useState<Theme>('dark');
+  const [currentTime, setCurrentTime] = useState<string>('');
+  const [showKeyboardHints, setShowKeyboardHints] = useState<boolean>(true);
+  const [showServerStatus, setShowServerStatus] = useState<boolean>(true);
+  const [focusedBox, setFocusedBox] = useState<string | null>(null);
 
   const toggleTheme = useCallback(() => {
     setTheme(prev => prev === 'dark' ? 'business' : 'dark');
   }, []);
   const { pumps, pumpData, fetchPumps } = usePumpStore();
   const { isConnected } = usePumpWebSocket();
+
+  // Update current time on client side only
+  useEffect(() => {
+    const updateTime = () => {
+      setCurrentTime(new Date().toISOString().split('T')[1].split('.')[0]);
+    };
+    updateTime();
+    const interval = setInterval(updateTime, 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     fetchPumps();
@@ -70,6 +84,12 @@ export default function ArchitecturePage() {
       } else if (e.key === 't') {
         // 't' for Theme toggle
         toggleTheme();
+      } else if (e.key === 'k') {
+        // 'k' for Keyboard hints toggle
+        setShowKeyboardHints(prev => !prev);
+      } else if (e.key === 's') {
+        // 's' for Server status toggle
+        setShowServerStatus(prev => !prev);
       }
     };
 
@@ -1118,6 +1138,383 @@ export default function ArchitecturePage() {
           50% { box-shadow: 0 0 20px rgba(0, 212, 255, 0.5); }
         }
 
+        @keyframes slideInLeft {
+          from { opacity: 0; transform: translateX(-50px); }
+          to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes slideInRight {
+          from { opacity: 0; transform: translateX(50px); }
+          to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes scaleIn {
+          from { opacity: 0; transform: scale(0.8); }
+          to { opacity: 1; transform: scale(1); }
+        }
+
+        @keyframes morphGlow {
+          0%, 100% {
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.3), 0 0 40px rgba(16, 185, 129, 0.2);
+            border-color: var(--accent-cyan);
+          }
+          50% {
+            box-shadow: 0 0 30px rgba(16, 185, 129, 0.4), 0 0 60px rgba(0, 212, 255, 0.3);
+            border-color: var(--accent-green);
+          }
+        }
+
+        @keyframes packetTravel {
+          0% { offset-distance: 0%; opacity: 1; }
+          100% { offset-distance: 100%; opacity: 1; }
+        }
+
+        @keyframes typewriterCursor {
+          0%, 50% { border-right-color: var(--accent-cyan); }
+          51%, 100% { border-right-color: transparent; }
+        }
+
+        @keyframes rainbowGlow {
+          0% { filter: drop-shadow(0 0 10px rgba(0, 212, 255, 0.8)); }
+          25% { filter: drop-shadow(0 0 10px rgba(16, 185, 129, 0.8)); }
+          50% { filter: drop-shadow(0 0 10px rgba(139, 92, 246, 0.8)); }
+          75% { filter: drop-shadow(0 0 10px rgba(245, 158, 11, 0.8)); }
+          100% { filter: drop-shadow(0 0 10px rgba(0, 212, 255, 0.8)); }
+        }
+
+        @keyframes floatUp {
+          0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+          100% { transform: translateY(-100px) rotate(10deg); opacity: 0; }
+        }
+
+        @keyframes heartbeat {
+          0%, 100% { transform: scale(1); }
+          14% { transform: scale(1.1); }
+          28% { transform: scale(1); }
+          42% { transform: scale(1.1); }
+          70% { transform: scale(1); }
+        }
+
+        .animate-slide-left {
+          animation: slideInLeft 0.6s ease-out forwards;
+        }
+
+        .animate-slide-right {
+          animation: slideInRight 0.6s ease-out forwards;
+        }
+
+        .animate-scale-in {
+          animation: scaleIn 0.5s ease-out forwards;
+        }
+
+        .animate-morph-glow {
+          animation: morphGlow 3s ease-in-out infinite;
+        }
+
+        .animate-heartbeat {
+          animation: heartbeat 1.5s ease-in-out infinite;
+        }
+
+        .animate-rainbow {
+          animation: rainbowGlow 4s linear infinite;
+        }
+
+        /* Interactive Demo Styles */
+        .demo-terminal {
+          background: linear-gradient(180deg, #0d1117 0%, #161b22 100%);
+          border: 1px solid #30363d;
+          border-radius: 12px;
+          overflow: hidden;
+          font-family: 'JetBrains Mono', monospace;
+        }
+
+        .demo-terminal-header {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          padding: 12px 16px;
+          background: #21262d;
+          border-bottom: 1px solid #30363d;
+        }
+
+        .demo-terminal-dot {
+          width: 12px;
+          height: 12px;
+          border-radius: 50%;
+        }
+
+        .demo-terminal-body {
+          padding: 16px;
+          min-height: 200px;
+          max-height: 300px;
+          overflow-y: auto;
+        }
+
+        .demo-terminal-line {
+          display: flex;
+          gap: 8px;
+          margin-bottom: 4px;
+          font-size: 0.75rem;
+        }
+
+        .demo-terminal-prompt {
+          color: var(--accent-green);
+          font-weight: 600;
+        }
+
+        .demo-terminal-output {
+          color: #c9d1d9;
+        }
+
+        /* Message Sequence Diagram Styles */
+        .sequence-diagram {
+          background: var(--bg-card);
+          border: 1px solid var(--border-color);
+          border-radius: 12px;
+          padding: 1.5rem;
+          position: relative;
+          overflow: hidden;
+        }
+
+        .sequence-lifeline {
+          stroke-dasharray: 8 4;
+          animation: dataFlow 2s linear infinite;
+        }
+
+        .sequence-message {
+          transition: all 0.3s ease;
+        }
+
+        .sequence-message:hover {
+          transform: scale(1.05);
+          filter: drop-shadow(0 0 8px var(--accent-cyan));
+        }
+
+        /* Keyboard Hints Overlay */
+        .keyboard-hints {
+          position: fixed;
+          bottom: 80px;
+          left: 20px;
+          background: var(--bg-card);
+          border: 1px solid var(--border-color);
+          border-radius: 10px;
+          padding: 0.8rem;
+          font-size: 0.7rem;
+          z-index: 999;
+          opacity: 0.9;
+          transition: opacity 0.3s;
+        }
+
+        .keyboard-hints:hover {
+          opacity: 1;
+        }
+
+        .keyboard-hint-row {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          margin-bottom: 0.3rem;
+        }
+
+        .keyboard-hint-row:last-child {
+          margin-bottom: 0;
+        }
+
+        .kbd {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          min-width: 24px;
+          height: 22px;
+          padding: 0 6px;
+          background: var(--bg-elevated);
+          border: 1px solid var(--border-color);
+          border-radius: 4px;
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 0.65rem;
+          font-weight: 600;
+          color: var(--text-secondary);
+          box-shadow: 0 2px 0 var(--border-color);
+        }
+
+        /* Live Control Panel */
+        .control-panel {
+          background: linear-gradient(135deg, var(--bg-card) 0%, rgba(0, 212, 255, 0.05) 100%);
+          border: 2px solid var(--accent-cyan);
+          border-radius: 16px;
+          padding: 1.5rem;
+          position: relative;
+          overflow: hidden;
+        }
+
+        .control-panel::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 4px;
+          background: linear-gradient(90deg, var(--accent-cyan), var(--accent-green), var(--accent-purple));
+        }
+
+        .control-button {
+          background: linear-gradient(135deg, var(--accent-green) 0%, #059669 100%);
+          color: white;
+          border: none;
+          padding: 0.8rem 1.5rem;
+          border-radius: 8px;
+          font-weight: 600;
+          font-size: 0.9rem;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+        }
+
+        .control-button:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+        }
+
+        .control-button.stop {
+          background: linear-gradient(135deg, var(--accent-red) 0%, #dc2626 100%);
+        }
+
+        .control-button.stop:hover {
+          box-shadow: 0 8px 20px rgba(239, 68, 68, 0.4);
+        }
+
+        .gauge-container {
+          position: relative;
+          width: 120px;
+          height: 120px;
+        }
+
+        .gauge-ring {
+          fill: none;
+          stroke: var(--border-color);
+          stroke-width: 10;
+        }
+
+        .gauge-value {
+          fill: none;
+          stroke-width: 10;
+          stroke-linecap: round;
+          transform-origin: center;
+          transform: rotate(-90deg);
+          transition: stroke-dashoffset 0.5s ease;
+        }
+
+        /* Zoomable Box Styles */
+        .zoomable-box {
+          cursor: pointer;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .zoomable-box:hover {
+          transform: scale(1.02);
+          box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .zoom-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(0, 0, 0, 0.85);
+          backdrop-filter: blur(8px);
+          z-index: 1000;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 2rem;
+          animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+
+        .zoom-content {
+          background: var(--bg-card);
+          border-radius: 16px;
+          padding: 2rem;
+          max-width: 90vw;
+          max-height: 85vh;
+          overflow-y: auto;
+          animation: zoomIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+          box-shadow: 0 25px 80px rgba(0, 0, 0, 0.5);
+          position: relative;
+        }
+
+        @keyframes zoomIn {
+          from {
+            opacity: 0;
+            transform: scale(0.8);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+
+        .zoom-close-btn {
+          position: absolute;
+          top: 1rem;
+          right: 1rem;
+          width: 36px;
+          height: 36px;
+          border-radius: 50%;
+          border: 1px solid var(--border-color);
+          background: var(--bg-elevated);
+          color: var(--text-muted);
+          font-size: 1.2rem;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: all 0.2s ease;
+        }
+
+        .zoom-close-btn:hover {
+          background: var(--accent-red);
+          border-color: var(--accent-red);
+          color: white;
+          transform: rotate(90deg);
+        }
+
+        .zoom-hint {
+          position: absolute;
+          bottom: 1rem;
+          left: 50%;
+          transform: translateX(-50%);
+          font-size: 0.75rem;
+          color: var(--text-muted);
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+        }
+
+        .click-to-zoom-hint {
+          position: absolute;
+          top: 0.5rem;
+          right: 0.5rem;
+          font-size: 0.6rem;
+          color: var(--text-muted);
+          background: var(--bg-dark);
+          padding: 0.2rem 0.4rem;
+          border-radius: 4px;
+          opacity: 0;
+          transition: opacity 0.2s ease;
+        }
+
+        .zoomable-box:hover .click-to-zoom-hint {
+          opacity: 1;
+        }
+
         .data-particle {
           animation: dataRise 3s linear infinite;
         }
@@ -1437,7 +1834,7 @@ export default function ArchitecturePage() {
           <h1>OPC UA Architecture</h1>
           <p className="subtitle">Complete Learning & Demonstration Guide</p>
           <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-            A Practical OPC UA Client–Server Demonstration Using RC Wastewater Treatment Pump Model
+            A Practical OPC UA Client–Server Demonstration Using <b>Rock Creek</b> Wastewater Treatment Pump Model
           </p>
           <div className="title-meta">
             <div className="meta-item">
@@ -1537,14 +1934,14 @@ export default function ArchitecturePage() {
             margin: '0 auto'
           }}>
             {[
-              { num: '01', title: 'Introduction', desc: 'Why OPC UA Exists & Industrial Reality', icon: <Info size={18} />, color: 'var(--accent-cyan)' },
-              { num: '02', title: 'Core Concepts', desc: 'Client–Server & PubSub Models', icon: <ArrowLeftRight size={18} />, color: 'var(--accent-green)' },
-              { num: '03', title: 'Address Space', desc: 'Information Modeling & NodeClasses', icon: <Database size={18} />, color: 'var(--accent-purple)' },
-              { num: '04', title: 'Services & Data Access', desc: 'Browse, Read, Subscribe, Call, History', icon: <Activity size={18} />, color: 'var(--accent-orange)' },
-              { num: '05', title: 'Network & Security', desc: 'Transport Protocols & Authentication', icon: <ShieldCheck size={18} />, color: 'var(--accent-pink)' },
-              { num: '06', title: 'Communication Architecture', desc: 'Cross-Platform Interoperability', icon: <Globe size={18} />, color: 'var(--accent-cyan)' },
-              { num: '07', title: 'PubSub Deep Dive', desc: 'Broker-less & Broker-based Patterns', icon: <Radio size={18} />, color: 'var(--accent-green)' },
-              { num: '08', title: 'Live Demonstration', desc: 'Interactive Dashboard & Real-time Data', icon: <Play size={18} />, color: 'var(--accent-orange)' },
+              { num: '01', title: 'Introduction', desc: 'Why OPC UA Exists & Industrial Reality', icon: <Info size={18} />, color: 'var(--accent-cyan)', slides: [3, 4, 5] },
+              { num: '02', title: 'Address Space & Modeling', desc: 'Information Modeling & NodeClasses', icon: <Database size={18} />, color: 'var(--accent-purple)', slides: [9, 10, 16] },
+              { num: '03', title: 'Core Concepts', desc: 'Client–Server & PubSub Architectures', icon: <ArrowLeftRight size={18} />, color: 'var(--accent-green)', slides: [7, 15, 17] },
+              { num: '04', title: 'Services & Data Access', desc: 'Browse, Read, Subscribe, Call, History', icon: <Activity size={18} />, color: 'var(--accent-orange)', slides: [11] },
+              { num: '05', title: 'Network & Security', desc: 'Transport, SecureChannel & RBAC', icon: <ShieldCheck size={18} />, color: 'var(--accent-pink)', slides: [6, 12, 8, 13, 14] },
+              { num: '06', title: 'Deep Dive: Communication', desc: 'Message Sequence & Session Flow', icon: <Radio size={18} />, color: 'var(--accent-green)', slides: [19] },
+              { num: '07', title: 'Future Directions', desc: 'TSN, 5G, OPC UA FX & Beyond', icon: <Globe size={18} />, color: 'var(--accent-cyan)', slides: [18] },
+              { num: '08', title: 'Live Demo', desc: 'Interactive Pump Control & Real-time Data', icon: <Play size={18} />, color: 'var(--accent-orange)', slides: [20] },
             ].map((item, i) => (
               <div
                 key={i}
@@ -1572,7 +1969,7 @@ export default function ArchitecturePage() {
                   e.currentTarget.style.transform = 'translateX(0)';
                   e.currentTarget.style.boxShadow = 'none';
                 }}
-                onClick={() => goToSlide(i + 3)}
+                onClick={() => goToSlide(item.slides[0])}
               >
                 <div style={{
                   display: 'flex',
@@ -2281,12 +2678,12 @@ export default function ArchitecturePage() {
 
               {/* Era labels - positioned below the timeline */}
               <g>
-                <rect x="50" y="90" width="230" height="16" rx="4" fill="rgba(239, 68, 68, 0.15)" stroke="#ef4444" strokeWidth="1" strokeDasharray="3 2" />
-                <text x="165" y="101" textAnchor="middle" fill="#ef4444" fontSize="8" fontWeight="600">CLASSIC OPC (DCOM)</text>
+                <rect x="20" y="90" width="130" height="16" rx="4" fill="rgba(239, 68, 68, 0.15)" stroke="#ef4444" strokeWidth="1" strokeDasharray="3 2" />
+                <text x="75" y="101" textAnchor="middle" fill="#ef4444" fontSize="8" fontWeight="600">CLASSIC OPC (DCOM)</text>
               </g>
               <g>
-                <rect x="400" y="90" width="420" height="16" rx="4" fill="rgba(16, 185, 129, 0.15)" stroke="#10b981" strokeWidth="1" />
-                <text x="610" y="101" textAnchor="middle" fill="#10b981" fontSize="8" fontWeight="600">OPC UA (Platform Independent)</text>
+                <rect x="450" y="90" width="210" height="16" rx="4" fill="rgba(16, 185, 129, 0.15)" stroke="#10b981" strokeWidth="1" />
+                <text x="530" y="101" textAnchor="middle" fill="#10b981" fontSize="8" fontWeight="600">OPC UA (Platform Independent)</text>
               </g>
             </svg>
           </div>
@@ -2521,228 +2918,452 @@ export default function ArchitecturePage() {
           </div>
         </section>
 
-        {/* Slide 6: Purdue Model */}
+        {/* Slide 6: Address Space */}
         <section className="slide" id="slide-6">
           <div className="section-header">
-            <div className="section-number">SECTION 01 • ARCHITECTURE</div>
-            <h2 className="section-title flex items-center gap-3">
-              Where OPC UA Fits: Purdue Model
-              <span className="live-badge">
-                <div className="pulse-dot" />
-                Live Network Active
-              </span>
-            </h2>
+            <div className="section-number">SECTION 02 • 12–22 MINUTES</div>
+            <h2 className="section-title">Address Space: Heart of OPC UA</h2>
+            <p className="section-goal">Goal: Explain semantics and structure</p>
           </div>
-          <div className="two-column" style={{ gridTemplateColumns: 'minmax(0, 1.5fr) 1fr' }}>
-            <div className="diagram-container" style={{ position: 'relative' }}>
-              <div className="diagram-title">Purdue Model with OPC UA Backbone</div>
-              <svg viewBox="0 0 800 550" xmlns="http://www.w3.org/2000/svg">
-                <defs>
-                  <linearGradient id="backbone" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" style={{ stopColor: '#00d4ff', stopOpacity: 0.7 }} />
-                    <stop offset="100%" style={{ stopColor: '#10b981', stopOpacity: 0.7 }} />
-                  </linearGradient>
-                  <filter id="glow">
-                    <feGaussianBlur stdDeviation="3" result="blur" />
-                    <feComposite in="SourceGraphic" in2="blur" operator="over" />
-                  </filter>
-                </defs>
-
-                {/* Vertical Backbone */}
-                <rect x="720" y="25" width="35" height="500" rx="5" fill="url(#backbone)" opacity="0.3" />
-                <rect x="720" y="25" width="35" height="500" rx="5" fill="none" stroke="#00d4ff" strokeWidth="1.5" />
-                <text x="737" y="275" fill="#00d4ff" fontSize="9" textAnchor="middle" transform="rotate(-90,737,275)" fontWeight="600">OPC UA BACKBONE</text>
-
-                {/* Levels - Each level is now interactive */}
-                {[
-                  { level: 5, name: 'ENTERPRISE', color: '#8b5cf6', sub: 'ERP • Business Planning • Cloud', y: 25 },
-                  { level: 4, name: 'SITE BUSINESS', color: '#ec4899', sub: 'MES • Scheduling • KPI', y: 115 },
-                  { level: 3, name: 'SITE OPERATIONS', color: '#f59e0b', sub: 'SCADA • HMI • Batch', y: 205 },
-                  { level: 2, name: 'AREA CONTROL', color: '#10b981', sub: 'PLCs • DCS • RTUs', y: 295 },
-                  { level: 1, name: 'BASIC CONTROL', color: '#00d4ff', sub: 'Sensors • Actuators • I/O', y: 385 },
-                ].map((l) => (
-                  <g key={l.level}
-                    className="layer-hover"
-                    onClick={() => setActiveLayer(l.level)}
-                    transform={`translate(40,${l.y})`}>
-                    <rect width="650" height="60" rx="8"
-                      fill={activeLayer === l.level ? 'rgba(0, 212, 255, 0.1)' : (theme === 'business' ? '#ffffff' : '#111827')}
-                      stroke={activeLayer === l.level ? l.color : (theme === 'business' ? '#e2e8f0' : '#1e293b')}
-                      strokeWidth={activeLayer === l.level ? 2.5 : 1}
-                      style={{ transition: 'all 0.3s' }} />
-                    <text x="16" y="24" fill={l.color} fontSize="14" fontWeight="800">LEVEL {l.level} — {l.name}</text>
-                    <text x="16" y="46" fill={theme === 'business' ? '#475569' : '#94a3b8'} fontSize="11" fontWeight="500">{l.sub}</text>
-
-                    {/* Connection to backbone */}
-                    <line x1="650" y1="30" x2="680" y2="30" stroke={l.color} strokeWidth="1" strokeDasharray="3,3" />
-
-                    {/* Active indicators */}
-                    {activeLayer === l.level && (
-                      <circle cx="640" cy="30" r="4" fill={l.color} filter="url(#glow)">
-                        <animate attributeName="r" values="4;6;4" dur="1s" repeatCount="indefinite" />
-                      </circle>
-                    )}
-                  </g>
-                ))}
-
-                {/* Level 0 */}
-                <g transform="translate(40,485)">
-                  <rect width="650" height="40" rx="8" fill={theme === 'business' ? '#f1f5f9' : '#0a0e17'} stroke={theme === 'business' ? '#cbd5e1' : '#334155'} />
-                  <text x="325" y="25" fill={theme === 'business' ? '#475569' : '#94a3b8'} fontSize="12" textAnchor="middle" fontWeight="700">LEVEL 0 — PHYSICAL PROCESS (Wastewater Simulation)</text>
-                </g>
-
-                {/* Animated Data Packet */}
-                {isPacketWalking && (
-                  <g className="data-packet">
-                    <circle r="9" fill="#00d4ff" filter="url(#glow)">
-                      <animateMotion
-                        dur="15s"
-                        path="M70 505 L70 415 L737 415 L737 325 L737 235 L737 145 L737 55 L680 55"
-                        keyPoints="0;0;0.1;0.1;0.2;0.4;0.4;0.6;0.6;0.8;0.8;1;1"
-                        keyTimes="0;0.13;0.17;0.3;0.33;0.47;0.5;0.63;0.67;0.8;0.83;0.97;1"
-                        calcMode="linear"
-                        fill="freeze"
-                      />
-                    </circle>
-                    <text fontSize="10" fill="white" fontWeight="900" textAnchor="middle" dy="-14">
-                      <animateMotion
-                        dur="15s"
-                        path="M70 505 L70 415 L737 415 L737 325 L737 235 L737 145 L737 55 L680 55"
-                        keyPoints="0;0;0.1;0.1;0.2;0.4;0.4;0.6;0.6;0.8;0.8;1;1"
-                        keyTimes="0;0.13;0.17;0.3;0.33;0.47;0.5;0.63;0.67;0.8;0.83;0.97;1"
-                        calcMode="linear"
-                        fill="freeze"
-                      />
-                      DATA_PACKET
-                    </text>
-                  </g>
-                )}
-              </svg>
-
-              <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }}>
-                <button
-                  className="btn-action"
-                  onClick={() => {
-                    setIsPacketWalking(true);
-                    setSimStatus("Dwell: Level 0 (Process)...");
-                    setCommModel("NA");
-                    setActiveLayer(0);
-
-                    const steps = [
-                      { t: 2500, l: 1, s: "Dwell: Level 1 (I/O)...", m: "CLIENT-SERVER" },
-                      { t: 5000, l: 2, s: "Dwell: Level 2 (PLC)...", m: "CLIENT-SERVER" },
-                      { t: 7500, l: 3, s: "Dwell: Level 3 (SCADA)...", m: "CLIENT-SERVER" },
-                      { t: 10000, l: 4, s: "Dwell: Level 4 (Business)...", m: "PUB-SUB" },
-                      { t: 12500, l: 5, s: "Dwell: Level 5 (Cloud)...", m: "PUB-SUB" },
-                    ];
-
-                    steps.forEach(step => {
-                      setTimeout(() => {
-                        setActiveLayer(step.l);
-                        setSimStatus(step.s);
-                        setCommModel(step.m);
-                      }, step.t);
-                    });
-
-                    setTimeout(() => {
-                      setIsPacketWalking(false);
-                      setSimStatus("");
-                      setCommModel("");
-                    }, 15500);
-                  }}
-                  disabled={isPacketWalking}
-                >
-                  <Play size={14} style={{ display: 'inline', marginRight: '4px' }} />
-                  Simulate Data Flow (L0 → L5)
-                </button>
-                {activeLayer && (
-                  <button
-                    className="btn-action"
-                    style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
-                    onClick={() => setActiveLayer(null)}
-                  >
-                    Clear Filter
-                  </button>
-                )}
+          <div className="two-column">
+            <div className="content-card" style={{ borderColor: '#ef4444' }}>
+              <h3 style={{ color: '#ef4444' }}>
+                <span className="icon" style={{ background: 'rgba(239,68,68,0.1)' }}>❌</span> NOT Flat Tags
+              </h3>
+              <div className="code-block" style={{ height: '140px' }}>
+                <span className="comment">// Traditional Modbus/S7 approach</span><br />
+                HR_40001 = <span className="number">1450</span><br />
+                HR_40002 = <span className="number">75.3</span><br />
+                <span className="comment">// If documentation is lost, meaning is lost.</span>
               </div>
             </div>
-
-            <div className="content-card">
-              <h3>
-                <Info size={16} />
-                {isPacketWalking ? "LIVE STREAMING LOG" : (activeLayer ? `Level ${activeLayer} Context` : 'Select a Layer')}
+            <div className="content-card" style={{ borderColor: '#10b981' }}>
+              <h3 style={{ color: '#10b981' }}>
+                <span className="icon" style={{ background: 'rgba(16,185,129,0.1)' }}>✓</span> Graph of Nodes
               </h3>
-              {isPacketWalking ? (
-                <div style={{ background: 'rgba(0,0,0,0.3)', padding: '1rem', borderRadius: '8px', border: '1px solid var(--accent-cyan)', animation: 'pulse 2s infinite' }}>
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <div className="pulse-dot" />
-                      <span className="text-[10px] font-black tracking-widest text-cyan-400">STATUS: {simStatus}</span>
-                    </div>
-                    {commModel !== "NA" && commModel !== "" && (
-                      <div className={`px-2 py-0.5 rounded text-[8px] font-bold border ${commModel === "PUB-SUB" ? 'bg-amber-500/20 border-amber-500/40 text-amber-400' : 'bg-cyan-500/20 border-cyan-500/40 text-cyan-400'}`}>
-                        {commModel}
-                      </div>
-                    )}
+              <div className="code-block" style={{ height: '140px', position: 'relative' }}>
+                <div style={{ position: 'absolute', top: '10px', right: '10px' }}>
+                  <span className="live-badge" style={{ fontSize: '0.6rem' }}>Live Graph</span>
+                </div>
+                <span className="comment">// OPC UA Information Model</span><br />
+                Pump_01 <span className="comment">(Instance of PumpType)</span><br />
+                &nbsp;├─ Speed = <span className="number">{(Object.values(pumpData)[0]?.rpm || 1450).toFixed(0)}</span> <span className="keyword">RPM</span><br />
+                &nbsp;├─ Status = <span className="string">{Object.values(pumpData)[0]?.is_running ? 'Running' : 'Stopped'}</span><br />
+                &nbsp;└─ Power = <span className="number">{(Object.values(pumpData)[0]?.power_consumption || 12.4).toFixed(1)}</span> <span className="keyword">kW</span>
+              </div>
+            </div>
+          </div>
+          <div className="diagram-container" style={{ textAlign: 'center' }}>
+            <div className="diagram-title">Hierarchical Reference Model</div>
+            <svg viewBox="0 0 600 120" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="300" cy="30" r="20" fill="none" stroke="var(--accent-cyan)" strokeWidth="2" />
+              <text x="300" y="34" fill="var(--accent-cyan)" fontSize="8" textAnchor="middle">Objects</text>
+
+              <line x1="300" y1="50" x2="200" y2="90" stroke="var(--text-muted)" strokeWidth="1" strokeDasharray="4" />
+              <line x1="300" y1="50" x2="400" y2="90" stroke="var(--text-muted)" strokeWidth="1" strokeDasharray="4" />
+
+              <rect x="170" y="90" width="60" height="20" rx="3" fill="var(--bg-elevated)" stroke="var(--accent-green)" />
+              <text x="200" y="103" fill="var(--accent-green)" fontSize="7" textAnchor="middle">Pump_1</text>
+
+              <rect x="370" y="90" width="60" height="20" rx="3" fill="var(--bg-elevated)" stroke="var(--accent-green)" />
+              <text x="400" y="103" fill="var(--accent-green)" fontSize="7" textAnchor="middle">Pump_2</text>
+
+              <text x="250" y="70" fill="var(--text-muted)" fontSize="6" transform="rotate(-22,250,70)">Organizes</text>
+              <text x="350" y="70" fill="var(--text-muted)" fontSize="6" transform="rotate(22,350,70)">Organizes</text>
+            </svg>
+          </div>
+          <div className="highlight-box">
+            <p><strong>Address Space</strong> is a graph-based model where nodes represent assets and references represent their relationships (e.g., <em>HasComponent, Organizes, HasTypeDefinition</em>).</p>
+          </div>
+        </section>
+
+        {/* Slide 7: NodeClasses - Enhanced with Icons and Animations */}
+        <section className="slide" id="slide-7">
+          <div className="section-header">
+            <div className="section-number">SECTION 02 • NODECLASSES</div>
+            <h2 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              8 NodeClasses
+              <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 400 }}>(OPC 10000-3)</span>
+            </h2>
+          </div>
+
+          {/* Categorized NodeClasses */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.8rem', marginBottom: '1rem' }}>
+            {[
+              { name: 'Object', desc: 'Container for variables, methods, and other objects', icon: <Database size={22} />, color: 'var(--accent-cyan)', category: 'Instance', example: 'Pump_01' },
+              { name: 'Variable', desc: 'Holds data values with DataType and AccessLevel', icon: <Activity size={22} />, color: 'var(--accent-green)', category: 'Instance', example: 'FlowRate = 2340.5' },
+              { name: 'Method', desc: 'Callable function with input/output arguments', icon: <Play size={22} />, color: 'var(--accent-orange)', category: 'Instance', example: 'StartPump()' },
+              { name: 'ObjectType', desc: 'Template defining structure for Objects', icon: <Layers size={22} />, color: 'var(--accent-purple)', category: 'Type', example: 'PumpType' },
+              { name: 'VariableType', desc: 'Template for Variable nodes', icon: <LayoutGrid size={22} />, color: 'var(--accent-pink)', category: 'Type', example: 'AnalogItemType' },
+              { name: 'ReferenceType', desc: 'Defines relationships between nodes', icon: <ArrowLeftRight size={22} />, color: 'var(--accent-cyan)', category: 'Meta', example: 'HasComponent' },
+              { name: 'DataType', desc: 'Defines value types (Int32, String, etc.)', icon: <Server size={22} />, color: 'var(--accent-green)', category: 'Meta', example: 'Double, Boolean' },
+              { name: 'View', desc: 'Filtered subset of Address Space', icon: <Globe size={22} />, color: 'var(--accent-orange)', category: 'Meta', example: 'OperatorView' },
+            ].map((node, i) => (
+              <div
+                key={i}
+                className="content-card animate-fade-in"
+                style={{
+                  padding: '1rem',
+                  borderColor: node.color,
+                  animationDelay: `${i * 0.05}s`,
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-4px) scale(1.02)';
+                  e.currentTarget.style.boxShadow = `0 8px 25px ${node.color}30`;
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0) scale(1)';
+                  e.currentTarget.style.boxShadow = 'none';
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.6rem' }}>
+                  <div style={{
+                    width: '38px',
+                    height: '38px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: `${node.color}15`,
+                    borderRadius: '8px',
+                    color: node.color
+                  }}>
+                    {node.icon}
                   </div>
-                  <div className="font-mono text-[11px] text-slate-400 space-y-1">
-                    <div>&gt; RAW_FLOW: {(Math.random() * 5000).toFixed(0)} m3/h</div>
-                    <div>&gt; PROTOCOL: OPC_UA_BINARY</div>
-                    <div>&gt; ENCRYPTION: AES_256_SHA256</div>
-                    <div>&gt; TARGET_NS: namespace=1;s=IPS_PMP_001.Flow</div>
+                  <div>
+                    <div style={{ fontFamily: 'JetBrains Mono', fontSize: '1rem', fontWeight: 700, color: node.color }}>{node.name}</div>
+                    <span style={{
+                      fontSize: '0.7rem',
+                      padding: '0.15rem 0.4rem',
+                      background: `${node.color}20`,
+                      borderRadius: '4px',
+                      color: node.color,
+                      fontWeight: 600
+                    }}>{node.category}</span>
                   </div>
                 </div>
-              ) : !activeLayer ? (
-                <p style={{ fontSize: '1.2rem', color: 'var(--text-secondary)', lineHeight: '1.6' }}>
-                  Click on a layer in the Purdue model to see how OPC UA functions at that level and how it interacts with the wastewater simulation.
-                </p>
-              ) : (
-                <div style={{ animation: 'fadeIn 0.3s ease-out' }}>
-                  {activeLayer === 5 && (
-                    <ul style={{ fontSize: '1rem', lineHeight: '1.8' }}>
-                      <li><strong>Role:</strong> Enterprise Strategy</li>
-                      <li><strong>OPC UA Use:</strong> PubSub to Azure/AWS IoT Hubs for plant-wide analytics.</li>
-                      <li><strong>Demo Link:</strong> View enterprise KPIs in Dashboard.</li>
-                    </ul>
-                  )}
-                  {activeLayer === 4 && (
-                    <ul style={{ fontSize: '1rem', lineHeight: '1.8' }}>
-                      <li><strong>Role:</strong> Site Management</li>
-                      <li><strong>OPC UA Use:</strong> Aggregating multiple servers into a Unified Namespace (UNS).</li>
-                      <li><strong>Data:</strong> Historical Access (HA) for compliance reporting.</li>
-                    </ul>
-                  )}
-                  {activeLayer === 3 && (
-                    <ul style={{ fontSize: '1rem', lineHeight: '1.8' }}>
-                      <li><strong>Role:</strong> Control Room</li>
-                      <li><strong>OPC UA Use:</strong> Client-Server for the SCADA/HMI dashboard you use.</li>
-                      <li><strong>Real-time:</strong> High-frequency subscriptions (100ms) for pump monitoring.</li>
-                    </ul>
-                  )}
-                  {activeLayer === 2 && (
-                    <ul style={{ fontSize: '1rem', lineHeight: '1.8' }}>
-                      <li><strong>Role:</strong> Area Control</li>
-                      <li><strong>OPC UA Use:</strong> PLC-to-PLC communication using OPC UA FX.</li>
-                      <li><strong>Security:</strong> X.509 Certificate-based trust between controllers.</li>
-                    </ul>
-                  )}
-                  {activeLayer === 1 && (
-                    <ul style={{ fontSize: '1rem', lineHeight: '1.8' }}>
-                      <li><strong>Role:</strong> Field Devices</li>
-                      <li><strong>OPC UA Use:</strong> OPC UA Nano/Micro profiles in smart pumps.</li>
-                      <li><strong>Impact:</strong> Semantic data (e.g., "Pump_1.BearingTemp") at the source.</li>
-                    </ul>
-                  )}
+                <p style={{ fontSize: '0.85rem', color: theme === 'business' ? '#475569' : 'var(--text-secondary)', margin: '0 0 0.5rem 0', lineHeight: 1.5 }}>{node.desc}</p>
+                <div style={{
+                  fontSize: '0.8rem',
+                  fontFamily: 'JetBrains Mono',
+                  color: node.color,
+                  background: theme === 'business' ? '#f1f5f9' : 'var(--bg-dark)',
+                  padding: '0.4rem 0.6rem',
+                  borderRadius: '5px',
+                  opacity: 0.9
+                }}>
+                  {node.example}
                 </div>
-              )}
+              </div>
+            ))}
+          </div>
+
+          {/* Type Hierarchy Diagram */}
+          <div className="diagram-container" style={{ padding: '1rem' }}>
+            <div className="diagram-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              Type System Hierarchy (from{' '}
+              <a
+                href="/types"
+                target="_blank"
+                style={{
+                  color: 'var(--accent-purple)',
+                  textDecoration: 'none',
+                  padding: '0.15rem 0.4rem',
+                  background: 'rgba(139,92,246,0.1)',
+                  borderRadius: '4px',
+                  border: '1px solid var(--accent-purple)',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'rgba(139,92,246,0.2)';
+                  e.currentTarget.style.transform = 'scale(1.05)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'rgba(139,92,246,0.1)';
+                  e.currentTarget.style.transform = 'scale(1)';
+                }}
+              >
+                types
+              </a>)
+            </div>
+            <svg viewBox="0 0 800 120" style={{ width: '100%', height: '120px' }}>
+              {/* BaseObjectType */}
+              <g transform="translate(30, 45)">
+                <rect width="120" height="35" rx="6" fill={theme === 'business' ? '#f1f5f9' : 'var(--bg-elevated)'} stroke={theme === 'business' ? '#94a3b8' : 'var(--text-muted)'} strokeWidth="1.5" strokeDasharray="4 2" />
+                <text x="60" y="22" fill={theme === 'business' ? '#64748b' : 'var(--text-muted)'} fontSize="10" textAnchor="middle" fontWeight="600">BaseObjectType</text>
+                <text x="60" y="50" fill={theme === 'business' ? '#94a3b8' : 'var(--text-muted)'} fontSize="8" textAnchor="middle">(OPC UA Base)</text>
+              </g>
+
+              {/* Arrow */}
+              <line x1="150" y1="62" x2="190" y2="62" stroke={theme === 'business' ? '#64748b' : 'var(--text-muted)'} strokeWidth="1.5" markerEnd="url(#arrowRight)" />
+              <text x="170" y="55" fill={theme === 'business' ? '#64748b' : 'var(--text-muted)'} fontSize="8" textAnchor="middle">extends</text>
+
+              {/* AssetType */}
+              <g transform="translate(190, 45)">
+                <rect width="90" height="35" rx="6" fill={theme === 'business' ? '#f5f3ff' : 'var(--bg-elevated)'} stroke="var(--accent-purple)" strokeWidth="2" />
+                <text x="45" y="22" fill="var(--accent-purple)" fontSize="11" textAnchor="middle" fontWeight="700">AssetType</text>
+                <text x="45" y="50" fill={theme === 'business' ? '#7c3aed' : 'var(--text-muted)'} fontSize="8" textAnchor="middle">(abstract)</text>
+              </g>
+
+              {/* Arrow to PumpType */}
+              <line x1="280" y1="62" x2="320" y2="40" stroke="var(--accent-purple)" strokeWidth="1.5" />
+              <line x1="280" y1="62" x2="320" y2="85" stroke="var(--accent-purple)" strokeWidth="1.5" />
+
+              {/* PumpType */}
+              <g transform="translate(320, 22)">
+                <rect width="100" height="35" rx="6" fill={theme === 'business' ? '#ecfdf5' : 'var(--bg-elevated)'} stroke="var(--accent-green)" strokeWidth="2" />
+                <text x="50" y="22" fill="var(--accent-green)" fontSize="11" textAnchor="middle" fontWeight="700">PumpType</text>
+              </g>
+
+              {/* ChamberType */}
+              <g transform="translate(320, 68)">
+                <rect width="100" height="35" rx="6" fill={theme === 'business' ? '#fdf2f8' : 'var(--bg-elevated)'} stroke="var(--accent-pink)" strokeWidth="2" />
+                <text x="50" y="22" fill="var(--accent-pink)" fontSize="11" textAnchor="middle" fontWeight="700">ChamberType</text>
+              </g>
+
+              {/* Arrow to InfluentPumpType */}
+              <line x1="420" y1="40" x2="460" y2="40" stroke="var(--accent-green)" strokeWidth="1.5" />
+
+              {/* InfluentPumpType */}
+              <g transform="translate(460, 22)">
+                <rect width="130" height="35" rx="6" fill={theme === 'business' ? '#ecfeff' : 'var(--bg-elevated)'} stroke="var(--accent-cyan)" strokeWidth="2" className="animate-glow" />
+                <text x="65" y="22" fill="var(--accent-cyan)" fontSize="11" textAnchor="middle" fontWeight="700">InfluentPumpType</text>
+              </g>
+
+              {/* Instance arrow */}
+              <line x1="590" y1="40" x2="630" y2="40" stroke="var(--accent-cyan)" strokeWidth="1.5" strokeDasharray="4 2" />
+              <text x="610" y="32" fill={theme === 'business' ? '#64748b' : 'var(--text-muted)'} fontSize="8" textAnchor="middle">instance</text>
+
+              {/* Instance */}
+              <g transform="translate(630, 22)">
+                <rect width="110" height="35" rx="6" fill={theme === 'business' ? 'rgba(2,132,199,0.1)' : 'rgba(0,212,255,0.1)'} stroke="var(--accent-cyan)" strokeWidth="2" />
+                <text x="55" y="18" fill="var(--accent-cyan)" fontSize="10" textAnchor="middle" fontWeight="700">IPS_PMP_001</text>
+                <text x="55" y="30" fill="var(--accent-green)" fontSize="9" textAnchor="middle">Running</text>
+              </g>
+
+              {/* Variables */}
+              <g transform="translate(630, 62)">
+                <rect width="110" height="42" rx="6" fill={theme === 'business' ? '#f8fafc' : 'var(--bg-dark)'} stroke={theme === 'business' ? '#e2e8f0' : 'var(--border-color)'} />
+                <text x="10" y="14" fill={theme === 'business' ? '#475569' : 'var(--text-secondary)'} fontSize="8">FlowRate: 2340.5</text>
+                <text x="10" y="26" fill={theme === 'business' ? '#475569' : 'var(--text-secondary)'} fontSize="8">RPM: 1145</text>
+                <text x="10" y="38" fill={theme === 'business' ? '#475569' : 'var(--text-secondary)'} fontSize="8">Power: 124.8 kW</text>
+              </g>
+            </svg>
+          </div>
+
+          <div className="highlight-box" style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+            <div style={{ flex: 1 }}>
+              <p style={{ margin: 0 }}><strong>PumpType (ObjectType)</strong> defines: 27 Variables (Speed, Pressure, Vibration...), 4 Methods (Start, Stop, SetSpeed, Reset), and 6 Alarm conditions</p>
+            </div>
+            <div style={{ display: 'flex', gap: '0.3rem' }}>
+              <span style={{ fontSize: '0.6rem', padding: '0.2rem 0.4rem', background: 'rgba(0,212,255,0.1)', border: '1px solid var(--accent-cyan)', borderRadius: '4px', color: 'var(--accent-cyan)' }}>Instance</span>
+              <span style={{ fontSize: '0.6rem', padding: '0.2rem 0.4rem', background: 'rgba(139,92,246,0.1)', border: '1px solid var(--accent-purple)', borderRadius: '4px', color: 'var(--accent-purple)' }}>Type</span>
+              <span style={{ fontSize: '0.6rem', padding: '0.2rem 0.4rem', background: 'rgba(100,116,139,0.1)', border: '1px solid var(--text-muted)', borderRadius: '4px', color: 'var(--text-muted)' }}>Meta</span>
             </div>
           </div>
         </section>
 
-        {/* Slide 7: Communication Models - Enhanced with Animations */}
-        <section className="slide" id="slide-7" style={{ paddingTop: '60px' }}>
+        {/* Slide 8: Information Modeling Mechanics - Enhanced with real types.yaml */}
+        <section className="slide" id="slide-8" style={{ paddingTop: '60px' }}>
+          <div className="section-header" style={{ marginBottom: '0.8rem' }}>
+            <div className="section-number">SECTION 02 • INFORMATION MODELING</div>
+            <h2 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              From Blueprint to Reality
+              <span className="live-badge" style={{ fontSize: '0.7rem', background: 'rgba(139,92,246,0.1)', borderColor: 'var(--accent-purple)', color: 'var(--accent-purple)' }}>
+                types → OPC UA
+              </span>
+            </h2>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+            {/* Type Definition */}
+            <div className="content-card animate-fade-in" style={{ borderColor: 'var(--accent-purple)', padding: '1.2rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.8rem' }}>
+                <Database size={24} style={{ color: 'var(--accent-purple)' }} />
+                <h4 style={{ margin: 0, fontSize: '1.1rem', color: 'var(--accent-purple)' }}>1. Type Definition</h4>
+              </div>
+              <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>types</div>
+              <div className="code-block" style={{ fontSize: '0.9rem', maxHeight: '280px', overflowY: 'auto', padding: '0.8rem', lineHeight: '1.5' }}>
+                <span className="keyword">PumpType</span>:<br />
+                &nbsp;&nbsp;type: <span className="string">ObjectType</span><br />
+                &nbsp;&nbsp;base: <span className="string">AssetType</span><br />
+                &nbsp;&nbsp;description: <span className="string">"Centrifugal pump"</span><br />
+                &nbsp;&nbsp;components:<br />
+                &nbsp;&nbsp;&nbsp;&nbsp;<span className="keyword">FlowRate</span>:<br />
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;type: <span className="string">AnalogItemType</span><br />
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dataType: <span className="string">Double</span><br />
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;engineeringUnits: <span className="string">m³/h</span><br />
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;euRange: {'{'}low: <span className="number">0</span>, high: <span className="number">5000</span>{'}'}<br />
+                &nbsp;&nbsp;&nbsp;&nbsp;<span className="keyword">RPM</span>:<br />
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;type: <span className="string">AnalogItemType</span><br />
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;euRange: {'{'}low: <span className="number">0</span>, high: <span className="number">1800</span>{'}'}<br />
+                &nbsp;&nbsp;&nbsp;&nbsp;<span className="keyword">PowerConsumption</span>:<br />
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;engineeringUnits: <span className="string">kW</span><br />
+                &nbsp;&nbsp;methods:<br />
+                &nbsp;&nbsp;&nbsp;&nbsp;<span className="keyword">StartPump</span>, <span className="keyword">StopPump</span>, <span className="keyword">SetSpeed</span>
+              </div>
+            </div>
+
+            {/* Asset Instance */}
+            <div className="content-card animate-fade-in" style={{ borderColor: 'var(--accent-orange)', animationDelay: '0.1s', padding: '1.2rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.8rem' }}>
+                <Layers size={24} style={{ color: 'var(--accent-orange)' }} />
+                <h4 style={{ margin: 0, fontSize: '1.1rem', color: 'var(--accent-orange)' }}>2. Asset Instance</h4>
+              </div>
+              <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>assets</div>
+              <div className="code-block" style={{ fontSize: '0.9rem', maxHeight: '280px', overflowY: 'auto', padding: '0.8rem', lineHeight: '1.5' }}>
+                {'{'}<br />
+                &nbsp;&nbsp;<span className="keyword">"id"</span>: <span className="string">"IPS_PMP_001"</span>,<br />
+                &nbsp;&nbsp;<span className="keyword">"name"</span>: <span className="string">"Influent Pump 1"</span>,<br />
+                &nbsp;&nbsp;<span className="keyword">"type"</span>: <span className="string">"InfluentPumpType"</span>,<br />
+                &nbsp;&nbsp;<span className="keyword">"parent"</span>: <span className="string">"S00630"</span>,<br />
+                &nbsp;&nbsp;<span className="keyword">"simulate"</span>: <span className="number">true</span>,<br />
+                &nbsp;&nbsp;<span className="keyword">"properties"</span>: {'{'}<br />
+                &nbsp;&nbsp;&nbsp;&nbsp;<span className="keyword">"Manufacturer"</span>: <span className="string">"Flygt"</span>,<br />
+                &nbsp;&nbsp;&nbsp;&nbsp;<span className="keyword">"Model"</span>: <span className="string">"CP3300.900"</span><br />
+                &nbsp;&nbsp;{'}'},<br />
+                &nbsp;&nbsp;<span className="keyword">"designSpecs"</span>: {'{'}<br />
+                &nbsp;&nbsp;&nbsp;&nbsp;<span className="keyword">"DesignFlow"</span>: <span className="number">2500.0</span>,<br />
+                &nbsp;&nbsp;&nbsp;&nbsp;<span className="keyword">"MaxRPM"</span>: <span className="number">1180</span><br />
+                &nbsp;&nbsp;{'}'}<br />
+                {'}'}
+              </div>
+            </div>
+
+            {/* Live OPC UA Instance */}
+            <div className="content-card animate-fade-in" style={{ borderColor: 'var(--accent-green)', animationDelay: '0.2s', padding: '1.2rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.8rem' }}>
+                <Activity size={24} style={{ color: 'var(--accent-green)' }} />
+                <h4 style={{ margin: 0, fontSize: '1.1rem', color: 'var(--accent-green)' }}>3. Live OPC UA Node</h4>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>
+                <span>ns=1;s=IPS_PMP_001</span>
+                <span className="live-badge" style={{ fontSize: '0.75rem' }}>
+                  <div className="pulse-dot" style={{ width: '6px', height: '6px' }} />
+                  LIVE
+                </span>
+              </div>
+              <div style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '1rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.6rem' }}>
+                  <div style={{ width: '10px', height: '10px', background: 'var(--accent-green)', borderRadius: '50%' }} />
+                  <span style={{ fontSize: '1rem', fontWeight: 600 }}>IPS_PMP_001 : InfluentPumpType</span>
+                </div>
+                <div style={{ paddingLeft: '1rem', borderLeft: '3px solid var(--accent-green)', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  <div style={{ fontSize: '0.95rem', display: 'flex', justifyContent: 'space-between' }}>
+                    <span style={{ color: 'var(--text-muted)' }}>FlowRate:</span>
+                    <span style={{ color: 'var(--accent-cyan)', fontFamily: 'JetBrains Mono' }}>{(Object.values(pumpData)[0]?.flow_rate || 2340.5).toFixed(1)} m³/h</span>
+                  </div>
+                  <div style={{ fontSize: '0.95rem', display: 'flex', justifyContent: 'space-between' }}>
+                    <span style={{ color: 'var(--text-muted)' }}>RPM:</span>
+                    <span style={{ color: 'var(--accent-cyan)', fontFamily: 'JetBrains Mono' }}>{(Object.values(pumpData)[0]?.rpm || 1145).toFixed(0)}</span>
+                  </div>
+                  <div style={{ fontSize: '0.95rem', display: 'flex', justifyContent: 'space-between' }}>
+                    <span style={{ color: 'var(--text-muted)' }}>Power:</span>
+                    <span style={{ color: 'var(--accent-orange)', fontFamily: 'JetBrains Mono' }}>{(Object.values(pumpData)[0]?.power_consumption || 124.8).toFixed(1)} kW</span>
+                  </div>
+                  <div style={{ fontSize: '0.95rem', display: 'flex', justifyContent: 'space-between' }}>
+                    <span style={{ color: 'var(--text-muted)' }}>Status:</span>
+                    <span style={{ color: Object.values(pumpData)[0]?.is_running ? 'var(--accent-green)' : 'var(--accent-red)', fontFamily: 'JetBrains Mono' }}>
+                      {Object.values(pumpData)[0]?.is_running ? 'RUNNING' : 'STOPPED'}
+                    </span>
+                  </div>
+                </div>
+                <button className="btn-action" style={{ marginTop: '0.8rem', padding: '0.5rem 1rem', fontSize: '0.9rem' }} onClick={() => fetchPumps()}>
+                  <RefreshCw size={14} style={{ marginRight: '5px' }} /> Refresh
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Asset Hierarchy Visualization */}
+          <div className="diagram-container" style={{ padding: '1rem' }}>
+            <div className="diagram-title">Asset Hierarchy (assets → OPC UA Address Space)</div>
+            <svg viewBox="0 0 900 120" style={{ width: '100%', height: '120px' }}>
+              {/* Plant Level */}
+              <g transform="translate(50, 20)">
+                <rect width="100" height="30" rx="5" fill="var(--bg-elevated)" stroke="var(--accent-purple)" strokeWidth="2" />
+                <text x="50" y="20" fill="var(--accent-purple)" fontSize="8" textAnchor="middle" fontWeight="600">RC_RockCreek</text>
+                <text x="50" y="40" fill="var(--text-muted)" fontSize="6" textAnchor="middle">Plant</text>
+              </g>
+
+              {/* Process Level */}
+              <g transform="translate(200, 20)">
+                <rect width="100" height="30" rx="5" fill="var(--bg-elevated)" stroke="var(--accent-cyan)" strokeWidth="2" />
+                <text x="50" y="20" fill="var(--accent-cyan)" fontSize="8" textAnchor="middle" fontWeight="600">P0041_Preliminary</text>
+                <text x="50" y="40" fill="var(--text-muted)" fontSize="6" textAnchor="middle">Process</text>
+              </g>
+
+              {/* System Level */}
+              <g transform="translate(350, 20)">
+                <rect width="120" height="30" rx="5" fill="var(--bg-elevated)" stroke="var(--accent-orange)" strokeWidth="2" />
+                <text x="60" y="20" fill="var(--accent-orange)" fontSize="8" textAnchor="middle" fontWeight="600">S00630_InfluentPumping</text>
+                <text x="60" y="40" fill="var(--text-muted)" fontSize="6" textAnchor="middle">System</text>
+              </g>
+
+              {/* Asset Level - Pumps */}
+              <g transform="translate(520, 10)">
+                <rect width="80" height="25" rx="4" fill="var(--bg-elevated)" stroke="var(--accent-green)" strokeWidth="2" className="animate-glow" />
+                <text x="40" y="17" fill="var(--accent-green)" fontSize="7" textAnchor="middle" fontWeight="600">IPS_PMP_001</text>
+              </g>
+              <g transform="translate(620, 10)">
+                <rect width="80" height="25" rx="4" fill="var(--bg-elevated)" stroke="var(--accent-green)" strokeWidth="1.5" />
+                <text x="40" y="17" fill="var(--accent-green)" fontSize="7" textAnchor="middle" fontWeight="600">IPS_PMP_002</text>
+              </g>
+              <g transform="translate(720, 10)">
+                <rect width="80" height="25" rx="4" fill="var(--bg-elevated)" stroke="var(--accent-green)" strokeWidth="1.5" />
+                <text x="40" y="17" fill="var(--accent-green)" fontSize="7" textAnchor="middle" fontWeight="600">IPS_PMP_003</text>
+              </g>
+              <g transform="translate(820, 10)">
+                <rect width="70" height="25" rx="4" fill="var(--bg-elevated)" stroke="var(--accent-pink)" strokeWidth="1.5" />
+                <text x="35" y="17" fill="var(--accent-pink)" fontSize="7" textAnchor="middle" fontWeight="600">IPS_WW_001</text>
+              </g>
+
+              {/* Connection lines */}
+              <line x1="150" y1="35" x2="200" y2="35" stroke="var(--text-muted)" strokeWidth="1" strokeDasharray="4 2" />
+              <line x1="300" y1="35" x2="350" y2="35" stroke="var(--text-muted)" strokeWidth="1" strokeDasharray="4 2" />
+              <line x1="470" y1="35" x2="520" y2="22" stroke="var(--text-muted)" strokeWidth="1" strokeDasharray="4 2" />
+              <line x1="470" y1="35" x2="620" y2="22" stroke="var(--text-muted)" strokeWidth="1" strokeDasharray="4 2" />
+              <line x1="470" y1="35" x2="720" y2="22" stroke="var(--text-muted)" strokeWidth="1" strokeDasharray="4 2" />
+              <line x1="470" y1="35" x2="820" y2="22" stroke="var(--text-muted)" strokeWidth="1" strokeDasharray="4 2" />
+
+              {/* Type inheritance */}
+              <g transform="translate(520, 50)">
+                <text x="0" y="10" fill="var(--text-muted)" fontSize="6">HasTypeDefinition ↓</text>
+                <rect x="0" y="15" width="80" height="20" rx="3" fill="rgba(139,92,246,0.1)" stroke="var(--accent-purple)" strokeWidth="1" strokeDasharray="3 2" />
+                <text x="40" y="28" fill="var(--accent-purple)" fontSize="6" textAnchor="middle">InfluentPumpType</text>
+              </g>
+
+              {/* Stats */}
+              <g transform="translate(650, 60)">
+                <rect width="240" height="50" rx="5" fill="var(--bg-dark)" stroke="var(--border-color)" />
+                <a href="/assets" target="_blank" style={{ cursor: 'pointer' }}>
+                  <text x="10" y="18" fill="var(--accent-purple)" fontSize="7" style={{ textDecoration: 'underline' }}>Asset Summary (assets) →</text>
+                </a>
+                <text x="10" y="32" fill="var(--accent-cyan)" fontSize="7">• 7 InfluentPumpType • 4 PumpType</text>
+                <text x="10" y="44" fill="var(--accent-pink)" fontSize="7">• 7 ChamberType • 15 Simulated</text>
+              </g>
+            </svg>
+          </div>
+
+          <div className="highlight-box" style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+            <div style={{ flex: 1 }}>
+              <p style={{ margin: 0 }}><strong>Strong Typing:</strong> <code>PumpType</code> defines 27 sensor data points, 4 methods, and 6 alarm types. Every pump instance automatically inherits the complete schema.</p>
+            </div>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <span className="protocol-badge" style={{ background: 'rgba(139,92,246,0.1)', borderColor: 'var(--accent-purple)', color: 'var(--accent-purple)' }}>27 Data Points</span>
+              <span className="protocol-badge" style={{ background: 'rgba(16,185,129,0.1)', borderColor: 'var(--accent-green)', color: 'var(--accent-green)' }}>4 Methods</span>
+              <span className="protocol-badge" style={{ background: 'rgba(239,68,68,0.1)', borderColor: 'var(--accent-red)', color: 'var(--accent-red)' }}>6 Alarms</span>
+            </div>
+          </div>
+        </section>
+
+
+        {/* Slide 9: Communication Models - Enhanced with Animations */}
+        <section className="slide" id="slide-9" style={{ paddingTop: '60px' }}>
           <div className="section-header" style={{ marginBottom: '1rem' }}>
-            <div className="section-number">SECTION 02 • 5–12 MINUTES</div>
+            <div className="section-number">SECTION 03 • 5–12 MINUTES</div>
             <h2 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
               Core Concepts
               <span className="live-badge animate-glow" style={{ fontSize: '0.7rem' }}>
@@ -3038,533 +3659,550 @@ export default function ArchitecturePage() {
             </div>
           </div>
         </section>
-
-        {/* Slide 8: SecureChannel vs Session - Enhanced with Animations */}
-        <section className="slide" id="slide-8" style={{ paddingTop: '60px' }}>
-          <div className="section-header" style={{ marginBottom: '0.8rem' }}>
-            <div className="section-number">SECTION 02 • SECURITY LAYERS</div>
+        {/* Slide 10: Interoperability - Complete OPC-UA Architecture */}
+        <section className="slide" id="slide-10" style={{ paddingTop: '60px' }}>
+          <div className="section-header" style={{ marginBottom: '1rem' }}>
+            <div className="section-number">SECTION 03 • COMMUNICATION ARCHITECTURE</div>
             <h2 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-              SecureChannel vs Session
+              Cross-Platform Interoperability
               <span className="live-badge animate-glow" style={{ fontSize: '0.7rem' }}>
                 <div className="pulse-dot" />
-                DUAL PROTECTION
+                DUAL MODEL
               </span>
             </h2>
-            <p className="section-goal">Goal: Understand why OPC UA needs BOTH layers</p>
           </div>
 
-          {/* Main Animated Diagram - Layered Security */}
-          <div className="diagram-container" style={{ padding: '1rem', marginBottom: '1rem' }}>
-            <svg viewBox="0 0 900 265" style={{ width: '100%', height: '265px' }}>
-              <defs>
-                {/* SecureChannel gradient (purple tunnel) */}
-                <linearGradient id="scTunnelGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="var(--accent-purple)" stopOpacity="0.3" />
-                  <stop offset="50%" stopColor="var(--accent-purple)" stopOpacity="0.1" />
-                  <stop offset="100%" stopColor="var(--accent-purple)" stopOpacity="0.3" />
-                </linearGradient>
-                {/* Session gradient (orange inner) */}
-                <linearGradient id="sessionGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="var(--accent-orange)" stopOpacity="0.3" />
-                  <stop offset="50%" stopColor="var(--accent-orange)" stopOpacity="0.15" />
-                  <stop offset="100%" stopColor="var(--accent-orange)" stopOpacity="0.3" />
-                </linearGradient>
-                <filter id="secGlow">
-                  <feGaussianBlur stdDeviation="2" result="blur" />
-                  <feComposite in="SourceGraphic" in2="blur" operator="over" />
-                </filter>
-                {/* Encryption pattern */}
-                <pattern id="encryptPattern" width="20" height="20" patternUnits="userSpaceOnUse">
-                  <text x="2" y="14" fill="var(--accent-purple)" fontSize="12" opacity="0.3">01</text>
-                </pattern>
-              </defs>
-
-              {/* Client */}
-              <g transform="translate(30, 70)">
-                <rect width="120" height="100" rx="12" fill={theme === 'business' ? '#f8fafc' : 'var(--bg-elevated)'} stroke="var(--accent-cyan)" strokeWidth="3" />
-                <rect x="15" y="14" width="90" height="32" rx="5" fill={theme === 'business' ? '#e0f2fe' : 'rgba(0,212,255,0.1)'} stroke="var(--accent-cyan)" strokeWidth="1.5" />
-                <text x="60" y="36" fill="var(--accent-cyan)" fontSize="14" textAnchor="middle" fontWeight="600">SCADA App</text>
-                <circle cx="35" cy="68" r="16" fill={theme === 'business' ? '#fef3c7' : 'rgba(245,158,11,0.2)'} stroke="var(--accent-orange)" strokeWidth="2" />
-                <text x="35" y="74" fill="var(--accent-orange)" fontSize="14" textAnchor="middle" fontWeight="700">👤</text>
-                <text x="70" y="65" fill={theme === 'business' ? '#334155' : 'var(--text-secondary)'} fontSize="11">Operator</text>
-                <text x="70" y="80" fill={theme === 'business' ? '#64748b' : 'var(--text-muted)'} fontSize="10">Role: Control</text>
-                <text x="60" y="118" fill={theme === 'business' ? '#0f172a' : 'var(--text-primary)'} fontSize="16" textAnchor="middle" fontWeight="700">CLIENT</text>
-              </g>
-
-              {/* Server */}
-              <g transform="translate(750, 70)">
-                <rect width="120" height="100" rx="12" fill={theme === 'business' ? '#f8fafc' : 'var(--bg-elevated)'} stroke="var(--accent-green)" strokeWidth="3" />
-                <rect x="15" y="14" width="90" height="32" rx="5" fill={theme === 'business' ? '#dcfce7' : 'rgba(16,185,129,0.1)'} stroke="var(--accent-green)" strokeWidth="1.5" />
-                <text x="60" y="36" fill="var(--accent-green)" fontSize="13" textAnchor="middle" fontWeight="600">OPC UA Server</text>
-                <rect x="18" y="55" width="84" height="26" rx="4" fill={theme === 'business' ? '#f1f5f9' : 'var(--bg-dark)'} stroke={theme === 'business' ? '#cbd5e1' : 'var(--border-color)'} strokeWidth="1.5" />
-                <text x="60" y="73" fill={theme === 'business' ? '#475569' : 'var(--text-muted)'} fontSize="11" textAnchor="middle">Address Space</text>
-                <text x="60" y="118" fill={theme === 'business' ? '#0f172a' : 'var(--text-primary)'} fontSize="16" textAnchor="middle" fontWeight="700">SERVER</text>
-              </g>
-
-              {/* SecureChannel - Outer Tunnel */}
-              <g>
-                {/* Top border of tunnel */}
-                <path d="M160 50 L740 50" stroke="var(--accent-purple)" strokeWidth="4" strokeDasharray="10 5" opacity="0.7" />
-                {/* Bottom border of tunnel */}
-                <path d="M160 195 L740 195" stroke="var(--accent-purple)" strokeWidth="4" strokeDasharray="10 5" opacity="0.7" />
-                {/* Tunnel fill */}
-                <rect x="160" y="50" width="580" height="145" fill="url(#scTunnelGrad)" rx="10" />
-                {/* Encryption symbols floating */}
-                <text x="180" y="78" fill="var(--accent-purple)" fontSize="14" opacity="0.5" fontFamily="JetBrains Mono">
-                  <animate attributeName="opacity" values="0.3;0.7;0.3" dur="2s" repeatCount="indefinite" />
-                  AES-256
-                </text>
-                <text x="630" y="78" fill="var(--accent-purple)" fontSize="14" opacity="0.5" fontFamily="JetBrains Mono">
-                  <animate attributeName="opacity" values="0.3;0.7;0.3" dur="2s" begin="1s" repeatCount="indefinite" />
-                  RSA-2048
-                </text>
-                {/* Lock icons on tunnel */}
-                <g transform="translate(165, 115)">
-                  <rect width="32" height="28" rx="4" fill="var(--accent-purple)" opacity="0.8" />
-                  <text x="16" y="20" fill="white" fontSize="14" textAnchor="middle">🔐</text>
-                </g>
-                <g transform="translate(703, 115)">
-                  <rect width="32" height="28" rx="4" fill="var(--accent-purple)" opacity="0.8" />
-                  <text x="16" y="20" fill="white" fontSize="14" textAnchor="middle">🔐</text>
-                </g>
-                {/* SecureChannel Label */}
-                <rect x="360" y="36" width="180" height="30" rx="5" fill={theme === 'business' ? '#ede9fe' : 'rgba(139,92,246,0.3)'} stroke="var(--accent-purple)" strokeWidth="2" />
-                <text x="450" y="57" fill="var(--accent-purple)" fontSize="16" textAnchor="middle" fontWeight="700">SECURE CHANNEL</text>
-              </g>
-
-              {/* Session - Inner Layer */}
-              <g>
-                <rect x="200" y="88" width="500" height="80" rx="8" fill="url(#sessionGrad)" stroke="var(--accent-orange)" strokeWidth="2" strokeDasharray="8 4" />
-                {/* Session state indicator */}
-                <rect x="208" y="96" width="100" height="24" rx="4" fill={theme === 'business' ? '#fef3c7' : 'rgba(245,158,11,0.2)'} stroke="var(--accent-orange)" strokeWidth="1.5" />
-                <text x="258" y="113" fill="var(--accent-orange)" fontSize="11" textAnchor="middle" fontWeight="600">SessionId: 42</text>
-                <rect x="592" y="96" width="100" height="24" rx="4" fill={theme === 'business' ? '#fef3c7' : 'rgba(245,158,11,0.2)'} stroke="var(--accent-orange)" strokeWidth="1.5" />
-                <text x="642" y="113" fill="var(--accent-orange)" fontSize="11" textAnchor="middle" fontWeight="600">AuthToken ✓</text>
-                {/* Session Label */}
-                <rect x="395" y="150" width="110" height="26" rx="5" fill={theme === 'business' ? '#fef3c7' : 'rgba(245,158,11,0.3)'} stroke="var(--accent-orange)" strokeWidth="2" />
-                <text x="450" y="169" fill="var(--accent-orange)" fontSize="14" textAnchor="middle" fontWeight="700">SESSION</text>
-              </g>
-
-              {/* Animated Message Flow */}
-              <g>
-                {/* Request message (encrypted) */}
-                <g filter="url(#secGlow)">
-                  <rect width="90" height="32" rx="5" fill="var(--accent-cyan)">
-                    <animate attributeName="x" values="210;600" dur="3s" repeatCount="indefinite" />
-                    <animate attributeName="y" values="112;112" dur="3s" repeatCount="indefinite" />
-                  </rect>
-                  <text fontSize="11" fill="white" fontWeight="600" textAnchor="middle">
-                    <animate attributeName="x" values="255;645" dur="3s" repeatCount="indefinite" />
-                    <animate attributeName="y" values="133" dur="3s" repeatCount="indefinite" />
-                    ReadRequest
-                  </text>
-                  {/* Encryption overlay effect */}
-                  <rect width="90" height="32" rx="5" fill="url(#encryptPattern)" opacity="0.5">
-                    <animate attributeName="x" values="210;600" dur="3s" repeatCount="indefinite" />
-                    <animate attributeName="y" values="112;112" dur="3s" repeatCount="indefinite" />
-                    <animate attributeName="opacity" values="0.5;0.2;0.5" dur="0.5s" repeatCount="indefinite" />
-                  </rect>
-                </g>
-
-                {/* Response message (encrypted) */}
-                <g filter="url(#secGlow)">
-                  <rect width="90" height="32" rx="5" fill="var(--accent-green)">
-                    <animate attributeName="x" values="600;210" dur="3s" begin="1.5s" repeatCount="indefinite" />
-                    <animate attributeName="y" values="112;112" dur="3s" begin="1.5s" repeatCount="indefinite" />
-                  </rect>
-                  <text fontSize="11" fill="white" fontWeight="600" textAnchor="middle">
-                    <animate attributeName="x" values="645;255" dur="3s" begin="1.5s" repeatCount="indefinite" />
-                    <animate attributeName="y" values="133" dur="3s" begin="1.5s" repeatCount="indefinite" />
-                    DataValue
-                  </text>
-                  <rect width="90" height="32" rx="5" fill="url(#encryptPattern)" opacity="0.5">
-                    <animate attributeName="x" values="600;210" dur="3s" begin="1.5s" repeatCount="indefinite" />
-                    <animate attributeName="y" values="112;112" dur="3s" begin="1.5s" repeatCount="indefinite" />
-                    <animate attributeName="opacity" values="0.5;0.2;0.5" dur="0.5s" repeatCount="indefinite" />
-                  </rect>
-                </g>
-              </g>
-
-              {/* Legend */}
-              <g transform="translate(280, 225)">
-                <rect x="0" y="0" width="22" height="14" rx="3" fill="var(--accent-purple)" opacity="0.5" />
-                <text x="30" y="12" fill={theme === 'business' ? '#475569' : 'var(--text-muted)'} fontSize="12">Encrypted Tunnel</text>
-                <rect x="160" y="0" width="22" height="14" rx="3" fill="var(--accent-orange)" opacity="0.5" />
-                <text x="190" y="12" fill={theme === 'business' ? '#475569' : 'var(--text-muted)'} fontSize="12">User Context</text>
-                <rect x="300" y="0" width="22" height="14" rx="3" fill="var(--accent-cyan)" />
-                <text x="330" y="12" fill={theme === 'business' ? '#475569' : 'var(--text-muted)'} fontSize="12">Message</text>
-              </g>
-            </svg>
-          </div>
-
-          {/* Two Column Comparison with Enhanced Details */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1rem' }}>
-            {/* SecureChannel */}
-            <div className="comm-model-card" style={{ borderColor: 'var(--accent-purple)', padding: '1.2rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                  <Lock size={28} style={{ color: 'var(--accent-purple)' }} />
-                  <h3 style={{ margin: 0, fontSize: '1.4rem', color: 'var(--accent-purple)', fontWeight: 700 }}>SecureChannel</h3>
-                </div>
-                <span style={{
-                  fontSize: '0.75rem',
-                  padding: '0.3rem 0.6rem',
-                  background: 'rgba(139,92,246,0.1)',
-                  border: '1px solid var(--accent-purple)',
-                  borderRadius: '4px',
-                  color: 'var(--accent-purple)',
-                  fontWeight: 600
-                }}>TRANSPORT LAYER</span>
+          {/* Main Architecture Diagram */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr auto 1fr',
+            gap: '1.5rem',
+            alignItems: 'stretch',
+            marginBottom: '1.5rem'
+          }}>
+            {/* Left: Client-Server Model */}
+            <div className="comm-model-card" style={{ borderColor: 'var(--accent-cyan)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
+                <ArrowLeftRight size={20} style={{ color: 'var(--accent-cyan)' }} />
+                <h3 style={{ margin: 0, fontSize: '1rem', color: 'var(--accent-cyan)' }}>Client–Server Model</h3>
               </div>
-
-              <div style={{ fontSize: '1.05rem', color: theme === 'business' ? '#475569' : 'var(--text-secondary)', marginBottom: '1rem', lineHeight: 1.5 }}>
-                Protects the <strong style={{ color: 'var(--accent-purple)' }}>PIPE</strong> — ensures no one can read or tamper with messages in transit
-              </div>
-
-              {/* Visual: Encryption Process */}
-              <svg viewBox="0 0 280 80" style={{ width: '100%', height: '80px', marginBottom: '0.8rem' }}>
-                <rect x="5" y="18" width="70" height="40" rx="5" fill={theme === 'business' ? '#f1f5f9' : 'var(--bg-dark)'} stroke={theme === 'business' ? '#cbd5e1' : 'var(--border-color)'} strokeWidth="1.5" />
-                <text x="40" y="44" fill={theme === 'business' ? '#334155' : 'var(--text-secondary)'} fontSize="12" textAnchor="middle">Plain MSG</text>
-
-                <text x="92" y="42" fill="var(--accent-purple)" fontSize="20">→</text>
-
-                <rect x="105" y="12" width="90" height="52" rx="5" fill={theme === 'business' ? '#ede9fe' : 'rgba(139,92,246,0.2)'} stroke="var(--accent-purple)" strokeWidth="2" />
-                <text x="150" y="34" fill="var(--accent-purple)" fontSize="11" textAnchor="middle" fontWeight="600">🔐 ENCRYPT</text>
-                <text x="150" y="52" fill="var(--accent-purple)" fontSize="11" textAnchor="middle" fontWeight="600">✍️ SIGN</text>
-
-                <text x="210" y="42" fill="var(--accent-purple)" fontSize="20">→</text>
-
-                <rect x="222" y="18" width="55" height="40" rx="5" fill="var(--accent-purple)" opacity="0.8" />
-                <text x="249" y="36" fill="white" fontSize="9" textAnchor="middle" fontFamily="JetBrains Mono">x9f3a7...</text>
-                <text x="249" y="52" fill="white" fontSize="10" textAnchor="middle" fontWeight="600">Secured</text>
-              </svg>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                {[
-                  { icon: '🔐', text: 'AES-256 encryption for confidentiality' },
-                  { icon: '✍️', text: 'SHA-256 signatures for integrity' },
-                  { icon: '📜', text: 'X.509 certificates for identity' },
-                  { icon: '🔄', text: 'Automatic key renewal' }
-                ].map((item, i) => (
-                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.95rem', color: theme === 'business' ? '#334155' : 'var(--text-secondary)' }}>
-                    <span style={{ fontSize: '1.1rem' }}>{item.icon}</span>
-                    <span>{item.text}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Session */}
-            <div className="comm-model-card" style={{ borderColor: 'var(--accent-orange)', padding: '1.2rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                  <User size={28} style={{ color: 'var(--accent-orange)' }} />
-                  <h3 style={{ margin: 0, fontSize: '1.4rem', color: 'var(--accent-orange)', fontWeight: 700 }}>Session</h3>
-                </div>
-                <span style={{
-                  fontSize: '0.75rem',
-                  padding: '0.3rem 0.6rem',
-                  background: 'rgba(245,158,11,0.1)',
-                  border: '1px solid var(--accent-orange)',
-                  borderRadius: '4px',
-                  color: 'var(--accent-orange)',
-                  fontWeight: 600
-                }}>APPLICATION LAYER</span>
-              </div>
-
-              <div style={{ fontSize: '1.05rem', color: theme === 'business' ? '#475569' : 'var(--text-secondary)', marginBottom: '1rem', lineHeight: 1.5 }}>
-                Protects the <strong style={{ color: 'var(--accent-orange)' }}>INTENT</strong> — ensures only authorized users perform allowed actions
-              </div>
-
-              {/* Visual: Authentication Flow */}
-              <svg viewBox="0 0 280 80" style={{ width: '100%', height: '80px', marginBottom: '0.8rem' }}>
-                <circle cx="32" cy="40" r="24" fill={theme === 'business' ? '#fef3c7' : 'rgba(245,158,11,0.2)'} stroke="var(--accent-orange)" strokeWidth="2" />
-                <text x="32" y="47" fontSize="22" textAnchor="middle">👤</text>
-
-                <text x="72" y="44" fill="var(--accent-orange)" fontSize="20">→</text>
-
-                <rect x="88" y="12" width="100" height="52" rx="5" fill={theme === 'business' ? '#fef3c7' : 'rgba(245,158,11,0.2)'} stroke="var(--accent-orange)" strokeWidth="2" />
-                <text x="138" y="34" fill="var(--accent-orange)" fontSize="10" textAnchor="middle" fontWeight="600">AUTHENTICATE</text>
-                <text x="138" y="52" fill="var(--accent-orange)" fontSize="10" textAnchor="middle" fontWeight="600">AUTHORIZE</text>
-
-                <text x="205" y="44" fill="var(--accent-orange)" fontSize="20">→</text>
-
-                <rect x="218" y="14" width="60" height="48" rx="5" fill="var(--accent-orange)" opacity="0.8" />
-                <text x="248" y="34" fill="white" fontSize="10" textAnchor="middle" fontWeight="600">Operator</text>
-                <text x="248" y="52" fill="white" fontSize="10" textAnchor="middle">Role: Write ✓</text>
-              </svg>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                {[
-                  { icon: '👤', text: 'User identity & authentication' },
-                  { icon: '🎭', text: 'Role-based access control (RBAC)' },
-                  { icon: '📋', text: 'Operation-level authorization' },
-                  { icon: '📝', text: 'Audit trail per user action' }
-                ].map((item, i) => (
-                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.95rem', color: theme === 'business' ? '#334155' : 'var(--text-secondary)' }}>
-                    <span style={{ fontSize: '1.1rem' }}>{item.icon}</span>
-                    <span>{item.text}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Why Both? Explanation */}
-          <div className="highlight-box" style={{ display: 'flex', alignItems: 'stretch', gap: '1rem', padding: '1rem' }}>
-            <div style={{ flex: 1, borderRight: '1px solid var(--border-color)', paddingRight: '1rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.4rem' }}>
-                <AlertTriangle size={16} style={{ color: 'var(--accent-red)' }} />
-                <strong style={{ color: 'var(--accent-red)', fontSize: '0.85rem' }}>Without SecureChannel</strong>
-              </div>
-              <p style={{ margin: 0, fontSize: '0.8rem', color: theme === 'business' ? '#475569' : 'var(--text-secondary)' }}>
-                Attackers can intercept credentials, replay commands, or modify pump setpoints in transit
+              <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
+                Bidirectional • Stateful Sessions • Interactive Control
               </p>
-            </div>
-            <div style={{ flex: 1, borderRight: '1px solid var(--border-color)', paddingRight: '1rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.4rem' }}>
-                <AlertTriangle size={16} style={{ color: 'var(--accent-red)' }} />
-                <strong style={{ color: 'var(--accent-red)', fontSize: '0.85rem' }}>Without Session</strong>
+
+              {/* Protocol Badges */}
+              <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
+                <span className="protocol-badge protocol-tcp">
+                  <Cable size={12} /> TCP/IP :4840
+                </span>
+                <span className="protocol-badge protocol-ws">
+                  <Wifi size={12} /> WebSocket
+                </span>
               </div>
-              <p style={{ margin: 0, fontSize: '0.8rem', color: theme === 'business' ? '#475569' : 'var(--text-secondary)' }}>
-                Any encrypted client could control critical pumps — no accountability or access control
-              </p>
-            </div>
-            <div style={{ flex: 1 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.4rem' }}>
-                <Shield size={16} style={{ color: 'var(--accent-green)' }} />
-                <strong style={{ color: 'var(--accent-green)', fontSize: '0.85rem' }}>With Both</strong>
-              </div>
-              <p style={{ margin: 0, fontSize: '0.8rem', color: theme === 'business' ? '#475569' : 'var(--text-secondary)' }}>
-                Defense in depth: encrypted transport + authenticated users = industrial-grade security
-              </p>
-            </div>
-          </div>
-        </section>
 
-        {/* Slide 9: Address Space */}
-        <section className="slide" id="slide-9">
-          <div className="section-header">
-            <div className="section-number">SECTION 03 • 12–22 MINUTES</div>
-            <h2 className="section-title">Address Space: Heart of OPC UA</h2>
-            <p className="section-goal">Goal: Explain semantics and structure</p>
-          </div>
-          <div className="two-column">
-            <div className="content-card" style={{ borderColor: '#ef4444' }}>
-              <h3 style={{ color: '#ef4444' }}>
-                <span className="icon" style={{ background: 'rgba(239,68,68,0.1)' }}>❌</span> NOT Flat Tags
-              </h3>
-              <div className="code-block" style={{ height: '140px' }}>
-                <span className="comment">// Traditional Modbus/S7 approach</span><br />
-                HR_40001 = <span className="number">1450</span><br />
-                HR_40002 = <span className="number">75.3</span><br />
-                <span className="comment">// If documentation is lost, meaning is lost.</span>
-              </div>
-            </div>
-            <div className="content-card" style={{ borderColor: '#10b981' }}>
-              <h3 style={{ color: '#10b981' }}>
-                <span className="icon" style={{ background: 'rgba(16,185,129,0.1)' }}>✓</span> Graph of Nodes
-              </h3>
-              <div className="code-block" style={{ height: '140px', position: 'relative' }}>
-                <div style={{ position: 'absolute', top: '10px', right: '10px' }}>
-                  <span className="live-badge" style={{ fontSize: '0.6rem' }}>Live Graph</span>
-                </div>
-                <span className="comment">// OPC UA Information Model</span><br />
-                Pump_01 <span className="comment">(Instance of PumpType)</span><br />
-                &nbsp;├─ Speed = <span className="number">{(Object.values(pumpData)[0]?.rpm || 1450).toFixed(0)}</span> <span className="keyword">RPM</span><br />
-                &nbsp;├─ Status = <span className="string">{Object.values(pumpData)[0]?.is_running ? 'Running' : 'Stopped'}</span><br />
-                &nbsp;└─ Power = <span className="number">{(Object.values(pumpData)[0]?.power_consumption || 12.4).toFixed(1)}</span> <span className="keyword">kW</span>
-              </div>
-            </div>
-          </div>
-          <div className="diagram-container" style={{ textAlign: 'center' }}>
-            <div className="diagram-title">Hierarchical Reference Model</div>
-            <svg viewBox="0 0 600 120" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="300" cy="30" r="20" fill="none" stroke="var(--accent-cyan)" strokeWidth="2" />
-              <text x="300" y="34" fill="var(--accent-cyan)" fontSize="8" textAnchor="middle">Objects</text>
-
-              <line x1="300" y1="50" x2="200" y2="90" stroke="var(--text-muted)" strokeWidth="1" strokeDasharray="4" />
-              <line x1="300" y1="50" x2="400" y2="90" stroke="var(--text-muted)" strokeWidth="1" strokeDasharray="4" />
-
-              <rect x="170" y="90" width="60" height="20" rx="3" fill="var(--bg-elevated)" stroke="var(--accent-green)" />
-              <text x="200" y="103" fill="var(--accent-green)" fontSize="7" textAnchor="middle">Pump_1</text>
-
-              <rect x="370" y="90" width="60" height="20" rx="3" fill="var(--bg-elevated)" stroke="var(--accent-green)" />
-              <text x="400" y="103" fill="var(--accent-green)" fontSize="7" textAnchor="middle">Pump_2</text>
-
-              <text x="250" y="70" fill="var(--text-muted)" fontSize="6" transform="rotate(-22,250,70)">Organizes</text>
-              <text x="350" y="70" fill="var(--text-muted)" fontSize="6" transform="rotate(22,350,70)">Organizes</text>
-            </svg>
-          </div>
-          <div className="highlight-box">
-            <p><strong>Address Space</strong> is a graph-based model where nodes represent assets and references represent their relationships (e.g., <em>HasComponent, Organizes, HasTypeDefinition</em>).</p>
-          </div>
-        </section>
-
-        {/* Slide 10: NodeClasses - Enhanced with Icons and Animations */}
-        <section className="slide" id="slide-10">
-          <div className="section-header">
-            <div className="section-number">SECTION 03 • NODECLASSES</div>
-            <h2 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-              8 NodeClasses
-              <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 400 }}>(OPC 10000-3)</span>
-            </h2>
-          </div>
-
-          {/* Categorized NodeClasses */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.8rem', marginBottom: '1rem' }}>
-            {[
-              { name: 'Object', desc: 'Container for variables, methods, and other objects', icon: <Database size={22} />, color: 'var(--accent-cyan)', category: 'Instance', example: 'Pump_01' },
-              { name: 'Variable', desc: 'Holds data values with DataType and AccessLevel', icon: <Activity size={22} />, color: 'var(--accent-green)', category: 'Instance', example: 'FlowRate = 2340.5' },
-              { name: 'Method', desc: 'Callable function with input/output arguments', icon: <Play size={22} />, color: 'var(--accent-orange)', category: 'Instance', example: 'StartPump()' },
-              { name: 'ObjectType', desc: 'Template defining structure for Objects', icon: <Layers size={22} />, color: 'var(--accent-purple)', category: 'Type', example: 'PumpType' },
-              { name: 'VariableType', desc: 'Template for Variable nodes', icon: <LayoutGrid size={22} />, color: 'var(--accent-pink)', category: 'Type', example: 'AnalogItemType' },
-              { name: 'ReferenceType', desc: 'Defines relationships between nodes', icon: <ArrowLeftRight size={22} />, color: 'var(--accent-cyan)', category: 'Meta', example: 'HasComponent' },
-              { name: 'DataType', desc: 'Defines value types (Int32, String, etc.)', icon: <Server size={22} />, color: 'var(--accent-green)', category: 'Meta', example: 'Double, Boolean' },
-              { name: 'View', desc: 'Filtered subset of Address Space', icon: <Globe size={22} />, color: 'var(--accent-orange)', category: 'Meta', example: 'OperatorView' },
-            ].map((node, i) => (
-              <div
-                key={i}
-                className="content-card animate-fade-in"
-                style={{
-                  padding: '1rem',
-                  borderColor: node.color,
-                  animationDelay: `${i * 0.05}s`,
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-4px) scale(1.02)';
-                  e.currentTarget.style.boxShadow = `0 8px 25px ${node.color}30`;
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0) scale(1)';
-                  e.currentTarget.style.boxShadow = 'none';
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.6rem' }}>
-                  <div style={{
-                    width: '38px',
-                    height: '38px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    background: `${node.color}15`,
-                    borderRadius: '8px',
-                    color: node.color
-                  }}>
-                    {node.icon}
+              {/* Client Icons */}
+              <div style={{ display: 'flex', gap: '0.8rem', justifyContent: 'center', marginTop: '1rem' }}>
+                <div className="client-icon-box">
+                  <div className="icon-wrapper" style={{ background: 'rgba(0, 212, 255, 0.1)' }}>
+                    <Monitor size={24} style={{ color: 'var(--accent-cyan)' }} />
                   </div>
-                  <div>
-                    <div style={{ fontFamily: 'JetBrains Mono', fontSize: '1rem', fontWeight: 700, color: node.color }}>{node.name}</div>
-                    <span style={{
-                      fontSize: '0.7rem',
-                      padding: '0.15rem 0.4rem',
-                      background: `${node.color}20`,
-                      borderRadius: '4px',
-                      color: node.color,
-                      fontWeight: 600
-                    }}>{node.category}</span>
-                  </div>
+                  <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>Desktop</span>
+                  <span className="protocol-badge protocol-tcp" style={{ marginTop: '0.3rem', fontSize: '0.55rem' }}>TCP/IP</span>
                 </div>
-                <p style={{ fontSize: '0.85rem', color: theme === 'business' ? '#475569' : 'var(--text-secondary)', margin: '0 0 0.5rem 0', lineHeight: 1.5 }}>{node.desc}</p>
+                <div className="client-icon-box">
+                  <div className="icon-wrapper" style={{ background: 'rgba(139, 92, 246, 0.1)' }}>
+                    <Globe size={24} style={{ color: 'var(--accent-purple)' }} />
+                  </div>
+                  <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>Web Client</span>
+                  <span className="protocol-badge protocol-ws" style={{ marginTop: '0.3rem', fontSize: '0.55rem' }}>WebSocket</span>
+                </div>
+                <div className="client-icon-box">
+                  <div className="icon-wrapper" style={{ background: 'rgba(236, 72, 153, 0.1)' }}>
+                    <Smartphone size={24} style={{ color: 'var(--accent-pink)' }} />
+                  </div>
+                  <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>Mobile</span>
+                  <span className="protocol-badge protocol-ws" style={{ marginTop: '0.3rem', fontSize: '0.55rem' }}>WebSocket</span>
+                </div>
+              </div>
+
+              {/* Connection Animation */}
+              <div style={{ position: 'relative', height: '40px', marginTop: '1rem' }}>
+                <svg width="100%" height="40" viewBox="0 0 300 40">
+                  <defs>
+                    <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" stopColor="var(--accent-cyan)" />
+                      <stop offset="100%" stopColor="var(--accent-green)" />
+                    </linearGradient>
+                  </defs>
+                  <path d="M50 20 L250 20" stroke="url(#lineGradient)" strokeWidth="2" className="connection-line" fill="none" />
+                  <circle cx="150" cy="20" r="4" fill="var(--accent-cyan)">
+                    <animate attributeName="cx" values="50;250;50" dur="3s" repeatCount="indefinite" />
+                  </circle>
+                  <text x="150" y="35" textAnchor="middle" fill="var(--text-muted)" fontSize="8">Request/Response</text>
+                </svg>
+              </div>
+            </div>
+
+            {/* Center: OPC UA Server */}
+            <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+              <div className="server-core animate-glow" style={{ width: '200px' }}>
                 <div style={{
-                  fontSize: '0.8rem',
-                  fontFamily: 'JetBrains Mono',
-                  color: node.color,
-                  background: theme === 'business' ? '#f1f5f9' : 'var(--bg-dark)',
-                  padding: '0.4rem 0.6rem',
-                  borderRadius: '5px',
-                  opacity: 0.9
+                  width: '60px',
+                  height: '60px',
+                  margin: '0 auto 0.8rem',
+                  background: 'linear-gradient(135deg, var(--accent-green), var(--accent-cyan))',
+                  borderRadius: '16px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
                 }}>
-                  {node.example}
+                  <Server size={32} style={{ color: 'white' }} />
                 </div>
+                <h3 style={{ margin: '0 0 0.3rem', fontSize: '1rem', color: theme === 'business' ? '#0f172a' : 'white' }}>OPC UA Server</h3>
+                <p style={{ margin: 0, fontSize: '0.7rem', color: 'var(--accent-green)' }}>Simulation Engine</p>
+                <div style={{
+                  marginTop: '0.8rem',
+                  padding: '0.4rem',
+                  background: 'var(--bg-dark)',
+                  borderRadius: '6px',
+                  fontFamily: 'JetBrains Mono',
+                  fontSize: '0.6rem',
+                  color: 'var(--accent-cyan)'
+                }}>
+                  opc.tcp://localhost:4840
+                </div>
+              </div>
+
+              {/* Dual arrows */}
+              <svg width="200" height="80" style={{ marginTop: '-10px' }}>
+                <defs>
+                  <marker id="arrowLeft" markerWidth="8" markerHeight="8" refX="0" refY="3" orient="auto">
+                    <path d="M8,0 L8,6 L0,3 z" fill="var(--accent-cyan)" />
+                  </marker>
+                  <marker id="arrowRight" markerWidth="8" markerHeight="8" refX="8" refY="3" orient="auto">
+                    <path d="M0,0 L0,6 L8,3 z" fill="var(--accent-orange)" />
+                  </marker>
+                </defs>
+                <path d="M20 30 L80 30" stroke="var(--accent-cyan)" strokeWidth="2" markerStart="url(#arrowLeft)" className="connection-line" />
+                <path d="M120 30 L180 30" stroke="var(--accent-orange)" strokeWidth="2" markerEnd="url(#arrowRight)" className="connection-line" />
+                <text x="50" y="50" textAnchor="middle" fill="var(--accent-cyan)" fontSize="8" fontWeight="600">C/S</text>
+                <text x="150" y="50" textAnchor="middle" fill="var(--accent-orange)" fontSize="8" fontWeight="600">PubSub</text>
+              </svg>
+            </div>
+
+            {/* Right: PubSub Model */}
+            <div className="comm-model-card" style={{ borderColor: 'var(--accent-orange)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
+                <Radio size={20} style={{ color: 'var(--accent-orange)' }} />
+                <h3 style={{ margin: 0, fontSize: '1rem', color: 'var(--accent-orange)' }}>Pub/Sub Model</h3>
+              </div>
+              <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
+                Scalable • Stateless • Decoupled Distribution
+              </p>
+
+              {/* Protocol Badge */}
+              <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
+                <span className="protocol-badge protocol-mqtt">
+                  <MessageSquare size={12} /> MQTT Broker
+                </span>
+              </div>
+
+              {/* Broker Icon */}
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                margin: '0.8rem 0',
+                padding: '1rem',
+                background: 'rgba(245, 158, 11, 0.1)',
+                borderRadius: '12px',
+                border: '1px dashed var(--accent-orange)'
+              }}>
+                <Cloud size={32} style={{ color: 'var(--accent-orange)', marginBottom: '0.5rem' }} />
+                <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--accent-orange)' }}>Message Broker</span>
+                <span style={{ fontSize: '0.6rem', color: 'var(--text-muted)' }}>MQTT / AMQP</span>
+              </div>
+
+              {/* Topic Display */}
+              <div className="topic-display" style={{ marginBottom: '0.8rem' }}>
+                plant/pumps/Pump_01/telemetry
+              </div>
+
+              {/* Subscribers */}
+              <div style={{ display: 'flex', gap: '0.6rem', justifyContent: 'center' }}>
+                <div className="client-icon-box" style={{ padding: '0.6rem' }}>
+                  <Globe size={20} style={{ color: 'var(--accent-pink)' }} />
+                  <span style={{ fontSize: '0.55rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>Dashboard</span>
+                </div>
+                <div className="client-icon-box" style={{ padding: '0.6rem' }}>
+                  <Database size={20} style={{ color: 'var(--accent-purple)' }} />
+                  <span style={{ fontSize: '0.55rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>Historian</span>
+                </div>
+                <div className="client-icon-box" style={{ padding: '0.6rem' }}>
+                  <Activity size={20} style={{ color: 'var(--accent-green)' }} />
+                  <span style={{ fontSize: '0.55rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>Analytics</span>
+                </div>
+              </div>
+
+              {/* Subscription Flow */}
+              <div style={{ position: 'relative', height: '30px', marginTop: '0.8rem' }}>
+                <svg width="100%" height="30" viewBox="0 0 300 30">
+                  <circle r="3" fill="var(--accent-orange)">
+                    <animate attributeName="cx" values="50;150;250" dur="2s" repeatCount="indefinite" />
+                    <animate attributeName="cy" values="15;15;15" dur="2s" repeatCount="indefinite" />
+                  </circle>
+                  <circle r="3" fill="var(--accent-orange)" opacity="0.5">
+                    <animate attributeName="cx" values="50;150;250" dur="2s" begin="0.3s" repeatCount="indefinite" />
+                  </circle>
+                  <circle r="3" fill="var(--accent-orange)" opacity="0.3">
+                    <animate attributeName="cx" values="50;150;250" dur="2s" begin="0.6s" repeatCount="indefinite" />
+                  </circle>
+                  <text x="150" y="28" textAnchor="middle" fill="var(--text-muted)" fontSize="7">Broadcast to Subscribers</text>
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom Summary */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(4, 1fr)',
+            gap: '1rem'
+          }}>
+            {[
+              { icon: <Cable size={18} />, title: 'TCP/IP', desc: 'Desktop OPC UA Clients', color: 'var(--accent-cyan)' },
+              { icon: <Wifi size={18} />, title: 'WebSocket', desc: 'Browser-based Clients', color: 'var(--accent-purple)' },
+              { icon: <Cloud size={18} />, title: 'MQTT Broker', desc: 'Scalable Distribution', color: 'var(--accent-orange)' },
+              { icon: <Radio size={18} />, title: 'Topics', desc: 'Semantic Namespaces', color: 'var(--accent-green)' },
+            ].map((item, i) => (
+              <div key={i} className="content-card animate-fade-in" style={{
+                textAlign: 'center',
+                padding: '0.8rem',
+                animationDelay: `${i * 0.1}s`
+              }}>
+                <div style={{ color: item.color, marginBottom: '0.3rem', display: 'flex', justifyContent: 'center' }}>
+                  {item.icon}
+                </div>
+                <div style={{ fontSize: '0.8rem', fontWeight: 600, color: item.color }}>{item.title}</div>
+                <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>{item.desc}</div>
               </div>
             ))}
           </div>
 
-          {/* Type Hierarchy Diagram */}
-          <div className="diagram-container" style={{ padding: '1rem' }}>
-            <div className="diagram-title">Type System Hierarchy (from types.yaml)</div>
-            <svg viewBox="0 0 800 120" style={{ width: '100%', height: '120px' }}>
-              {/* BaseObjectType */}
-              <g transform="translate(30, 45)">
-                <rect width="120" height="35" rx="6" fill={theme === 'business' ? '#f1f5f9' : 'var(--bg-elevated)'} stroke={theme === 'business' ? '#94a3b8' : 'var(--text-muted)'} strokeWidth="1.5" strokeDasharray="4 2" />
-                <text x="60" y="22" fill={theme === 'business' ? '#64748b' : 'var(--text-muted)'} fontSize="10" textAnchor="middle" fontWeight="600">BaseObjectType</text>
-                <text x="60" y="50" fill={theme === 'business' ? '#94a3b8' : 'var(--text-muted)'} fontSize="8" textAnchor="middle">(OPC UA Base)</text>
+          <div className="highlight-box" style={{ marginTop: '1rem' }}>
+            <p style={{ margin: 0 }}>
+              <strong style={{ color: 'var(--accent-cyan)' }}>Client–Server</strong> for interactive control & real-time monitoring •
+              <strong style={{ color: 'var(--accent-orange)' }}> PubSub</strong> for massive scale telemetry to cloud, historians & analytics
+            </p>
+          </div>
+        </section>
+
+        {/* Slide 11: Client-Server vs PubSub - Comprehensive Comparison */}
+        <section className="slide" id="slide-11" style={{ paddingTop: '60px' }}>
+          <div className="section-header" style={{ marginBottom: '0.8rem' }}>
+            <div className="section-number">SECTION 03 • COMMUNICATION MODELS</div>
+            <h2 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              Client-Server vs Pub/Sub
+              <span className="live-badge animate-morph-glow" style={{ fontSize: '0.7rem' }}>
+                <div className="pulse-dot" />
+                TWO PARADIGMS
+              </span>
+            </h2>
+            <p className="section-goal">Understanding when to use each communication model</p>
+          </div>
+
+          {/* Main Animated Comparison Diagram */}
+          <div className="diagram-container" style={{ padding: '1rem', marginBottom: '1rem' }}>
+            <svg viewBox="0 0 900 200" style={{ width: '100%', height: '200px' }}>
+              <defs>
+                {/* Client-Server gradient */}
+                <linearGradient id="csGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="var(--accent-cyan)" stopOpacity="0.2" />
+                  <stop offset="100%" stopColor="var(--accent-cyan)" stopOpacity="0.05" />
+                </linearGradient>
+                {/* PubSub gradient */}
+                <linearGradient id="psGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="var(--accent-orange)" stopOpacity="0.05" />
+                  <stop offset="100%" stopColor="var(--accent-orange)" stopOpacity="0.2" />
+                </linearGradient>
+                <filter id="glowCS">
+                  <feGaussianBlur stdDeviation="3" result="blur" />
+                  <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                </filter>
+              </defs>
+
+              {/* Divider */}
+              <line x1="450" y1="10" x2="450" y2="190" stroke={theme === 'business' ? '#e2e8f0' : 'var(--border-color)'} strokeWidth="2" strokeDasharray="8 4" />
+              <text x="450" y="105" fill={theme === 'business' ? '#64748b' : 'var(--text-muted)'} fontSize="12" textAnchor="middle" fontWeight="600">VS</text>
+
+              {/* LEFT: Client-Server Model */}
+              <g>
+                <rect x="20" y="10" width="400" height="180" rx="10" fill="url(#csGrad)" />
+                <text x="220" y="35" fill="var(--accent-cyan)" fontSize="16" textAnchor="middle" fontWeight="700">CLIENT-SERVER</text>
+
+                {/* Client */}
+                <g transform="translate(60, 60)">
+                  <rect width="80" height="50" rx="8" fill={theme === 'business' ? '#f0f9ff' : 'var(--bg-elevated)'} stroke="var(--accent-cyan)" strokeWidth="2" />
+                  <text x="40" y="22" fill="var(--accent-cyan)" fontSize="10" textAnchor="middle" fontWeight="600">CLIENT</text>
+                  <text x="40" y="38" fill={theme === 'business' ? '#0284c7' : '#67e8f9'} fontSize="8" textAnchor="middle">SCADA/HMI</text>
+                </g>
+
+                {/* Server */}
+                <g transform="translate(280, 60)">
+                  <rect width="80" height="50" rx="8" fill={theme === 'business' ? '#f0fdf4' : 'var(--bg-elevated)'} stroke="var(--accent-green)" strokeWidth="2" />
+                  <text x="40" y="22" fill="var(--accent-green)" fontSize="10" textAnchor="middle" fontWeight="600">SERVER</text>
+                  <text x="40" y="38" fill={theme === 'business' ? '#059669' : '#6ee7b7'} fontSize="8" textAnchor="middle">OPC UA</text>
+                </g>
+
+                {/* Bidirectional arrows with animated packets */}
+                <g>
+                  {/* Request arrow */}
+                  <line x1="145" y1="78" x2="275" y2="78" stroke="var(--accent-cyan)" strokeWidth="2" markerEnd="url(#arrowRight)" />
+                  <text x="210" y="72" fill="var(--accent-cyan)" fontSize="8" textAnchor="middle" fontWeight="600">Request</text>
+                  <circle r="5" fill="var(--accent-cyan)" filter="url(#glowCS)">
+                    <animate attributeName="cx" values="150;270" dur="1.5s" repeatCount="indefinite" />
+                    <animate attributeName="cy" values="78;78" dur="1.5s" repeatCount="indefinite" />
+                    <animate attributeName="opacity" values="1;1;0" keyTimes="0;0.8;1" dur="1.5s" repeatCount="indefinite" />
+                  </circle>
+
+                  {/* Response arrow */}
+                  <line x1="275" y1="92" x2="145" y2="92" stroke="var(--accent-green)" strokeWidth="2" markerEnd="url(#arrowLeft)" />
+                  <text x="210" y="104" fill="var(--accent-green)" fontSize="8" textAnchor="middle" fontWeight="600">Response</text>
+                  <circle r="5" fill="var(--accent-green)" filter="url(#glowCS)">
+                    <animate attributeName="cx" values="270;150" dur="1.5s" begin="0.5s" repeatCount="indefinite" />
+                    <animate attributeName="cy" values="92;92" dur="1.5s" begin="0.5s" repeatCount="indefinite" />
+                    <animate attributeName="opacity" values="1;1;0" keyTimes="0;0.8;1" dur="1.5s" begin="0.5s" repeatCount="indefinite" />
+                  </circle>
+                </g>
+
+                {/* Key characteristics */}
+                <g transform="translate(60, 125)">
+                  <rect width="300" height="55" rx="6" fill={theme === 'business' ? '#f8fafc' : 'var(--bg-dark)'} stroke={theme === 'business' ? '#e2e8f0' : 'var(--border-color)'} />
+                  <text x="150" y="18" fill="var(--accent-cyan)" fontSize="9" textAnchor="middle" fontWeight="600">BIDIRECTIONAL • STATEFUL • 1:1 CONNECTION</text>
+                  <text x="150" y="35" fill={theme === 'business' ? '#475569' : 'var(--text-secondary)'} fontSize="8" textAnchor="middle">Session maintains context, authentication, subscriptions</text>
+                  <text x="150" y="48" fill={theme === 'business' ? '#64748b' : 'var(--text-muted)'} fontSize="7" textAnchor="middle">Read • Write • Subscribe • Browse • Call Methods</text>
+                </g>
               </g>
 
-              {/* Arrow */}
-              <line x1="150" y1="62" x2="190" y2="62" stroke={theme === 'business' ? '#64748b' : 'var(--text-muted)'} strokeWidth="1.5" markerEnd="url(#arrowRight)" />
-              <text x="170" y="55" fill={theme === 'business' ? '#64748b' : 'var(--text-muted)'} fontSize="8" textAnchor="middle">extends</text>
+              {/* RIGHT: PubSub Model */}
+              <g>
+                <rect x="480" y="10" width="400" height="180" rx="10" fill="url(#psGrad)" />
+                <text x="680" y="35" fill="var(--accent-orange)" fontSize="16" textAnchor="middle" fontWeight="700">PUB/SUB</text>
 
-              {/* AssetType */}
-              <g transform="translate(190, 45)">
-                <rect width="90" height="35" rx="6" fill={theme === 'business' ? '#f5f3ff' : 'var(--bg-elevated)'} stroke="var(--accent-purple)" strokeWidth="2" />
-                <text x="45" y="22" fill="var(--accent-purple)" fontSize="11" textAnchor="middle" fontWeight="700">AssetType</text>
-                <text x="45" y="50" fill={theme === 'business' ? '#7c3aed' : 'var(--text-muted)'} fontSize="8" textAnchor="middle">(abstract)</text>
-              </g>
+                {/* Publisher */}
+                <g transform="translate(510, 55)">
+                  <rect width="70" height="40" rx="6" fill={theme === 'business' ? '#fefce8' : 'var(--bg-elevated)'} stroke="var(--accent-orange)" strokeWidth="2" />
+                  <text x="35" y="18" fill="var(--accent-orange)" fontSize="9" textAnchor="middle" fontWeight="600">PUBLISHER</text>
+                  <text x="35" y="32" fill={theme === 'business' ? '#b45309' : '#fde047'} fontSize="7" textAnchor="middle">Server/PLC</text>
+                </g>
 
-              {/* Arrow to PumpType */}
-              <line x1="280" y1="62" x2="320" y2="40" stroke="var(--accent-purple)" strokeWidth="1.5" />
-              <line x1="280" y1="62" x2="320" y2="85" stroke="var(--accent-purple)" strokeWidth="1.5" />
+                {/* Broker (optional) */}
+                <g transform="translate(650, 50)">
+                  <rect width="60" height="50" rx="6" fill={theme === 'business' ? '#ede9fe' : 'rgba(139,92,246,0.2)'} stroke="var(--accent-purple)" strokeWidth="1.5" strokeDasharray="4 2" />
+                  <text x="30" y="20" fill="var(--accent-purple)" fontSize="8" textAnchor="middle" fontWeight="600">BROKER</text>
+                  <text x="30" y="32" fill={theme === 'business' ? '#7c3aed' : '#c4b5fd'} fontSize="6" textAnchor="middle">(optional)</text>
+                  <text x="30" y="44" fill={theme === 'business' ? '#7c3aed' : '#c4b5fd'} fontSize="6" textAnchor="middle">MQTT/AMQP</text>
+                </g>
 
-              {/* PumpType */}
-              <g transform="translate(320, 22)">
-                <rect width="100" height="35" rx="6" fill={theme === 'business' ? '#ecfdf5' : 'var(--bg-elevated)'} stroke="var(--accent-green)" strokeWidth="2" />
-                <text x="50" y="22" fill="var(--accent-green)" fontSize="11" textAnchor="middle" fontWeight="700">PumpType</text>
-              </g>
+                {/* Subscribers */}
+                <g transform="translate(770, 45)">
+                  <rect width="50" height="28" rx="4" fill={theme === 'business' ? '#dcfce7' : 'var(--bg-elevated)'} stroke="var(--accent-green)" strokeWidth="1.5" />
+                  <text x="25" y="18" fill="var(--accent-green)" fontSize="7" textAnchor="middle" fontWeight="600">SUB 1</text>
+                </g>
+                <g transform="translate(770, 78)">
+                  <rect width="50" height="28" rx="4" fill={theme === 'business' ? '#dcfce7' : 'var(--bg-elevated)'} stroke="var(--accent-green)" strokeWidth="1.5" />
+                  <text x="25" y="18" fill="var(--accent-green)" fontSize="7" textAnchor="middle" fontWeight="600">SUB 2</text>
+                </g>
+                <g transform="translate(835, 60)">
+                  <rect width="35" height="28" rx="4" fill={theme === 'business' ? '#dcfce7' : 'var(--bg-elevated)'} stroke="var(--accent-green)" strokeWidth="1.5" />
+                  <text x="17" y="18" fill="var(--accent-green)" fontSize="7" textAnchor="middle" fontWeight="600">...</text>
+                </g>
 
-              {/* ChamberType */}
-              <g transform="translate(320, 68)">
-                <rect width="100" height="35" rx="6" fill={theme === 'business' ? '#fdf2f8' : 'var(--bg-elevated)'} stroke="var(--accent-pink)" strokeWidth="2" />
-                <text x="50" y="22" fill="var(--accent-pink)" fontSize="11" textAnchor="middle" fontWeight="700">ChamberType</text>
-              </g>
+                {/* Broadcast arrows with animated packets */}
+                <g>
+                  <line x1="585" y1="75" x2="645" y2="75" stroke="var(--accent-orange)" strokeWidth="2" />
+                  <line x1="715" y1="59" x2="765" y2="59" stroke="var(--accent-orange)" strokeWidth="1.5" />
+                  <line x1="715" y1="75" x2="765" y2="75" stroke="var(--accent-orange)" strokeWidth="1.5" />
+                  <line x1="715" y1="91" x2="765" y2="91" stroke="var(--accent-orange)" strokeWidth="1.5" />
+                  <line x1="715" y1="75" x2="765" y2="59" stroke="var(--accent-orange)" strokeWidth="1.5" opacity="0.5" />
+                  <line x1="715" y1="75" x2="765" y2="91" stroke="var(--accent-orange)" strokeWidth="1.5" opacity="0.5" />
 
-              {/* Arrow to InfluentPumpType */}
-              <line x1="420" y1="40" x2="460" y2="40" stroke="var(--accent-green)" strokeWidth="1.5" />
+                  {/* Animated broadcast packets */}
+                  <circle r="4" fill="var(--accent-orange)">
+                    <animate attributeName="cx" values="590;765" dur="2s" repeatCount="indefinite" />
+                    <animate attributeName="cy" values="75;59" dur="2s" repeatCount="indefinite" />
+                    <animate attributeName="opacity" values="1;1;0" keyTimes="0;0.85;1" dur="2s" repeatCount="indefinite" />
+                  </circle>
+                  <circle r="4" fill="var(--accent-orange)">
+                    <animate attributeName="cx" values="590;765" dur="2s" begin="0.2s" repeatCount="indefinite" />
+                    <animate attributeName="cy" values="75;75" dur="2s" begin="0.2s" repeatCount="indefinite" />
+                    <animate attributeName="opacity" values="1;1;0" keyTimes="0;0.85;1" dur="2s" begin="0.2s" repeatCount="indefinite" />
+                  </circle>
+                  <circle r="4" fill="var(--accent-orange)">
+                    <animate attributeName="cx" values="590;765" dur="2s" begin="0.4s" repeatCount="indefinite" />
+                    <animate attributeName="cy" values="75;91" dur="2s" begin="0.4s" repeatCount="indefinite" />
+                    <animate attributeName="opacity" values="1;1;0" keyTimes="0;0.85;1" dur="2s" begin="0.4s" repeatCount="indefinite" />
+                  </circle>
+                </g>
 
-              {/* InfluentPumpType */}
-              <g transform="translate(460, 22)">
-                <rect width="130" height="35" rx="6" fill={theme === 'business' ? '#ecfeff' : 'var(--bg-elevated)'} stroke="var(--accent-cyan)" strokeWidth="2" className="animate-glow" />
-                <text x="65" y="22" fill="var(--accent-cyan)" fontSize="11" textAnchor="middle" fontWeight="700">InfluentPumpType</text>
-              </g>
-
-              {/* Instance arrow */}
-              <line x1="590" y1="40" x2="630" y2="40" stroke="var(--accent-cyan)" strokeWidth="1.5" strokeDasharray="4 2" />
-              <text x="610" y="32" fill={theme === 'business' ? '#64748b' : 'var(--text-muted)'} fontSize="8" textAnchor="middle">instance</text>
-
-              {/* Instance */}
-              <g transform="translate(630, 22)">
-                <rect width="110" height="35" rx="6" fill={theme === 'business' ? 'rgba(2,132,199,0.1)' : 'rgba(0,212,255,0.1)'} stroke="var(--accent-cyan)" strokeWidth="2" />
-                <text x="55" y="18" fill="var(--accent-cyan)" fontSize="10" textAnchor="middle" fontWeight="700">IPS_PMP_001</text>
-                <text x="55" y="30" fill="var(--accent-green)" fontSize="9" textAnchor="middle">Running</text>
-              </g>
-
-              {/* Variables */}
-              <g transform="translate(630, 62)">
-                <rect width="110" height="42" rx="6" fill={theme === 'business' ? '#f8fafc' : 'var(--bg-dark)'} stroke={theme === 'business' ? '#e2e8f0' : 'var(--border-color)'} />
-                <text x="10" y="14" fill={theme === 'business' ? '#475569' : 'var(--text-secondary)'} fontSize="8">FlowRate: 2340.5</text>
-                <text x="10" y="26" fill={theme === 'business' ? '#475569' : 'var(--text-secondary)'} fontSize="8">RPM: 1145</text>
-                <text x="10" y="38" fill={theme === 'business' ? '#475569' : 'var(--text-secondary)'} fontSize="8">Power: 124.8 kW</text>
+                {/* Key characteristics */}
+                <g transform="translate(510, 125)">
+                  <rect width="350" height="55" rx="6" fill={theme === 'business' ? '#f8fafc' : 'var(--bg-dark)'} stroke={theme === 'business' ? '#e2e8f0' : 'var(--border-color)'} />
+                  <text x="175" y="18" fill="var(--accent-orange)" fontSize="9" textAnchor="middle" fontWeight="600">UNIDIRECTIONAL • STATELESS • 1:N DISTRIBUTION</text>
+                  <text x="175" y="35" fill={theme === 'business' ? '#475569' : 'var(--text-secondary)'} fontSize="8" textAnchor="middle">Decoupled publishers and subscribers, no session</text>
+                  <text x="175" y="48" fill={theme === 'business' ? '#64748b' : 'var(--text-muted)'} fontSize="7" textAnchor="middle">Telemetry • Analytics • Cloud Integration • Historians</text>
+                </g>
               </g>
             </svg>
           </div>
 
-          <div className="highlight-box" style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-            <div style={{ flex: 1 }}>
-              <p style={{ margin: 0 }}><strong>PumpType (ObjectType)</strong> defines: 27 Variables (Speed, Pressure, Vibration...), 4 Methods (Start, Stop, SetSpeed, Reset), and 6 Alarm conditions</p>
+          {/* Detailed Comparison Table */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.8rem', marginBottom: '1rem' }}>
+            {/* Communication Pattern */}
+            <div className="content-card animate-fade-in" style={{ padding: '1rem', borderColor: 'var(--accent-purple)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.8rem' }}>
+                <ArrowLeftRight size={20} style={{ color: 'var(--accent-purple)' }} />
+                <h4 style={{ margin: 0, fontSize: '0.95rem', color: 'var(--accent-purple)', fontWeight: 700 }}>Communication</h4>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                <div style={{ background: theme === 'business' ? '#f0f9ff' : 'rgba(0,212,255,0.1)', padding: '0.6rem', borderRadius: '6px', borderLeft: '3px solid var(--accent-cyan)' }}>
+                  <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--accent-cyan)', marginBottom: '0.2rem' }}>Client-Server</div>
+                  <div style={{ fontSize: '0.7rem', color: theme === 'business' ? '#475569' : 'var(--text-secondary)' }}>
+                    Request → Response<br />
+                    TCP connection maintained<br />
+                    Session-based state
+                  </div>
+                </div>
+                <div style={{ background: theme === 'business' ? '#fffbeb' : 'rgba(245,158,11,0.1)', padding: '0.6rem', borderRadius: '6px', borderLeft: '3px solid var(--accent-orange)' }}>
+                  <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--accent-orange)', marginBottom: '0.2rem' }}>Pub/Sub</div>
+                  <div style={{ fontSize: '0.7rem', color: theme === 'business' ? '#475569' : 'var(--text-secondary)' }}>
+                    Publish → Broadcast<br />
+                    UDP multicast or broker<br />
+                    No connection state
+                  </div>
+                </div>
+              </div>
             </div>
-            <div style={{ display: 'flex', gap: '0.3rem' }}>
-              <span style={{ fontSize: '0.6rem', padding: '0.2rem 0.4rem', background: 'rgba(0,212,255,0.1)', border: '1px solid var(--accent-cyan)', borderRadius: '4px', color: 'var(--accent-cyan)' }}>Instance</span>
-              <span style={{ fontSize: '0.6rem', padding: '0.2rem 0.4rem', background: 'rgba(139,92,246,0.1)', border: '1px solid var(--accent-purple)', borderRadius: '4px', color: 'var(--accent-purple)' }}>Type</span>
-              <span style={{ fontSize: '0.6rem', padding: '0.2rem 0.4rem', background: 'rgba(100,116,139,0.1)', border: '1px solid var(--text-muted)', borderRadius: '4px', color: 'var(--text-muted)' }}>Meta</span>
+
+            {/* Message Encoding */}
+            <div className="content-card animate-fade-in" style={{ padding: '1rem', borderColor: 'var(--accent-green)', animationDelay: '0.1s' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.8rem' }}>
+                <Database size={20} style={{ color: 'var(--accent-green)' }} />
+                <h4 style={{ margin: 0, fontSize: '0.95rem', color: 'var(--accent-green)', fontWeight: 700 }}>Message Encoding</h4>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                <div style={{ background: theme === 'business' ? '#f0f9ff' : 'rgba(0,212,255,0.1)', padding: '0.6rem', borderRadius: '6px', borderLeft: '3px solid var(--accent-cyan)' }}>
+                  <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--accent-cyan)', marginBottom: '0.2rem' }}>Client-Server</div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem' }}>
+                    <span style={{ fontSize: '0.65rem', padding: '0.15rem 0.4rem', background: 'var(--accent-cyan)', color: 'white', borderRadius: '3px', fontWeight: 600 }}>UA Binary</span>
+                    <span style={{ fontSize: '0.65rem', padding: '0.15rem 0.4rem', background: 'var(--accent-green)', color: 'white', borderRadius: '3px', fontWeight: 600 }}>XML</span>
+                    <span style={{ fontSize: '0.65rem', padding: '0.15rem 0.4rem', background: 'var(--accent-purple)', color: 'white', borderRadius: '3px', fontWeight: 600 }}>JSON</span>
+                  </div>
+                  <div style={{ fontSize: '0.65rem', color: theme === 'business' ? '#64748b' : 'var(--text-muted)', marginTop: '0.3rem' }}>Service-oriented with headers</div>
+                </div>
+                <div style={{ background: theme === 'business' ? '#fffbeb' : 'rgba(245,158,11,0.1)', padding: '0.6rem', borderRadius: '6px', borderLeft: '3px solid var(--accent-orange)' }}>
+                  <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--accent-orange)', marginBottom: '0.2rem' }}>Pub/Sub</div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem' }}>
+                    <span style={{ fontSize: '0.65rem', padding: '0.15rem 0.4rem', background: 'var(--accent-orange)', color: 'white', borderRadius: '3px', fontWeight: 600 }}>UADP Binary</span>
+                    <span style={{ fontSize: '0.65rem', padding: '0.15rem 0.4rem', background: 'var(--accent-green)', color: 'white', borderRadius: '3px', fontWeight: 600 }}>JSON</span>
+                  </div>
+                  <div style={{ fontSize: '0.65rem', color: theme === 'business' ? '#64748b' : 'var(--text-muted)', marginTop: '0.3rem' }}>Compact NetworkMessages</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Purpose & Use Cases */}
+            <div className="content-card animate-fade-in" style={{ padding: '1rem', borderColor: 'var(--accent-pink)', animationDelay: '0.2s' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.8rem' }}>
+                <Zap size={20} style={{ color: 'var(--accent-pink)' }} />
+                <h4 style={{ margin: 0, fontSize: '0.95rem', color: 'var(--accent-pink)', fontWeight: 700 }}>Purpose</h4>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                <div style={{ background: theme === 'business' ? '#f0f9ff' : 'rgba(0,212,255,0.1)', padding: '0.6rem', borderRadius: '6px', borderLeft: '3px solid var(--accent-cyan)' }}>
+                  <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--accent-cyan)', marginBottom: '0.2rem' }}>Client-Server</div>
+                  <div style={{ fontSize: '0.7rem', color: theme === 'business' ? '#475569' : 'var(--text-secondary)' }}>
+                    Control & interaction<br />
+                    Write values, call methods<br />
+                    Browse address space
+                  </div>
+                </div>
+                <div style={{ background: theme === 'business' ? '#fffbeb' : 'rgba(245,158,11,0.1)', padding: '0.6rem', borderRadius: '6px', borderLeft: '3px solid var(--accent-orange)' }}>
+                  <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--accent-orange)', marginBottom: '0.2rem' }}>Pub/Sub</div>
+                  <div style={{ fontSize: '0.7rem', color: theme === 'business' ? '#475569' : 'var(--text-secondary)' }}>
+                    Massive telemetry<br />
+                    Cloud ingestion<br />
+                    Analytics & ML pipelines
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Visual Message Format Comparison */}
+          <div className="diagram-container" style={{ padding: '1rem' }}>
+            <div className="diagram-title" style={{ marginBottom: '0.8rem' }}>Message Structure Comparison</div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+              {/* Client-Server Message */}
+              <div>
+                <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--accent-cyan)', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <Cable size={14} /> Client-Server: Service Request
+                </div>
+                <div className="code-block" style={{ fontSize: '0.65rem', padding: '0.8rem' }}>
+                  <span className="comment">// ReadRequest Message</span><br />
+                  {'{'}<br />
+                  &nbsp;&nbsp;<span className="keyword">"RequestHeader"</span>: {'{'}<br />
+                  &nbsp;&nbsp;&nbsp;&nbsp;<span className="string">"AuthenticationToken"</span>: <span className="number">"session-42"</span>,<br />
+                  &nbsp;&nbsp;&nbsp;&nbsp;<span className="string">"Timestamp"</span>: <span className="string">"2025-01-15T..."</span><br />
+                  &nbsp;&nbsp;{'}'},<br />
+                  &nbsp;&nbsp;<span className="keyword">"NodesToRead"</span>: [{'{'}<br />
+                  &nbsp;&nbsp;&nbsp;&nbsp;<span className="string">"NodeId"</span>: <span className="string">"ns=1;s=Pump_01.FlowRate"</span>,<br />
+                  &nbsp;&nbsp;&nbsp;&nbsp;<span className="string">"AttributeId"</span>: <span className="number">13</span> <span className="comment">// Value</span><br />
+                  &nbsp;&nbsp;{'}'}]<br />
+                  {'}'}
+                </div>
+              </div>
+
+              {/* PubSub Message */}
+              <div>
+                <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--accent-orange)', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <Radio size={14} /> Pub/Sub: NetworkMessage
+                </div>
+                <div className="code-block" style={{ fontSize: '0.65rem', padding: '0.8rem' }}>
+                  <span className="comment">// UADP NetworkMessage (compact)</span><br />
+                  {'{'}<br />
+                  &nbsp;&nbsp;<span className="keyword">"PublisherId"</span>: <span className="string">"Pump_Station_01"</span>,<br />
+                  &nbsp;&nbsp;<span className="keyword">"DataSetWriterId"</span>: <span className="number">1</span>,<br />
+                  &nbsp;&nbsp;<span className="keyword">"SequenceNumber"</span>: <span className="number">12847</span>,<br />
+                  &nbsp;&nbsp;<span className="keyword">"Payload"</span>: {'{'}<br />
+                  &nbsp;&nbsp;&nbsp;&nbsp;<span className="string">"FlowRate"</span>: <span className="number">2340.5</span>,<br />
+                  &nbsp;&nbsp;&nbsp;&nbsp;<span className="string">"RPM"</span>: <span className="number">1145</span>,<br />
+                  &nbsp;&nbsp;&nbsp;&nbsp;<span className="string">"Power"</span>: <span className="number">124.8</span><br />
+                  &nbsp;&nbsp;{'}'}<br />
+                  {'}'}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom Summary */}
+          <div className="highlight-box" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '2rem', padding: '1rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <ArrowLeftRight size={18} style={{ color: 'var(--accent-cyan)' }} />
+              <span><strong style={{ color: 'var(--accent-cyan)' }}>Client-Server</strong> = Interactive control, browsing, methods</span>
+            </div>
+            <div style={{ width: '2px', height: '24px', background: 'var(--border-color)' }} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <Radio size={18} style={{ color: 'var(--accent-orange)' }} />
+              <span><strong style={{ color: 'var(--accent-orange)' }}>Pub/Sub</strong> = Scalable telemetry, cloud, analytics</span>
             </div>
           </div>
         </section>
 
-        {/* Slide 11: Services & Data Access - Enhanced with Aggregate Formula */}
-        <section className="slide" id="slide-11" style={{ paddingTop: '60px' }}>
+        {/* Slide 12: Services & Data Access - Enhanced with Aggregate Formula */}
+        <section className="slide" id="slide-12" style={{ paddingTop: '60px' }}>
           <div className="section-header" style={{ marginBottom: '0.8rem' }}>
             <div className="section-number">SECTION 04 • 22–30 MINUTES</div>
             <h2 className="section-title">Services & Data Access</h2>
@@ -3808,8 +4446,225 @@ export default function ArchitecturePage() {
           </div>
         </section>
 
-        {/* Slide 12: Network & Transport - Enhanced with Protocol Simulation */}
-        <section className="slide" id="slide-12" style={{ paddingTop: '60px' }}>
+        {/* Slide 13: Purdue Model */}
+        <section className="slide" id="slide-13">
+          <div className="section-header">
+            <div className="section-number">SECTION 05 • Network Architecture</div>
+            <h2 className="section-title flex items-center gap-3">
+              Where OPC UA Fits: Purdue Model
+              <span className="live-badge">
+                <div className="pulse-dot" />
+                Live Network Active
+              </span>
+            </h2>
+          </div>
+          <div className="two-column" style={{ gridTemplateColumns: 'minmax(0, 1.5fr) 1fr' }}>
+            <div className="diagram-container" style={{ position: 'relative' }}>
+              <div className="diagram-title">Purdue Model with OPC UA Backbone</div>
+              <svg viewBox="0 0 800 550" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <linearGradient id="backbone" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" style={{ stopColor: '#00d4ff', stopOpacity: 0.7 }} />
+                    <stop offset="100%" style={{ stopColor: '#10b981', stopOpacity: 0.7 }} />
+                  </linearGradient>
+                  <filter id="glow">
+                    <feGaussianBlur stdDeviation="3" result="blur" />
+                    <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                  </filter>
+                </defs>
+
+                {/* Vertical Backbone */}
+                <rect x="720" y="25" width="35" height="500" rx="5" fill="url(#backbone)" opacity="0.3" />
+                <rect x="720" y="25" width="35" height="500" rx="5" fill="none" stroke="#00d4ff" strokeWidth="1.5" />
+                <text x="737" y="275" fill="#00d4ff" fontSize="9" textAnchor="middle" transform="rotate(-90,737,275)" fontWeight="600">OPC UA BACKBONE</text>
+
+                {/* Levels - Each level is now interactive */}
+                {[
+                  { level: 5, name: 'ENTERPRISE', color: '#8b5cf6', sub: 'ERP • Business Planning • Cloud', y: 25 },
+                  { level: 4, name: 'SITE BUSINESS', color: '#ec4899', sub: 'MES • Scheduling • KPI', y: 115 },
+                  { level: 3, name: 'SITE OPERATIONS', color: '#f59e0b', sub: 'SCADA • HMI • Batch', y: 205 },
+                  { level: 2, name: 'AREA CONTROL', color: '#10b981', sub: 'PLCs • DCS • RTUs', y: 295 },
+                  { level: 1, name: 'BASIC CONTROL', color: '#00d4ff', sub: 'Sensors • Actuators • I/O', y: 385 },
+                ].map((l) => (
+                  <g key={l.level}
+                    className="layer-hover"
+                    onClick={() => setActiveLayer(l.level)}
+                    transform={`translate(40,${l.y})`}>
+                    <rect width="650" height="60" rx="8"
+                      fill={activeLayer === l.level ? 'rgba(0, 212, 255, 0.1)' : (theme === 'business' ? '#ffffff' : '#111827')}
+                      stroke={activeLayer === l.level ? l.color : (theme === 'business' ? '#e2e8f0' : '#1e293b')}
+                      strokeWidth={activeLayer === l.level ? 2.5 : 1}
+                      style={{ transition: 'all 0.3s' }} />
+                    <text x="16" y="24" fill={l.color} fontSize="14" fontWeight="800">LEVEL {l.level} — {l.name}</text>
+                    <text x="16" y="46" fill={theme === 'business' ? '#475569' : '#94a3b8'} fontSize="11" fontWeight="500">{l.sub}</text>
+
+                    {/* Connection to backbone */}
+                    <line x1="650" y1="30" x2="680" y2="30" stroke={l.color} strokeWidth="1" strokeDasharray="3,3" />
+
+                    {/* Active indicators */}
+                    {activeLayer === l.level && (
+                      <circle cx="640" cy="30" r="4" fill={l.color} filter="url(#glow)">
+                        <animate attributeName="r" values="4;6;4" dur="1s" repeatCount="indefinite" />
+                      </circle>
+                    )}
+                  </g>
+                ))}
+
+                {/* Level 0 */}
+                <g transform="translate(40,485)">
+                  <rect width="650" height="40" rx="8" fill={theme === 'business' ? '#f1f5f9' : '#0a0e17'} stroke={theme === 'business' ? '#cbd5e1' : '#334155'} />
+                  <text x="325" y="25" fill={theme === 'business' ? '#475569' : '#94a3b8'} fontSize="12" textAnchor="middle" fontWeight="700">LEVEL 0 — PHYSICAL PROCESS (Wastewater Simulation)</text>
+                </g>
+
+                {/* Animated Data Packet */}
+                {isPacketWalking && (
+                  <g className="data-packet">
+                    <circle r="9" fill="#00d4ff" filter="url(#glow)">
+                      <animateMotion
+                        dur="15s"
+                        path="M70 505 L70 415 L737 415 L737 325 L737 235 L737 145 L737 55 L680 55"
+                        keyPoints="0;0;0.1;0.1;0.2;0.4;0.4;0.6;0.6;0.8;0.8;1;1"
+                        keyTimes="0;0.13;0.17;0.3;0.33;0.47;0.5;0.63;0.67;0.8;0.83;0.97;1"
+                        calcMode="linear"
+                        fill="freeze"
+                      />
+                    </circle>
+                    <text fontSize="10" fill="white" fontWeight="900" textAnchor="middle" dy="-14">
+                      <animateMotion
+                        dur="15s"
+                        path="M70 505 L70 415 L737 415 L737 325 L737 235 L737 145 L737 55 L680 55"
+                        keyPoints="0;0;0.1;0.1;0.2;0.4;0.4;0.6;0.6;0.8;0.8;1;1"
+                        keyTimes="0;0.13;0.17;0.3;0.33;0.47;0.5;0.63;0.67;0.8;0.83;0.97;1"
+                        calcMode="linear"
+                        fill="freeze"
+                      />
+                      DATA_PACKET
+                    </text>
+                  </g>
+                )}
+              </svg>
+
+              <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }}>
+                <button
+                  className="btn-action"
+                  onClick={() => {
+                    setIsPacketWalking(true);
+                    setSimStatus("Dwell: Level 0 (Process)...");
+                    setCommModel("NA");
+                    setActiveLayer(0);
+
+                    const steps = [
+                      { t: 2500, l: 1, s: "Dwell: Level 1 (I/O)...", m: "CLIENT-SERVER" },
+                      { t: 5000, l: 2, s: "Dwell: Level 2 (PLC)...", m: "CLIENT-SERVER" },
+                      { t: 7500, l: 3, s: "Dwell: Level 3 (SCADA)...", m: "CLIENT-SERVER" },
+                      { t: 10000, l: 4, s: "Dwell: Level 4 (Business)...", m: "PUB-SUB" },
+                      { t: 12500, l: 5, s: "Dwell: Level 5 (Cloud)...", m: "PUB-SUB" },
+                    ];
+
+                    steps.forEach(step => {
+                      setTimeout(() => {
+                        setActiveLayer(step.l);
+                        setSimStatus(step.s);
+                        setCommModel(step.m);
+                      }, step.t);
+                    });
+
+                    setTimeout(() => {
+                      setIsPacketWalking(false);
+                      setSimStatus("");
+                      setCommModel("");
+                    }, 15500);
+                  }}
+                  disabled={isPacketWalking}
+                >
+                  <Play size={14} style={{ display: 'inline', marginRight: '4px' }} />
+                  Simulate Data Flow (L0 → L5)
+                </button>
+                {activeLayer && (
+                  <button
+                    className="btn-action"
+                    style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
+                    onClick={() => setActiveLayer(null)}
+                  >
+                    Clear Filter
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <div className="content-card">
+              <h3>
+                <Info size={16} />
+                {isPacketWalking ? "LIVE STREAMING LOG" : (activeLayer ? `Level ${activeLayer} Context` : 'Select a Layer')}
+              </h3>
+              {isPacketWalking ? (
+                <div style={{ background: 'rgba(0,0,0,0.3)', padding: '1rem', borderRadius: '8px', border: '1px solid var(--accent-cyan)', animation: 'pulse 2s infinite' }}>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <div className="pulse-dot" />
+                      <span className="text-[10px] font-black tracking-widest text-cyan-400">STATUS: {simStatus}</span>
+                    </div>
+                    {commModel !== "NA" && commModel !== "" && (
+                      <div className={`px-2 py-0.5 rounded text-[8px] font-bold border ${commModel === "PUB-SUB" ? 'bg-amber-500/20 border-amber-500/40 text-amber-400' : 'bg-cyan-500/20 border-cyan-500/40 text-cyan-400'}`}>
+                        {commModel}
+                      </div>
+                    )}
+                  </div>
+                  <div className="font-mono text-[11px] text-slate-400 space-y-1">
+                    <div>&gt; RAW_FLOW: {(Math.random() * 5000).toFixed(0)} m3/h</div>
+                    <div>&gt; PROTOCOL: OPC_UA_BINARY</div>
+                    <div>&gt; ENCRYPTION: AES_256_SHA256</div>
+                    <div>&gt; TARGET_NS: namespace=1;s=IPS_PMP_001.Flow</div>
+                  </div>
+                </div>
+              ) : !activeLayer ? (
+                <p style={{ fontSize: '1.2rem', color: 'var(--text-secondary)', lineHeight: '1.6' }}>
+                  Click on a layer in the Purdue model to see how OPC UA functions at that level and how it interacts with the wastewater simulation.
+                </p>
+              ) : (
+                <div style={{ animation: 'fadeIn 0.3s ease-out' }}>
+                  {activeLayer === 5 && (
+                    <ul style={{ fontSize: '1rem', lineHeight: '1.8' }}>
+                      <li><strong>Role:</strong> Enterprise Strategy</li>
+                      <li><strong>OPC UA Use:</strong> PubSub to Azure/AWS IoT Hubs for plant-wide analytics.</li>
+                      <li><strong>Demo Link:</strong> View enterprise KPIs in Dashboard.</li>
+                    </ul>
+                  )}
+                  {activeLayer === 4 && (
+                    <ul style={{ fontSize: '1rem', lineHeight: '1.8' }}>
+                      <li><strong>Role:</strong> Site Management</li>
+                      <li><strong>OPC UA Use:</strong> Aggregating multiple servers into a Unified Namespace (UNS).</li>
+                      <li><strong>Data:</strong> Historical Access (HA) for compliance reporting.</li>
+                    </ul>
+                  )}
+                  {activeLayer === 3 && (
+                    <ul style={{ fontSize: '1rem', lineHeight: '1.8' }}>
+                      <li><strong>Role:</strong> Control Room</li>
+                      <li><strong>OPC UA Use:</strong> Client-Server for the SCADA/HMI dashboard you use.</li>
+                      <li><strong>Real-time:</strong> High-frequency subscriptions (100ms) for pump monitoring.</li>
+                    </ul>
+                  )}
+                  {activeLayer === 2 && (
+                    <ul style={{ fontSize: '1rem', lineHeight: '1.8' }}>
+                      <li><strong>Role:</strong> Area Control</li>
+                      <li><strong>OPC UA Use:</strong> PLC-to-PLC communication using OPC UA FX.</li>
+                      <li><strong>Security:</strong> X.509 Certificate-based trust between controllers.</li>
+                    </ul>
+                  )}
+                  {activeLayer === 1 && (
+                    <ul style={{ fontSize: '1rem', lineHeight: '1.8' }}>
+                      <li><strong>Role:</strong> Field Devices</li>
+                      <li><strong>OPC UA Use:</strong> OPC UA Nano/Micro profiles in smart pumps.</li>
+                      <li><strong>Impact:</strong> Semantic data (e.g., "Pump_1.BearingTemp") at the source.</li>
+                    </ul>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
+        {/* Slide 14: Network & Transport - Enhanced with Protocol Simulation */}
+        <section className="slide" id="slide-14" style={{ paddingTop: '60px' }}>
           <div className="section-header" style={{ marginBottom: '0.8rem' }}>
             <div className="section-number">SECTION 05 • NETWORK PROTOCOLS</div>
             <h2 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
@@ -4057,8 +4912,8 @@ export default function ArchitecturePage() {
           </div>
         </section>
 
-        {/* Slide 13: Security Architecture - Enhanced with Animations */}
-        <section className="slide" id="slide-13" style={{ paddingTop: '60px' }}>
+        {/* Slide 15: Security Architecture - Enhanced with Animations */}
+        <section className="slide" id="slide-15" style={{ paddingTop: '60px' }}>
           <div className="section-header" style={{ marginBottom: '0.8rem' }}>
             <div className="section-number">SECTION 05 • SECURITY</div>
             <h2 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
@@ -4314,9 +5169,311 @@ export default function ArchitecturePage() {
           </div>
 
         </section>
+        {/* Slide 16: SecureChannel vs Session - Enhanced with Animations */}
+        <section className="slide" id="slide-16" style={{ paddingTop: '60px' }}>
+          <div className="section-header" style={{ marginBottom: '0.8rem' }}>
+            <div className="section-number">SECTION 05 • SECURITY LAYERS</div>
+            <h2 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              SecureChannel vs Session
+              <span className="live-badge animate-glow" style={{ fontSize: '0.7rem' }}>
+                <div className="pulse-dot" />
+                DUAL PROTECTION
+              </span>
+            </h2>
+            <p className="section-goal">Goal: Understand why OPC UA needs BOTH layers</p>
+          </div>
 
-        {/* Slide 14: Role-Based Access Control */}
-        <section className="slide" id="slide-14">
+          {/* Main Animated Diagram - Layered Security */}
+          <div className="diagram-container" style={{ padding: '1rem', marginBottom: '1rem' }}>
+            <svg viewBox="0 0 900 265" style={{ width: '100%', height: '265px' }}>
+              <defs>
+                {/* SecureChannel gradient (purple tunnel) */}
+                <linearGradient id="scTunnelGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="var(--accent-purple)" stopOpacity="0.3" />
+                  <stop offset="50%" stopColor="var(--accent-purple)" stopOpacity="0.1" />
+                  <stop offset="100%" stopColor="var(--accent-purple)" stopOpacity="0.3" />
+                </linearGradient>
+                {/* Session gradient (orange inner) */}
+                <linearGradient id="sessionGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="var(--accent-orange)" stopOpacity="0.3" />
+                  <stop offset="50%" stopColor="var(--accent-orange)" stopOpacity="0.15" />
+                  <stop offset="100%" stopColor="var(--accent-orange)" stopOpacity="0.3" />
+                </linearGradient>
+                <filter id="secGlow">
+                  <feGaussianBlur stdDeviation="2" result="blur" />
+                  <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                </filter>
+                {/* Encryption pattern */}
+                <pattern id="encryptPattern" width="20" height="20" patternUnits="userSpaceOnUse">
+                  <text x="2" y="14" fill="var(--accent-purple)" fontSize="12" opacity="0.3">01</text>
+                </pattern>
+              </defs>
+
+              {/* Client */}
+              <g transform="translate(30, 70)">
+                <rect width="120" height="100" rx="12" fill={theme === 'business' ? '#f8fafc' : 'var(--bg-elevated)'} stroke="var(--accent-cyan)" strokeWidth="3" />
+                <rect x="15" y="14" width="90" height="32" rx="5" fill={theme === 'business' ? '#e0f2fe' : 'rgba(0,212,255,0.1)'} stroke="var(--accent-cyan)" strokeWidth="1.5" />
+                <text x="60" y="36" fill="var(--accent-cyan)" fontSize="14" textAnchor="middle" fontWeight="600">SCADA App</text>
+                <circle cx="35" cy="68" r="16" fill={theme === 'business' ? '#fef3c7' : 'rgba(245,158,11,0.2)'} stroke="var(--accent-orange)" strokeWidth="2" />
+                <text x="35" y="74" fill="var(--accent-orange)" fontSize="14" textAnchor="middle" fontWeight="700">👤</text>
+                <text x="70" y="65" fill={theme === 'business' ? '#334155' : 'var(--text-secondary)'} fontSize="11">Operator</text>
+                <text x="70" y="80" fill={theme === 'business' ? '#64748b' : 'var(--text-muted)'} fontSize="10">Role: Control</text>
+                <text x="60" y="118" fill={theme === 'business' ? '#0f172a' : 'var(--text-primary)'} fontSize="16" textAnchor="middle" fontWeight="700">CLIENT</text>
+              </g>
+
+              {/* Server */}
+              <g transform="translate(750, 70)">
+                <rect width="120" height="100" rx="12" fill={theme === 'business' ? '#f8fafc' : 'var(--bg-elevated)'} stroke="var(--accent-green)" strokeWidth="3" />
+                <rect x="5" y="14" width="110" height="32" rx="5" fill={theme === 'business' ? '#dcfce7' : 'rgba(16,185,129,0.1)'} stroke="var(--accent-green)" strokeWidth="1.5" />
+                <text x="60" y="36" fill="var(--accent-green)" fontSize="13" textAnchor="middle" fontWeight="600">OPC UA Server</text>
+                <rect x="18" y="55" width="84" height="26" rx="4" fill={theme === 'business' ? '#f1f5f9' : 'var(--bg-dark)'} stroke={theme === 'business' ? '#cbd5e1' : 'var(--border-color)'} strokeWidth="1.5" />
+                <text x="60" y="73" fill={theme === 'business' ? '#475569' : 'var(--text-muted)'} fontSize="11" textAnchor="middle">Address Space</text>
+                <text x="60" y="118" fill={theme === 'business' ? '#0f172a' : 'var(--text-primary)'} fontSize="16" textAnchor="middle" fontWeight="700">SERVER</text>
+              </g>
+
+              {/* SecureChannel - Outer Tunnel */}
+              <g>
+                {/* Top border of tunnel */}
+                <path d="M160 50 L740 50" stroke="var(--accent-purple)" strokeWidth="4" strokeDasharray="10 5" opacity="0.7" />
+                {/* Bottom border of tunnel */}
+                <path d="M160 195 L740 195" stroke="var(--accent-purple)" strokeWidth="4" strokeDasharray="10 5" opacity="0.7" />
+                {/* Tunnel fill */}
+                <rect x="160" y="50" width="580" height="145" fill="url(#scTunnelGrad)" rx="10" />
+                {/* Encryption symbols floating */}
+                <text x="180" y="78" fill="var(--accent-purple)" fontSize="14" opacity="0.5" fontFamily="JetBrains Mono">
+                  <animate attributeName="opacity" values="0.3;0.7;0.3" dur="2s" repeatCount="indefinite" />
+                  AES-256
+                </text>
+                <text x="630" y="78" fill="var(--accent-purple)" fontSize="14" opacity="0.5" fontFamily="JetBrains Mono">
+                  <animate attributeName="opacity" values="0.3;0.7;0.3" dur="2s" begin="1s" repeatCount="indefinite" />
+                  RSA-2048
+                </text>
+                {/* Lock icons on tunnel */}
+                <g transform="translate(165, 115)">
+                  <rect width="32" height="28" rx="4" fill="var(--accent-purple)" opacity="0.8" />
+                  <text x="16" y="20" fill="white" fontSize="14" textAnchor="middle">🔐</text>
+                </g>
+                <g transform="translate(703, 115)">
+                  <rect width="32" height="28" rx="4" fill="var(--accent-purple)" opacity="0.8" />
+                  <text x="16" y="20" fill="white" fontSize="14" textAnchor="middle">🔐</text>
+                </g>
+                {/* SecureChannel Label */}
+                <rect x="360" y="36" width="180" height="30" rx="5" fill={theme === 'business' ? '#ede9fe' : 'rgba(139,92,246,0.3)'} stroke="var(--accent-purple)" strokeWidth="2" />
+                <text x="450" y="57" fill="var(--accent-purple)" fontSize="16" textAnchor="middle" fontWeight="700">SECURE CHANNEL</text>
+              </g>
+
+              {/* Session - Inner Layer */}
+              <g>
+                <rect x="200" y="88" width="500" height="80" rx="8" fill="url(#sessionGrad)" stroke="var(--accent-orange)" strokeWidth="2" strokeDasharray="8 4" />
+                {/* Session state indicator */}
+                <rect x="208" y="96" width="100" height="24" rx="4" fill={theme === 'business' ? '#fef3c7' : 'rgba(245,158,11,0.2)'} stroke="var(--accent-orange)" strokeWidth="1.5" />
+                <text x="258" y="113" fill="var(--accent-orange)" fontSize="11" textAnchor="middle" fontWeight="600">SessionId: 42</text>
+                <rect x="592" y="96" width="100" height="24" rx="4" fill={theme === 'business' ? '#fef3c7' : 'rgba(245,158,11,0.2)'} stroke="var(--accent-orange)" strokeWidth="1.5" />
+                <text x="642" y="113" fill="var(--accent-orange)" fontSize="11" textAnchor="middle" fontWeight="600">AuthToken ✓</text>
+                {/* Session Label */}
+                <rect x="395" y="150" width="110" height="26" rx="5" fill={theme === 'business' ? '#fef3c7' : 'rgba(245,158,11,0.3)'} stroke="var(--accent-orange)" strokeWidth="2" />
+                <text x="450" y="169" fill="var(--accent-orange)" fontSize="14" textAnchor="middle" fontWeight="700">SESSION</text>
+              </g>
+
+              {/* Animated Message Flow */}
+              <g>
+                {/* Request message (encrypted) */}
+                <g filter="url(#secGlow)">
+                  <rect width="90" height="32" rx="5" fill="var(--accent-cyan)">
+                    <animate attributeName="x" values="210;600" dur="3s" repeatCount="indefinite" />
+                    <animate attributeName="y" values="112;112" dur="3s" repeatCount="indefinite" />
+                  </rect>
+                  <text fontSize="11" fill="white" fontWeight="600" textAnchor="middle">
+                    <animate attributeName="x" values="255;645" dur="3s" repeatCount="indefinite" />
+                    <animate attributeName="y" values="133" dur="3s" repeatCount="indefinite" />
+                    ReadRequest
+                  </text>
+                  {/* Encryption overlay effect */}
+                  <rect width="90" height="32" rx="5" fill="url(#encryptPattern)" opacity="0.5">
+                    <animate attributeName="x" values="210;600" dur="3s" repeatCount="indefinite" />
+                    <animate attributeName="y" values="112;112" dur="3s" repeatCount="indefinite" />
+                    <animate attributeName="opacity" values="0.5;0.2;0.5" dur="0.5s" repeatCount="indefinite" />
+                  </rect>
+                </g>
+
+                {/* Response message (encrypted) */}
+                <g filter="url(#secGlow)">
+                  <rect width="90" height="32" rx="5" fill="var(--accent-green)">
+                    <animate attributeName="x" values="600;210" dur="3s" begin="1.5s" repeatCount="indefinite" />
+                    <animate attributeName="y" values="112;112" dur="3s" begin="1.5s" repeatCount="indefinite" />
+                  </rect>
+                  <text fontSize="11" fill="white" fontWeight="600" textAnchor="middle">
+                    <animate attributeName="x" values="645;255" dur="3s" begin="1.5s" repeatCount="indefinite" />
+                    <animate attributeName="y" values="133" dur="3s" begin="1.5s" repeatCount="indefinite" />
+                    DataValue
+                  </text>
+                  <rect width="90" height="32" rx="5" fill="url(#encryptPattern)" opacity="0.5">
+                    <animate attributeName="x" values="600;210" dur="3s" begin="1.5s" repeatCount="indefinite" />
+                    <animate attributeName="y" values="112;112" dur="3s" begin="1.5s" repeatCount="indefinite" />
+                    <animate attributeName="opacity" values="0.5;0.2;0.5" dur="0.5s" repeatCount="indefinite" />
+                  </rect>
+                </g>
+              </g>
+
+              {/* Legend */}
+              <g transform="translate(280, 225)">
+                <rect x="0" y="0" width="22" height="14" rx="3" fill="var(--accent-purple)" opacity="0.5" />
+                <text x="30" y="12" fill={theme === 'business' ? '#475569' : 'var(--text-muted)'} fontSize="12">Encrypted Tunnel</text>
+                <rect x="160" y="0" width="22" height="14" rx="3" fill="var(--accent-orange)" opacity="0.5" />
+                <text x="190" y="12" fill={theme === 'business' ? '#475569' : 'var(--text-muted)'} fontSize="12">User Context</text>
+                <rect x="300" y="0" width="22" height="14" rx="3" fill="var(--accent-cyan)" />
+                <text x="330" y="12" fill={theme === 'business' ? '#475569' : 'var(--text-muted)'} fontSize="12">Message</text>
+              </g>
+            </svg>
+          </div>
+
+          {/* Two Column Comparison with Enhanced Details */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1rem' }}>
+            {/* SecureChannel */}
+            <div className="comm-model-card" style={{ borderColor: 'var(--accent-purple)', padding: '1.2rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                  <Lock size={28} style={{ color: 'var(--accent-purple)' }} />
+                  <h3 style={{ margin: 0, fontSize: '1.4rem', color: 'var(--accent-purple)', fontWeight: 700 }}>SecureChannel</h3>
+                </div>
+                <span style={{
+                  fontSize: '0.75rem',
+                  padding: '0.3rem 0.6rem',
+                  background: 'rgba(139,92,246,0.1)',
+                  border: '1px solid var(--accent-purple)',
+                  borderRadius: '4px',
+                  color: 'var(--accent-purple)',
+                  fontWeight: 600
+                }}>TRANSPORT LAYER</span>
+              </div>
+
+              <div style={{ fontSize: '1.05rem', color: theme === 'business' ? '#475569' : 'var(--text-secondary)', marginBottom: '1rem', lineHeight: 1.5 }}>
+                Protects the <strong style={{ color: 'var(--accent-purple)' }}>PIPE</strong> — ensures no one can read or tamper with messages in transit
+              </div>
+
+              {/* Visual: Encryption Process */}
+              <svg viewBox="0 0 280 80" style={{ width: '100%', height: '80px', marginBottom: '0.8rem' }}>
+                <rect x="5" y="18" width="70" height="40" rx="5" fill={theme === 'business' ? '#f1f5f9' : 'var(--bg-dark)'} stroke={theme === 'business' ? '#cbd5e1' : 'var(--border-color)'} strokeWidth="1.5" />
+                <text x="40" y="44" fill={theme === 'business' ? '#334155' : 'var(--text-secondary)'} fontSize="12" textAnchor="middle">Plain MSG</text>
+
+                <text x="92" y="42" fill="var(--accent-purple)" fontSize="20">→</text>
+
+                <rect x="105" y="12" width="90" height="52" rx="5" fill={theme === 'business' ? '#ede9fe' : 'rgba(139,92,246,0.2)'} stroke="var(--accent-purple)" strokeWidth="2" />
+                <text x="150" y="34" fill="var(--accent-purple)" fontSize="11" textAnchor="middle" fontWeight="600">🔐 ENCRYPT</text>
+                <text x="150" y="52" fill="var(--accent-purple)" fontSize="11" textAnchor="middle" fontWeight="600">✍️ SIGN</text>
+
+                <text x="210" y="42" fill="var(--accent-purple)" fontSize="20">→</text>
+
+                <rect x="222" y="18" width="55" height="40" rx="5" fill="var(--accent-purple)" opacity="0.8" />
+                <text x="249" y="36" fill="white" fontSize="9" textAnchor="middle" fontFamily="JetBrains Mono">x9f3a7...</text>
+                <text x="249" y="52" fill="white" fontSize="10" textAnchor="middle" fontWeight="600">Secured</text>
+              </svg>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                {[
+                  { icon: '🔐', text: 'AES-256 encryption for confidentiality' },
+                  { icon: '✍️', text: 'SHA-256 signatures for integrity' },
+                  { icon: '📜', text: 'X.509 certificates for identity' },
+                  { icon: '🔄', text: 'Automatic key renewal' }
+                ].map((item, i) => (
+                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.95rem', color: theme === 'business' ? '#334155' : 'var(--text-secondary)' }}>
+                    <span style={{ fontSize: '1.1rem' }}>{item.icon}</span>
+                    <span>{item.text}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Session */}
+            <div className="comm-model-card" style={{ borderColor: 'var(--accent-orange)', padding: '1.2rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                  <User size={28} style={{ color: 'var(--accent-orange)' }} />
+                  <h3 style={{ margin: 0, fontSize: '1.4rem', color: 'var(--accent-orange)', fontWeight: 700 }}>Session</h3>
+                </div>
+                <span style={{
+                  fontSize: '0.75rem',
+                  padding: '0.3rem 0.6rem',
+                  background: 'rgba(245,158,11,0.1)',
+                  border: '1px solid var(--accent-orange)',
+                  borderRadius: '4px',
+                  color: 'var(--accent-orange)',
+                  fontWeight: 600
+                }}>APPLICATION LAYER</span>
+              </div>
+
+              <div style={{ fontSize: '1.05rem', color: theme === 'business' ? '#475569' : 'var(--text-secondary)', marginBottom: '1rem', lineHeight: 1.5 }}>
+                Protects the <strong style={{ color: 'var(--accent-orange)' }}>INTENT</strong> — ensures only authorized users perform allowed actions
+              </div>
+
+              {/* Visual: Authentication Flow */}
+              <svg viewBox="0 0 280 80" style={{ width: '100%', height: '80px', marginBottom: '0.8rem' }}>
+                <circle cx="32" cy="40" r="24" fill={theme === 'business' ? '#fef3c7' : 'rgba(245,158,11,0.2)'} stroke="var(--accent-orange)" strokeWidth="2" />
+                <text x="32" y="47" fontSize="22" textAnchor="middle">👤</text>
+
+                <text x="72" y="44" fill="var(--accent-orange)" fontSize="20">→</text>
+
+                <rect x="88" y="12" width="100" height="52" rx="5" fill={theme === 'business' ? '#fef3c7' : 'rgba(245,158,11,0.2)'} stroke="var(--accent-orange)" strokeWidth="2" />
+                <text x="138" y="34" fill="var(--accent-orange)" fontSize="10" textAnchor="middle" fontWeight="600">AUTHENTICATE</text>
+                <text x="138" y="52" fill="var(--accent-orange)" fontSize="10" textAnchor="middle" fontWeight="600">AUTHORIZE</text>
+
+                <text x="205" y="44" fill="var(--accent-orange)" fontSize="20">→</text>
+
+                <rect x="218" y="14" width="60" height="48" rx="5" fill="var(--accent-orange)" opacity="0.8" />
+                <text x="248" y="34" fill="white" fontSize="10" textAnchor="middle" fontWeight="600">Operator</text>
+                <text x="248" y="52" fill="white" fontSize="10" textAnchor="middle">Role: Write ✓</text>
+              </svg>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                {[
+                  { icon: '👤', text: 'User identity & authentication' },
+                  { icon: '🎭', text: 'Role-based access control (RBAC)' },
+                  { icon: '📋', text: 'Operation-level authorization' },
+                  { icon: '📝', text: 'Audit trail per user action' }
+                ].map((item, i) => (
+                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.95rem', color: theme === 'business' ? '#334155' : 'var(--text-secondary)' }}>
+                    <span style={{ fontSize: '1.1rem' }}>{item.icon}</span>
+                    <span>{item.text}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Why Both? Explanation */}
+          <div className="highlight-box" style={{ display: 'flex', alignItems: 'stretch', gap: '1rem', padding: '1rem' }}>
+            <div style={{ flex: 1, borderRight: '1px solid var(--border-color)', paddingRight: '1rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.4rem' }}>
+                <AlertTriangle size={16} style={{ color: 'var(--accent-red)' }} />
+                <strong style={{ color: 'var(--accent-red)', fontSize: '0.85rem' }}>Without SecureChannel</strong>
+              </div>
+              <p style={{ margin: 0, fontSize: '0.8rem', color: theme === 'business' ? '#475569' : 'var(--text-secondary)' }}>
+                Attackers can intercept credentials, replay commands, or modify pump setpoints in transit
+              </p>
+            </div>
+            <div style={{ flex: 1, borderRight: '1px solid var(--border-color)', paddingRight: '1rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.4rem' }}>
+                <AlertTriangle size={16} style={{ color: 'var(--accent-red)' }} />
+                <strong style={{ color: 'var(--accent-red)', fontSize: '0.85rem' }}>Without Session</strong>
+              </div>
+              <p style={{ margin: 0, fontSize: '0.8rem', color: theme === 'business' ? '#475569' : 'var(--text-secondary)' }}>
+                Any encrypted client could control critical pumps — no accountability or access control
+              </p>
+            </div>
+            <div style={{ flex: 1 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.4rem' }}>
+                <Shield size={16} style={{ color: 'var(--accent-green)' }} />
+                <strong style={{ color: 'var(--accent-green)', fontSize: '0.85rem' }}>With Both</strong>
+              </div>
+              <p style={{ margin: 0, fontSize: '0.8rem', color: theme === 'business' ? '#475569' : 'var(--text-secondary)' }}>
+                Defense in depth: encrypted transport + authenticated users = industrial-grade security
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* Slide 17: Role-Based Access Control */}
+        <section className="slide" id="slide-17">
           <div className="section-header">
             <div className="section-number">SECTION 05 • AUTHORIZATION</div>
             <h2 className="section-title">Role-Based Access Control</h2>
@@ -4379,491 +5536,188 @@ export default function ArchitecturePage() {
           </div>
         </section>
 
-        {/* Slide 15: OPC UA PubSub */}
-        <section className="slide" id="slide-15">
-          <div className="section-header">
-            <div className="section-number">SECTION 07 • 48–55 MINUTES</div>
-            <h2 className="section-title">OPC UA PubSub</h2>
-            <p className="section-goal">Goal: Scalable data distribution</p>
-          </div>
-          <div className="content-grid">
-            <div className="content-card" style={{ borderColor: '#00d4ff' }}>
-              <h3 style={{ color: '#00d4ff' }}>
-                <span className="icon" style={{ background: 'rgba(0,212,255,0.1)' }}>📡</span> Broker-less
-              </h3>
-              <ul>
-                <li>UDP / Ethernet</li>
-                <li>Deterministic LAN</li>
-                <li>Low latency</li>
-                <li>TSN-compatible</li>
-              </ul>
-            </div>
-            <div className="content-card" style={{ borderColor: '#8b5cf6' }}>
-              <h3 style={{ color: '#8b5cf6' }}>
-                <span className="icon" style={{ background: 'rgba(139,92,246,0.1)' }}>☁️</span> Broker-based
-              </h3>
-              <ul>
-                <li>MQTT / AMQP</li>
-                <li>Cloud integration</li>
-                <li>Azure, AWS compatible</li>
-                <li>Massive scale</li>
-              </ul>
-            </div>
-          </div>
-          <div className="content-grid" style={{ marginTop: '1rem' }}>
-            <div className="content-card">
-              <h3><span className="icon">📦</span> Message Encodings</h3>
-              <ul>
-                <li><strong style={{ color: '#00d4ff' }}>UADP (Binary)</strong> — High-performance</li>
-                <li><strong style={{ color: '#10b981' }}>JSON</strong> — Human-readable</li>
-              </ul>
-            </div>
-            <div className="content-card">
-              <h3><span className="icon">🔒</span> PubSub Security</h3>
-              <ul>
-                <li>TLS mandatory for brokers</li>
-                <li>Read-only telemetry recommended</li>
-                <li>Versioned schemas</li>
-                <li>Signed UADP messages</li>
-              </ul>
-            </div>
-          </div>
-        </section>
-
-        {/* Slide 16: Information Modeling Mechanics - Enhanced with real types.yaml */}
-        <section className="slide" id="slide-16" style={{ paddingTop: '60px' }}>
+        {/* Slide 18: Deep Dive - Communication Model */}
+        <section className="slide" id="slide-18" style={{ paddingTop: '60px' }}>
           <div className="section-header" style={{ marginBottom: '0.8rem' }}>
-            <div className="section-number">SECTION 08 • INFORMATION MODELING</div>
+            <div className="section-number">SECTION 06 • DEEP DIVE</div>
             <h2 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-              From Blueprint to Reality
-              <span className="live-badge" style={{ fontSize: '0.7rem', background: 'rgba(139,92,246,0.1)', borderColor: 'var(--accent-purple)', color: 'var(--accent-purple)' }}>
-                types.yaml → OPC UA
+              Message Sequence in Detail
+              <span className="live-badge animate-morph-glow" style={{ fontSize: '0.7rem' }}>
+                <div className="pulse-dot" />
+                INTERACTIVE
               </span>
             </h2>
+            <p className="section-goal">Understanding the complete request/response lifecycle</p>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.8rem', marginBottom: '1rem' }}>
-            {/* Type Definition */}
-            <div className="content-card animate-fade-in" style={{ borderColor: 'var(--accent-purple)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.6rem' }}>
-                <Database size={16} style={{ color: 'var(--accent-purple)' }} />
-                <h4 style={{ margin: 0, fontSize: '0.85rem', color: 'var(--accent-purple)' }}>1. Type Definition</h4>
-              </div>
-              <div style={{ fontSize: '0.55rem', color: 'var(--text-muted)', marginBottom: '0.4rem' }}>types.yaml</div>
-              <div className="code-block" style={{ fontSize: '0.6rem', maxHeight: '200px', overflowY: 'auto', padding: '0.6rem' }}>
-                <span className="keyword">PumpType</span>:<br />
-                &nbsp;&nbsp;type: <span className="string">ObjectType</span><br />
-                &nbsp;&nbsp;base: <span className="string">AssetType</span><br />
-                &nbsp;&nbsp;description: <span className="string">"Centrifugal pump"</span><br />
-                &nbsp;&nbsp;components:<br />
-                &nbsp;&nbsp;&nbsp;&nbsp;<span className="keyword">FlowRate</span>:<br />
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;type: <span className="string">AnalogItemType</span><br />
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dataType: <span className="string">Double</span><br />
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;engineeringUnits: <span className="string">m³/h</span><br />
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;euRange: {'{'}low: <span className="number">0</span>, high: <span className="number">5000</span>{'}'}<br />
-                &nbsp;&nbsp;&nbsp;&nbsp;<span className="keyword">RPM</span>:<br />
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;type: <span className="string">AnalogItemType</span><br />
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;euRange: {'{'}low: <span className="number">0</span>, high: <span className="number">1800</span>{'}'}<br />
-                &nbsp;&nbsp;&nbsp;&nbsp;<span className="keyword">PowerConsumption</span>:<br />
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;engineeringUnits: <span className="string">kW</span><br />
-                &nbsp;&nbsp;methods:<br />
-                &nbsp;&nbsp;&nbsp;&nbsp;<span className="keyword">StartPump</span>, <span className="keyword">StopPump</span>, <span className="keyword">SetSpeed</span>
-              </div>
-            </div>
+          {/* Interactive Message Sequence Diagram */}
+          <div className="sequence-diagram" style={{ marginBottom: '1rem' }}>
+            <svg viewBox="0 0 900 320" style={{ width: '100%', height: '320px' }}>
+              <defs>
+                <linearGradient id="clientLifeline" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="var(--accent-cyan)" stopOpacity="1" />
+                  <stop offset="100%" stopColor="var(--accent-cyan)" stopOpacity="0.3" />
+                </linearGradient>
+                <linearGradient id="serverLifeline" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="var(--accent-green)" stopOpacity="1" />
+                  <stop offset="100%" stopColor="var(--accent-green)" stopOpacity="0.3" />
+                </linearGradient>
+                <filter id="msgGlow">
+                  <feGaussianBlur stdDeviation="3" result="blur" />
+                  <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                </filter>
+                <marker id="arrowCyan" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                  <path d="M0,0 L0,6 L9,3 z" fill="var(--accent-cyan)" />
+                </marker>
+                <marker id="arrowGreen" markerWidth="10" markerHeight="10" refX="0" refY="3" orient="auto">
+                  <path d="M9,0 L9,6 L0,3 z" fill="var(--accent-green)" />
+                </marker>
+              </defs>
 
-            {/* Asset Instance */}
-            <div className="content-card animate-fade-in" style={{ borderColor: 'var(--accent-orange)', animationDelay: '0.1s' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.6rem' }}>
-                <Layers size={16} style={{ color: 'var(--accent-orange)' }} />
-                <h4 style={{ margin: 0, fontSize: '0.85rem', color: 'var(--accent-orange)' }}>2. Asset Instance</h4>
-              </div>
-              <div style={{ fontSize: '0.55rem', color: 'var(--text-muted)', marginBottom: '0.4rem' }}>assets.json</div>
-              <div className="code-block" style={{ fontSize: '0.6rem', maxHeight: '200px', overflowY: 'auto', padding: '0.6rem' }}>
-                {'{'}<br />
-                &nbsp;&nbsp;<span className="keyword">"id"</span>: <span className="string">"IPS_PMP_001"</span>,<br />
-                &nbsp;&nbsp;<span className="keyword">"name"</span>: <span className="string">"Influent Pump 1"</span>,<br />
-                &nbsp;&nbsp;<span className="keyword">"type"</span>: <span className="string">"InfluentPumpType"</span>,<br />
-                &nbsp;&nbsp;<span className="keyword">"parent"</span>: <span className="string">"S00630"</span>,<br />
-                &nbsp;&nbsp;<span className="keyword">"simulate"</span>: <span className="number">true</span>,<br />
-                &nbsp;&nbsp;<span className="keyword">"properties"</span>: {'{'}<br />
-                &nbsp;&nbsp;&nbsp;&nbsp;<span className="keyword">"Manufacturer"</span>: <span className="string">"Flygt"</span>,<br />
-                &nbsp;&nbsp;&nbsp;&nbsp;<span className="keyword">"Model"</span>: <span className="string">"CP3300.900"</span><br />
-                &nbsp;&nbsp;{'}'},<br />
-                &nbsp;&nbsp;<span className="keyword">"designSpecs"</span>: {'{'}<br />
-                &nbsp;&nbsp;&nbsp;&nbsp;<span className="keyword">"DesignFlow"</span>: <span className="number">2500.0</span>,<br />
-                &nbsp;&nbsp;&nbsp;&nbsp;<span className="keyword">"MaxRPM"</span>: <span className="number">1180</span><br />
-                &nbsp;&nbsp;{'}'}<br />
-                {'}'}
-              </div>
-            </div>
-
-            {/* Live OPC UA Instance */}
-            <div className="content-card animate-fade-in" style={{ borderColor: 'var(--accent-green)', animationDelay: '0.2s' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.6rem' }}>
-                <Activity size={16} style={{ color: 'var(--accent-green)' }} />
-                <h4 style={{ margin: 0, fontSize: '0.85rem', color: 'var(--accent-green)' }}>3. Live OPC UA Node</h4>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.55rem', color: 'var(--text-muted)', marginBottom: '0.4rem' }}>
-                <span>ns=1;s=IPS_PMP_001</span>
-                <span className="live-badge" style={{ fontSize: '0.5rem' }}>
-                  <div className="pulse-dot" style={{ width: '4px', height: '4px' }} />
-                  LIVE
-                </span>
-              </div>
-              <div style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-color)', borderRadius: '6px', padding: '0.8rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.4rem' }}>
-                  <div style={{ width: '6px', height: '6px', background: 'var(--accent-green)', borderRadius: '50%' }} />
-                  <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>IPS_PMP_001 : InfluentPumpType</span>
-                </div>
-                <div style={{ paddingLeft: '0.8rem', borderLeft: '2px solid var(--accent-green)', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
-                  <div style={{ fontSize: '0.65rem', display: 'flex', justifyContent: 'space-between' }}>
-                    <span style={{ color: 'var(--text-muted)' }}>FlowRate:</span>
-                    <span style={{ color: 'var(--accent-cyan)', fontFamily: 'JetBrains Mono' }}>{(Object.values(pumpData)[0]?.flow_rate || 2340.5).toFixed(1)} m³/h</span>
-                  </div>
-                  <div style={{ fontSize: '0.65rem', display: 'flex', justifyContent: 'space-between' }}>
-                    <span style={{ color: 'var(--text-muted)' }}>RPM:</span>
-                    <span style={{ color: 'var(--accent-cyan)', fontFamily: 'JetBrains Mono' }}>{(Object.values(pumpData)[0]?.rpm || 1145).toFixed(0)}</span>
-                  </div>
-                  <div style={{ fontSize: '0.65rem', display: 'flex', justifyContent: 'space-between' }}>
-                    <span style={{ color: 'var(--text-muted)' }}>Power:</span>
-                    <span style={{ color: 'var(--accent-orange)', fontFamily: 'JetBrains Mono' }}>{(Object.values(pumpData)[0]?.power_consumption || 124.8).toFixed(1)} kW</span>
-                  </div>
-                  <div style={{ fontSize: '0.65rem', display: 'flex', justifyContent: 'space-between' }}>
-                    <span style={{ color: 'var(--text-muted)' }}>Status:</span>
-                    <span style={{ color: Object.values(pumpData)[0]?.is_running ? 'var(--accent-green)' : 'var(--accent-red)', fontFamily: 'JetBrains Mono' }}>
-                      {Object.values(pumpData)[0]?.is_running ? 'RUNNING' : 'STOPPED'}
-                    </span>
-                  </div>
-                </div>
-                <button className="btn-action" style={{ marginTop: '0.6rem', padding: '0.3rem 0.6rem', fontSize: '0.65rem' }} onClick={() => fetchPumps()}>
-                  <RefreshCw size={10} style={{ marginRight: '3px' }} /> Refresh
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Asset Hierarchy Visualization */}
-          <div className="diagram-container" style={{ padding: '1rem' }}>
-            <div className="diagram-title">Asset Hierarchy (assets.json → OPC UA Address Space)</div>
-            <svg viewBox="0 0 900 120" style={{ width: '100%', height: '120px' }}>
-              {/* Plant Level */}
-              <g transform="translate(50, 20)">
-                <rect width="100" height="30" rx="5" fill="var(--bg-elevated)" stroke="var(--accent-purple)" strokeWidth="2" />
-                <text x="50" y="20" fill="var(--accent-purple)" fontSize="8" textAnchor="middle" fontWeight="600">RC_RockCreek</text>
-                <text x="50" y="40" fill="var(--text-muted)" fontSize="6" textAnchor="middle">Plant</text>
+              {/* Client Actor */}
+              <g transform="translate(80, 15)">
+                <rect x="-40" y="0" width="80" height="45" rx="8" fill={theme === 'business' ? '#e0f2fe' : 'rgba(0,212,255,0.15)'} stroke="var(--accent-cyan)" strokeWidth="2" />
+                <text x="0" y="20" fill="var(--accent-cyan)" fontSize="12" textAnchor="middle" fontWeight="700">OPC UA Client</text>
+                <text x="0" y="35" fill={theme === 'business' ? '#0284c7' : '#67e8f9'} fontSize="9" textAnchor="middle">SCADA / HMI</text>
               </g>
 
-              {/* Process Level */}
-              <g transform="translate(200, 20)">
-                <rect width="100" height="30" rx="5" fill="var(--bg-elevated)" stroke="var(--accent-cyan)" strokeWidth="2" />
-                <text x="50" y="20" fill="var(--accent-cyan)" fontSize="8" textAnchor="middle" fontWeight="600">P0041_Preliminary</text>
-                <text x="50" y="40" fill="var(--text-muted)" fontSize="6" textAnchor="middle">Process</text>
+              {/* Server Actor */}
+              <g transform="translate(820, 15)">
+                <rect x="-40" y="0" width="80" height="45" rx="8" fill={theme === 'business' ? '#dcfce7' : 'rgba(16,185,129,0.15)'} stroke="var(--accent-green)" strokeWidth="2" />
+                <text x="0" y="20" fill="var(--accent-green)" fontSize="12" textAnchor="middle" fontWeight="700">OPC UA Server</text>
+                <text x="0" y="35" fill={theme === 'business' ? '#059669' : '#6ee7b7'} fontSize="9" textAnchor="middle">Pump Controller</text>
               </g>
 
-              {/* System Level */}
-              <g transform="translate(350, 20)">
-                <rect width="120" height="30" rx="5" fill="var(--bg-elevated)" stroke="var(--accent-orange)" strokeWidth="2" />
-                <text x="60" y="20" fill="var(--accent-orange)" fontSize="8" textAnchor="middle" fontWeight="600">S00630_InfluentPumping</text>
-                <text x="60" y="40" fill="var(--text-muted)" fontSize="6" textAnchor="middle">System</text>
+              {/* Lifelines */}
+              <line x1="80" y1="65" x2="80" y2="310" stroke="url(#clientLifeline)" strokeWidth="3" className="sequence-lifeline" />
+              <line x1="820" y1="65" x2="820" y2="310" stroke="url(#serverLifeline)" strokeWidth="3" className="sequence-lifeline" />
+
+              {/* Message 1: CreateSessionRequest */}
+              <g className="sequence-message" style={{ cursor: 'pointer' }}>
+                <line x1="90" y1="85" x2="810" y2="85" stroke="var(--accent-cyan)" strokeWidth="2" markerEnd="url(#arrowCyan)" />
+                <rect x="350" y="72" width="200" height="26" rx="5" fill={theme === 'business' ? '#f0f9ff' : 'var(--bg-dark)'} stroke="var(--accent-cyan)" strokeWidth="1.5" />
+                <text x="450" y="90" fill="var(--accent-cyan)" fontSize="11" textAnchor="middle" fontWeight="600">CreateSessionRequest</text>
+                <text x="100" y="78" fill={theme === 'business' ? '#64748b' : '#94a3b8'} fontSize="9">1.</text>
+                {/* Animated packet */}
+                <circle r="6" fill="var(--accent-cyan)" filter="url(#msgGlow)">
+                  <animate attributeName="cx" values="90;810" dur="2s" repeatCount="indefinite" />
+                  <animate attributeName="cy" values="85;85" dur="2s" repeatCount="indefinite" />
+                  <animate attributeName="opacity" values="1;1;0" keyTimes="0;0.9;1" dur="2s" repeatCount="indefinite" />
+                </circle>
               </g>
 
-              {/* Asset Level - Pumps */}
-              <g transform="translate(520, 10)">
-                <rect width="80" height="25" rx="4" fill="var(--bg-elevated)" stroke="var(--accent-green)" strokeWidth="2" className="animate-glow" />
-                <text x="40" y="17" fill="var(--accent-green)" fontSize="7" textAnchor="middle" fontWeight="600">IPS_PMP_001</text>
-              </g>
-              <g transform="translate(620, 10)">
-                <rect width="80" height="25" rx="4" fill="var(--bg-elevated)" stroke="var(--accent-green)" strokeWidth="1.5" />
-                <text x="40" y="17" fill="var(--accent-green)" fontSize="7" textAnchor="middle" fontWeight="600">IPS_PMP_002</text>
-              </g>
-              <g transform="translate(720, 10)">
-                <rect width="80" height="25" rx="4" fill="var(--bg-elevated)" stroke="var(--accent-green)" strokeWidth="1.5" />
-                <text x="40" y="17" fill="var(--accent-green)" fontSize="7" textAnchor="middle" fontWeight="600">IPS_PMP_003</text>
-              </g>
-              <g transform="translate(820, 10)">
-                <rect width="70" height="25" rx="4" fill="var(--bg-elevated)" stroke="var(--accent-pink)" strokeWidth="1.5" />
-                <text x="35" y="17" fill="var(--accent-pink)" fontSize="7" textAnchor="middle" fontWeight="600">IPS_WW_001</text>
+              {/* Message 2: CreateSessionResponse */}
+              <g className="sequence-message" style={{ cursor: 'pointer' }}>
+                <line x1="810" y1="115" x2="90" y2="115" stroke="var(--accent-green)" strokeWidth="2" markerEnd="url(#arrowGreen)" />
+                <rect x="330" y="102" width="240" height="26" rx="5" fill={theme === 'business' ? '#f0fdf4' : 'var(--bg-dark)'} stroke="var(--accent-green)" strokeWidth="1.5" />
+                <text x="450" y="120" fill="var(--accent-green)" fontSize="11" textAnchor="middle" fontWeight="600">CreateSessionResponse (SessionId, Nonce)</text>
+                <text x="830" y="108" fill={theme === 'business' ? '#64748b' : '#94a3b8'} fontSize="9">2.</text>
+                <circle r="6" fill="var(--accent-green)" filter="url(#msgGlow)">
+                  <animate attributeName="cx" values="810;90" dur="2s" begin="0.5s" repeatCount="indefinite" />
+                  <animate attributeName="cy" values="115;115" dur="2s" begin="0.5s" repeatCount="indefinite" />
+                  <animate attributeName="opacity" values="1;1;0" keyTimes="0;0.9;1" dur="2s" begin="0.5s" repeatCount="indefinite" />
+                </circle>
               </g>
 
-              {/* Connection lines */}
-              <line x1="150" y1="35" x2="200" y2="35" stroke="var(--text-muted)" strokeWidth="1" strokeDasharray="4 2" />
-              <line x1="300" y1="35" x2="350" y2="35" stroke="var(--text-muted)" strokeWidth="1" strokeDasharray="4 2" />
-              <line x1="470" y1="35" x2="520" y2="22" stroke="var(--text-muted)" strokeWidth="1" strokeDasharray="4 2" />
-              <line x1="470" y1="35" x2="620" y2="22" stroke="var(--text-muted)" strokeWidth="1" strokeDasharray="4 2" />
-              <line x1="470" y1="35" x2="720" y2="22" stroke="var(--text-muted)" strokeWidth="1" strokeDasharray="4 2" />
-              <line x1="470" y1="35" x2="820" y2="22" stroke="var(--text-muted)" strokeWidth="1" strokeDasharray="4 2" />
-
-              {/* Type inheritance */}
-              <g transform="translate(520, 50)">
-                <text x="0" y="10" fill="var(--text-muted)" fontSize="6">HasTypeDefinition ↓</text>
-                <rect x="0" y="15" width="80" height="20" rx="3" fill="rgba(139,92,246,0.1)" stroke="var(--accent-purple)" strokeWidth="1" strokeDasharray="3 2" />
-                <text x="40" y="28" fill="var(--accent-purple)" fontSize="6" textAnchor="middle">InfluentPumpType</text>
+              {/* Message 3: ActivateSessionRequest */}
+              <g className="sequence-message" style={{ cursor: 'pointer' }}>
+                <line x1="90" y1="150" x2="810" y2="150" stroke="var(--accent-orange)" strokeWidth="2" markerEnd="url(#arrowCyan)" />
+                <rect x="310" y="137" width="280" height="26" rx="5" fill={theme === 'business' ? '#fffbeb' : 'var(--bg-dark)'} stroke="var(--accent-orange)" strokeWidth="1.5" />
+                <text x="450" y="155" fill="var(--accent-orange)" fontSize="11" textAnchor="middle" fontWeight="600">ActivateSessionRequest (Credentials, Signature)</text>
+                <text x="100" y="143" fill={theme === 'business' ? '#64748b' : '#94a3b8'} fontSize="9">3.</text>
+                <circle r="6" fill="var(--accent-orange)" filter="url(#msgGlow)">
+                  <animate attributeName="cx" values="90;810" dur="2s" begin="1s" repeatCount="indefinite" />
+                  <animate attributeName="cy" values="150;150" dur="2s" begin="1s" repeatCount="indefinite" />
+                  <animate attributeName="opacity" values="1;1;0" keyTimes="0;0.9;1" dur="2s" begin="1s" repeatCount="indefinite" />
+                </circle>
               </g>
 
-              {/* Stats */}
-              <g transform="translate(650, 60)">
-                <rect width="240" height="50" rx="5" fill="var(--bg-dark)" stroke="var(--border-color)" />
-                <text x="10" y="18" fill="var(--text-muted)" fontSize="7">Asset Summary (assets.json):</text>
-                <text x="10" y="32" fill="var(--accent-cyan)" fontSize="7">• 7 InfluentPumpType • 4 PumpType</text>
-                <text x="10" y="44" fill="var(--accent-pink)" fontSize="7">• 7 ChamberType • 15 Simulated</text>
+              {/* Message 4: ActivateSessionResponse */}
+              <g className="sequence-message" style={{ cursor: 'pointer' }}>
+                <line x1="810" y1="180" x2="90" y2="180" stroke="var(--accent-green)" strokeWidth="2" markerEnd="url(#arrowGreen)" />
+                <rect x="350" y="167" width="200" height="26" rx="5" fill={theme === 'business' ? '#f0fdf4' : 'var(--bg-dark)'} stroke="var(--accent-green)" strokeWidth="1.5" />
+                <text x="450" y="185" fill="var(--accent-green)" fontSize="11" textAnchor="middle" fontWeight="600">ActivateSessionResponse ✓</text>
+                <text x="830" y="173" fill={theme === 'business' ? '#64748b' : '#94a3b8'} fontSize="9">4.</text>
+              </g>
+
+              {/* Secure Channel Box */}
+              <rect x="70" y="200" width="760" height="90" rx="8" fill="rgba(139,92,246,0.1)" stroke="var(--accent-purple)" strokeWidth="2" strokeDasharray="8 4" />
+              <text x="450" y="218" fill="var(--accent-purple)" fontSize="10" textAnchor="middle" fontWeight="600">ENCRYPTED SESSION ESTABLISHED</text>
+
+              {/* Message 5: ReadRequest (inside secure channel) */}
+              <g className="sequence-message" style={{ cursor: 'pointer' }}>
+                <line x1="90" y1="240" x2="810" y2="240" stroke="var(--accent-cyan)" strokeWidth="2" markerEnd="url(#arrowCyan)" />
+                <rect x="330" y="227" width="240" height="26" rx="5" fill="var(--accent-purple)" fillOpacity="0.2" stroke="var(--accent-cyan)" strokeWidth="1.5" />
+                <text x="450" y="245" fill="var(--accent-cyan)" fontSize="11" textAnchor="middle" fontWeight="600">ReadRequest (ns=1;s=Pump_01.FlowRate)</text>
+                <text x="100" y="233" fill={theme === 'business' ? '#64748b' : '#94a3b8'} fontSize="9">5.</text>
+                <circle r="6" fill="var(--accent-cyan)" filter="url(#msgGlow)">
+                  <animate attributeName="cx" values="90;810" dur="1.5s" begin="1.5s" repeatCount="indefinite" />
+                  <animate attributeName="cy" values="240;240" dur="1.5s" begin="1.5s" repeatCount="indefinite" />
+                  <animate attributeName="opacity" values="1;1;0" keyTimes="0;0.9;1" dur="1.5s" begin="1.5s" repeatCount="indefinite" />
+                </circle>
+              </g>
+
+              {/* Message 6: ReadResponse (inside secure channel) */}
+              <g className="sequence-message" style={{ cursor: 'pointer' }}>
+                <line x1="810" y1="270" x2="90" y2="270" stroke="var(--accent-green)" strokeWidth="2" markerEnd="url(#arrowGreen)" />
+                <rect x="300" y="257" width="300" height="26" rx="5" fill="var(--accent-purple)" fillOpacity="0.2" stroke="var(--accent-green)" strokeWidth="1.5" />
+                <text x="450" y="275" fill="var(--accent-green)" fontSize="11" textAnchor="middle" fontWeight="600">ReadResponse (Value: 2340.5, Status: Good, Timestamp)</text>
+                <text x="830" y="263" fill={theme === 'business' ? '#64748b' : '#94a3b8'} fontSize="9">6.</text>
+                <circle r="6" fill="var(--accent-green)" filter="url(#msgGlow)">
+                  <animate attributeName="cx" values="810;90" dur="1.5s" begin="2s" repeatCount="indefinite" />
+                  <animate attributeName="cy" values="270;270" dur="1.5s" begin="2s" repeatCount="indefinite" />
+                  <animate attributeName="opacity" values="1;1;0" keyTimes="0;0.9;1" dur="1.5s" begin="2s" repeatCount="indefinite" />
+                </circle>
+              </g>
+
+              {/* Time annotations */}
+              <g transform="translate(20, 85)">
+                <text fill={theme === 'business' ? '#64748b' : '#94a3b8'} fontSize="8" textAnchor="end">t₀</text>
+              </g>
+              <g transform="translate(20, 180)">
+                <text fill={theme === 'business' ? '#64748b' : '#94a3b8'} fontSize="8" textAnchor="end">t₁</text>
+              </g>
+              <g transform="translate(20, 270)">
+                <text fill={theme === 'business' ? '#64748b' : '#94a3b8'} fontSize="8" textAnchor="end">t₂</text>
               </g>
             </svg>
           </div>
 
-          <div className="highlight-box" style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-            <div style={{ flex: 1 }}>
-              <p style={{ margin: 0 }}><strong>Strong Typing:</strong> <code>PumpType</code> defines 27 sensor data points, 4 methods, and 6 alarm types. Every pump instance automatically inherits the complete schema.</p>
-            </div>
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
-              <span className="protocol-badge" style={{ background: 'rgba(139,92,246,0.1)', borderColor: 'var(--accent-purple)', color: 'var(--accent-purple)' }}>27 Data Points</span>
-              <span className="protocol-badge" style={{ background: 'rgba(16,185,129,0.1)', borderColor: 'var(--accent-green)', color: 'var(--accent-green)' }}>4 Methods</span>
-              <span className="protocol-badge" style={{ background: 'rgba(239,68,68,0.1)', borderColor: 'var(--accent-red)', color: 'var(--accent-red)' }}>6 Alarms</span>
-            </div>
-          </div>
-        </section>
-
-        {/* Slide 17: Interoperability - Complete OPC-UA Architecture */}
-        <section className="slide" id="slide-17" style={{ paddingTop: '60px' }}>
-          <div className="section-header" style={{ marginBottom: '1rem' }}>
-            <div className="section-number">SECTION 08 • COMMUNICATION ARCHITECTURE</div>
-            <h2 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-              Cross-Platform Interoperability
-              <span className="live-badge animate-glow" style={{ fontSize: '0.7rem' }}>
-                <div className="pulse-dot" />
-                DUAL MODEL
-              </span>
-            </h2>
-          </div>
-
-          {/* Main Architecture Diagram */}
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr auto 1fr',
-            gap: '1.5rem',
-            alignItems: 'stretch',
-            marginBottom: '1.5rem'
-          }}>
-            {/* Left: Client-Server Model */}
-            <div className="comm-model-card" style={{ borderColor: 'var(--accent-cyan)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
-                <ArrowLeftRight size={20} style={{ color: 'var(--accent-cyan)' }} />
-                <h3 style={{ margin: 0, fontSize: '1rem', color: 'var(--accent-cyan)' }}>Client–Server Model</h3>
-              </div>
-              <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
-                Bidirectional • Stateful Sessions • Interactive Control
-              </p>
-
-              {/* Protocol Badges */}
-              <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
-                <span className="protocol-badge protocol-tcp">
-                  <Cable size={12} /> TCP/IP :4840
-                </span>
-                <span className="protocol-badge protocol-ws">
-                  <Wifi size={12} /> WebSocket
-                </span>
-              </div>
-
-              {/* Client Icons */}
-              <div style={{ display: 'flex', gap: '0.8rem', justifyContent: 'center', marginTop: '1rem' }}>
-                <div className="client-icon-box">
-                  <div className="icon-wrapper" style={{ background: 'rgba(0, 212, 255, 0.1)' }}>
-                    <Monitor size={24} style={{ color: 'var(--accent-cyan)' }} />
-                  </div>
-                  <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>Desktop</span>
-                  <span className="protocol-badge protocol-tcp" style={{ marginTop: '0.3rem', fontSize: '0.55rem' }}>TCP/IP</span>
-                </div>
-                <div className="client-icon-box">
-                  <div className="icon-wrapper" style={{ background: 'rgba(139, 92, 246, 0.1)' }}>
-                    <Globe size={24} style={{ color: 'var(--accent-purple)' }} />
-                  </div>
-                  <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>Web Client</span>
-                  <span className="protocol-badge protocol-ws" style={{ marginTop: '0.3rem', fontSize: '0.55rem' }}>WebSocket</span>
-                </div>
-                <div className="client-icon-box">
-                  <div className="icon-wrapper" style={{ background: 'rgba(236, 72, 153, 0.1)' }}>
-                    <Smartphone size={24} style={{ color: 'var(--accent-pink)' }} />
-                  </div>
-                  <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>Mobile</span>
-                  <span className="protocol-badge protocol-ws" style={{ marginTop: '0.3rem', fontSize: '0.55rem' }}>WebSocket</span>
-                </div>
-              </div>
-
-              {/* Connection Animation */}
-              <div style={{ position: 'relative', height: '40px', marginTop: '1rem' }}>
-                <svg width="100%" height="40" viewBox="0 0 300 40">
-                  <defs>
-                    <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                      <stop offset="0%" stopColor="var(--accent-cyan)" />
-                      <stop offset="100%" stopColor="var(--accent-green)" />
-                    </linearGradient>
-                  </defs>
-                  <path d="M50 20 L250 20" stroke="url(#lineGradient)" strokeWidth="2" className="connection-line" fill="none" />
-                  <circle cx="150" cy="20" r="4" fill="var(--accent-cyan)">
-                    <animate attributeName="cx" values="50;250;50" dur="3s" repeatCount="indefinite" />
-                  </circle>
-                  <text x="150" y="35" textAnchor="middle" fill="var(--text-muted)" fontSize="8">Request/Response</text>
-                </svg>
-              </div>
-            </div>
-
-            {/* Center: OPC UA Server */}
-            <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
-              <div className="server-core animate-glow" style={{ width: '200px' }}>
-                <div style={{
-                  width: '60px',
-                  height: '60px',
-                  margin: '0 auto 0.8rem',
-                  background: 'linear-gradient(135deg, var(--accent-green), var(--accent-cyan))',
-                  borderRadius: '16px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}>
-                  <Server size={32} style={{ color: 'white' }} />
-                </div>
-                <h3 style={{ margin: '0 0 0.3rem', fontSize: '1rem', color: theme === 'business' ? '#0f172a' : 'white' }}>OPC UA Server</h3>
-                <p style={{ margin: 0, fontSize: '0.7rem', color: 'var(--accent-green)' }}>Simulation Engine</p>
-                <div style={{
-                  marginTop: '0.8rem',
-                  padding: '0.4rem',
-                  background: 'var(--bg-dark)',
-                  borderRadius: '6px',
-                  fontFamily: 'JetBrains Mono',
-                  fontSize: '0.6rem',
-                  color: 'var(--accent-cyan)'
-                }}>
-                  opc.tcp://localhost:4840
-                </div>
-              </div>
-
-              {/* Dual arrows */}
-              <svg width="200" height="80" style={{ marginTop: '-10px' }}>
-                <defs>
-                  <marker id="arrowLeft" markerWidth="8" markerHeight="8" refX="0" refY="3" orient="auto">
-                    <path d="M8,0 L8,6 L0,3 z" fill="var(--accent-cyan)" />
-                  </marker>
-                  <marker id="arrowRight" markerWidth="8" markerHeight="8" refX="8" refY="3" orient="auto">
-                    <path d="M0,0 L0,6 L8,3 z" fill="var(--accent-orange)" />
-                  </marker>
-                </defs>
-                <path d="M20 30 L80 30" stroke="var(--accent-cyan)" strokeWidth="2" markerStart="url(#arrowLeft)" className="connection-line" />
-                <path d="M120 30 L180 30" stroke="var(--accent-orange)" strokeWidth="2" markerEnd="url(#arrowRight)" className="connection-line" />
-                <text x="50" y="50" textAnchor="middle" fill="var(--accent-cyan)" fontSize="8" fontWeight="600">C/S</text>
-                <text x="150" y="50" textAnchor="middle" fill="var(--accent-orange)" fontSize="8" fontWeight="600">PubSub</text>
-              </svg>
-            </div>
-
-            {/* Right: PubSub Model */}
-            <div className="comm-model-card" style={{ borderColor: 'var(--accent-orange)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
-                <Radio size={20} style={{ color: 'var(--accent-orange)' }} />
-                <h3 style={{ margin: 0, fontSize: '1rem', color: 'var(--accent-orange)' }}>Pub/Sub Model</h3>
-              </div>
-              <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
-                Scalable • Stateless • Decoupled Distribution
-              </p>
-
-              {/* Protocol Badge */}
-              <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
-                <span className="protocol-badge protocol-mqtt">
-                  <MessageSquare size={12} /> MQTT Broker
-                </span>
-              </div>
-
-              {/* Broker Icon */}
-              <div style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                margin: '0.8rem 0',
-                padding: '1rem',
-                background: 'rgba(245, 158, 11, 0.1)',
-                borderRadius: '12px',
-                border: '1px dashed var(--accent-orange)'
-              }}>
-                <Cloud size={32} style={{ color: 'var(--accent-orange)', marginBottom: '0.5rem' }} />
-                <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--accent-orange)' }}>Message Broker</span>
-                <span style={{ fontSize: '0.6rem', color: 'var(--text-muted)' }}>MQTT / AMQP</span>
-              </div>
-
-              {/* Topic Display */}
-              <div className="topic-display" style={{ marginBottom: '0.8rem' }}>
-                plant/pumps/Pump_01/telemetry
-              </div>
-
-              {/* Subscribers */}
-              <div style={{ display: 'flex', gap: '0.6rem', justifyContent: 'center' }}>
-                <div className="client-icon-box" style={{ padding: '0.6rem' }}>
-                  <Globe size={20} style={{ color: 'var(--accent-pink)' }} />
-                  <span style={{ fontSize: '0.55rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>Dashboard</span>
-                </div>
-                <div className="client-icon-box" style={{ padding: '0.6rem' }}>
-                  <Database size={20} style={{ color: 'var(--accent-purple)' }} />
-                  <span style={{ fontSize: '0.55rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>Historian</span>
-                </div>
-                <div className="client-icon-box" style={{ padding: '0.6rem' }}>
-                  <Activity size={20} style={{ color: 'var(--accent-green)' }} />
-                  <span style={{ fontSize: '0.55rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>Analytics</span>
-                </div>
-              </div>
-
-              {/* Subscription Flow */}
-              <div style={{ position: 'relative', height: '30px', marginTop: '0.8rem' }}>
-                <svg width="100%" height="30" viewBox="0 0 300 30">
-                  <circle r="3" fill="var(--accent-orange)">
-                    <animate attributeName="cx" values="50;150;250" dur="2s" repeatCount="indefinite" />
-                    <animate attributeName="cy" values="15;15;15" dur="2s" repeatCount="indefinite" />
-                  </circle>
-                  <circle r="3" fill="var(--accent-orange)" opacity="0.5">
-                    <animate attributeName="cx" values="50;150;250" dur="2s" begin="0.3s" repeatCount="indefinite" />
-                  </circle>
-                  <circle r="3" fill="var(--accent-orange)" opacity="0.3">
-                    <animate attributeName="cx" values="50;150;250" dur="2s" begin="0.6s" repeatCount="indefinite" />
-                  </circle>
-                  <text x="150" y="28" textAnchor="middle" fill="var(--text-muted)" fontSize="7">Broadcast to Subscribers</text>
-                </svg>
-              </div>
-            </div>
-          </div>
-
-          {/* Bottom Summary */}
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(4, 1fr)',
-            gap: '1rem'
-          }}>
+          {/* Key Insights */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.8rem' }}>
             {[
-              { icon: <Cable size={18} />, title: 'TCP/IP', desc: 'Desktop OPC UA Clients', color: 'var(--accent-cyan)' },
-              { icon: <Wifi size={18} />, title: 'WebSocket', desc: 'Browser-based Clients', color: 'var(--accent-purple)' },
-              { icon: <Cloud size={18} />, title: 'MQTT Broker', desc: 'Scalable Distribution', color: 'var(--accent-orange)' },
-              { icon: <Radio size={18} />, title: 'Topics', desc: 'Semantic Namespaces', color: 'var(--accent-green)' },
+              { step: '1-2', title: 'Session Creation', desc: 'Server allocates resources, generates nonces for crypto', color: 'var(--accent-cyan)', icon: '🔗' },
+              { step: '3-4', title: 'Authentication', desc: 'Client proves identity via signature over server nonce', color: 'var(--accent-orange)', icon: '🔐' },
+              { step: '5-6', title: 'Data Exchange', desc: 'All messages encrypted with session keys', color: 'var(--accent-purple)', icon: '📨' },
+              { step: 'Always', title: 'Quality Metadata', desc: 'Every response includes StatusCode + Timestamp', color: 'var(--accent-green)', icon: '✅' },
             ].map((item, i) => (
               <div key={i} className="content-card animate-fade-in" style={{
-                textAlign: 'center',
-                padding: '0.8rem',
+                padding: '1rem',
+                borderColor: item.color,
                 animationDelay: `${i * 0.1}s`
               }}>
-                <div style={{ color: item.color, marginBottom: '0.3rem', display: 'flex', justifyContent: 'center' }}>
-                  {item.icon}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                  <span style={{ fontSize: '1.3rem' }}>{item.icon}</span>
+                  <span style={{ fontSize: '0.7rem', padding: '0.2rem 0.4rem', background: `${item.color}20`, borderRadius: '4px', color: item.color, fontFamily: 'JetBrains Mono', fontWeight: 600 }}>Step {item.step}</span>
                 </div>
-                <div style={{ fontSize: '0.8rem', fontWeight: 600, color: item.color }}>{item.title}</div>
-                <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>{item.desc}</div>
+                <div style={{ fontSize: '0.9rem', fontWeight: 700, color: item.color, marginBottom: '0.3rem' }}>{item.title}</div>
+                <div style={{ fontSize: '0.75rem', color: theme === 'business' ? '#475569' : 'var(--text-secondary)', lineHeight: 1.4 }}>{item.desc}</div>
               </div>
             ))}
           </div>
 
           <div className="highlight-box" style={{ marginTop: '1rem' }}>
             <p style={{ margin: 0 }}>
-              <strong style={{ color: 'var(--accent-cyan)' }}>Client–Server</strong> for interactive control & real-time monitoring •
-              <strong style={{ color: 'var(--accent-orange)' }}> PubSub</strong> for massive scale telemetry to cloud, historians & analytics
+              <strong>Key Insight:</strong> OPC UA's session model provides <strong style={{ color: 'var(--accent-purple)' }}>mutual authentication</strong> — both client and server verify each other's identity before any data is exchanged.
+              This prevents man-in-the-middle attacks and ensures audit trails are attributable to real users.
             </p>
           </div>
         </section>
 
-        {/* Slide 18: Future Directions */}
-        <section className="slide" id="slide-18">
+        {/* Slide 19: Future Directions */}
+        <section className="slide" id="slide-19">
           <div className="section-header">
-            <div className="section-number">SECTION 08 • FUTURE READY</div>
+            <div className="section-number">SECTION 07 • FUTURE READY</div>
             <h2 className="section-title">Future Directions</h2>
           </div>
           <div className="content-grid" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
@@ -4906,16 +5760,380 @@ export default function ArchitecturePage() {
             It preserves <strong>meaning, trust, and quality</strong> across decades of industrial systems.
           </div>
           <div style={{ marginTop: '1.5rem', textAlign: 'center' }}>
-            <button className="btn-action" onClick={() => goToSlide(18)}>
-              Final Conclusion →
+            <button className="btn-action" onClick={() => goToSlide(19)}>
+              Deep Dive: Communication →
             </button>
           </div>
         </section>
 
-        {/* Slide 19: Conclusion */}
-        <section className="slide title-slide" id="slide-19">
+
+        {/* Slide 20: Live Demo */}
+        <section className="slide" id="slide-20" style={{ paddingTop: '60px' }}>
+          <div className="section-header" style={{ marginBottom: '0.8rem' }}>
+            <div className="section-number">Section 08: LIVE DEMO • INTERACTIVE</div>
+            <h2 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              Live Pump Control Demo
+              <span className="live-badge animate-heartbeat" style={{ fontSize: '0.7rem', background: 'rgba(16,185,129,0.1)', borderColor: 'var(--accent-green)' }}>
+                <div className="pulse-dot" style={{ background: 'var(--accent-green)' }} />
+                {isConnected ? 'CONNECTED' : 'CONNECTING...'}
+              </span>
+            </h2>
+            <p className="section-goal">Real-time OPC UA server interaction via this dashboard</p>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: '1.5rem', marginBottom: '1rem' }}>
+            {/* Control Panel */}
+            <div className="control-panel">
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                <h3 style={{ margin: 0, fontSize: '1.1rem', color: 'var(--accent-cyan)' }}>Pump Control</h3>
+                <span style={{ fontSize: '0.7rem', fontFamily: 'JetBrains Mono', color: 'var(--text-muted)' }}>
+                  ns=1;s={Object.values(pumpData)[0]?.name || 'IPS_PMP_001'}
+                </span>
+              </div>
+
+              {/* Live Status Display */}
+              <div style={{
+                background: 'var(--bg-dark)',
+                borderRadius: '10px',
+                padding: '1rem',
+                marginBottom: '1rem',
+                border: `2px solid ${Object.values(pumpData)[0]?.is_running ? 'var(--accent-green)' : 'var(--accent-orange)'}`
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.8rem' }}>
+                  <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Status:</span>
+                  <span style={{
+                    fontSize: '1rem',
+                    fontWeight: 700,
+                    color: Object.values(pumpData)[0]?.is_running ? 'var(--accent-green)' : 'var(--accent-orange)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem'
+                  }}>
+                    {Object.values(pumpData)[0]?.is_running ? (
+                      <>
+                        <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--accent-green)', animation: 'pulse 1.5s infinite' }} />
+                        RUNNING
+                      </>
+                    ) : (
+                      <>
+                        <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--accent-orange)' }} />
+                        STOPPED
+                      </>
+                    )}
+                  </span>
+                </div>
+
+                {/* Live Values */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.8rem' }}>
+                  <div style={{ background: 'var(--bg-elevated)', padding: '0.6rem', borderRadius: '8px' }}>
+                    <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', marginBottom: '0.2rem' }}>Flow Rate</div>
+                    <div style={{ fontSize: '1.2rem', fontWeight: 700, fontFamily: 'JetBrains Mono', color: 'var(--accent-cyan)' }}>
+                      {(Object.values(pumpData)[0]?.flow_rate || 0).toFixed(1)}
+                      <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginLeft: '4px' }}>GPM</span>
+                    </div>
+                  </div>
+                  <div style={{ background: 'var(--bg-elevated)', padding: '0.6rem', borderRadius: '8px' }}>
+                    <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', marginBottom: '0.2rem' }}>RPM</div>
+                    <div style={{ fontSize: '1.2rem', fontWeight: 700, fontFamily: 'JetBrains Mono', color: 'var(--accent-orange)' }}>
+                      {(Object.values(pumpData)[0]?.rpm || 0).toFixed(0)}
+                    </div>
+                  </div>
+                  <div style={{ background: 'var(--bg-elevated)', padding: '0.6rem', borderRadius: '8px' }}>
+                    <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', marginBottom: '0.2rem' }}>Power</div>
+                    <div style={{ fontSize: '1.2rem', fontWeight: 700, fontFamily: 'JetBrains Mono', color: 'var(--accent-green)' }}>
+                      {(Object.values(pumpData)[0]?.power_consumption || 0).toFixed(1)}
+                      <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginLeft: '4px' }}>kW</span>
+                    </div>
+                  </div>
+                  <div style={{ background: 'var(--bg-elevated)', padding: '0.6rem', borderRadius: '8px' }}>
+                    <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', marginBottom: '0.2rem' }}>Power Factor</div>
+                    <div style={{ fontSize: '1.2rem', fontWeight: 700, fontFamily: 'JetBrains Mono', color: 'var(--accent-purple)' }}>
+                      {(Object.values(pumpData)[0]?.power_factor || 0).toFixed(2)}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Control Buttons */}
+              <div style={{ display: 'flex', gap: '0.8rem', justifyContent: 'center' }}>
+                <button
+                  className="control-button"
+                  onClick={() => {
+                    const pump = Object.keys(pumpData)[0];
+                    if (pump) {
+                      usePumpStore.getState().startPump(pump);
+                    }
+                  }}
+                  disabled={Object.values(pumpData)[0]?.is_running}
+                  style={{ opacity: Object.values(pumpData)[0]?.is_running ? 0.5 : 1 }}
+                >
+                  <Play size={16} /> Start Pump
+                </button>
+                <button
+                  className="control-button stop"
+                  onClick={() => {
+                    const pump = Object.keys(pumpData)[0];
+                    if (pump) {
+                      usePumpStore.getState().stopPump(pump);
+                    }
+                  }}
+                  disabled={!Object.values(pumpData)[0]?.is_running}
+                  style={{ opacity: !Object.values(pumpData)[0]?.is_running ? 0.5 : 1 }}
+                >
+                  <Activity size={16} /> Stop Pump
+                </button>
+              </div>
+            </div>
+
+            {/* OPC UA Request/Response Log */}
+            <div className="demo-terminal">
+              <div className="demo-terminal-header">
+                <div className="demo-terminal-dot" style={{ background: '#ff5f56' }} />
+                <div className="demo-terminal-dot" style={{ background: '#ffbd2e' }} />
+                <div className="demo-terminal-dot" style={{ background: '#27ca40' }} />
+                <span style={{ marginLeft: '12px', fontSize: '0.75rem', color: '#8b949e' }}>OPC UA Communication Log</span>
+              </div>
+              <div className="demo-terminal-body">
+                <div className="demo-terminal-line">
+                  <span className="demo-terminal-prompt">$</span>
+                  <span style={{ color: 'var(--accent-cyan)' }}>opcua-client connect opc.tcp://localhost:4840</span>
+                </div>
+                <div className="demo-terminal-line">
+                  <span style={{ color: '#8b949e' }}>[INFO]</span>
+                  <span className="demo-terminal-output">Establishing SecureChannel with SecurityPolicy: Aes256_Sha256_RsaPss</span>
+                </div>
+                <div className="demo-terminal-line">
+                  <span style={{ color: 'var(--accent-green)' }}>[SUCCESS]</span>
+                  <span className="demo-terminal-output">SecureChannel established, TokenId: 1</span>
+                </div>
+                <div className="demo-terminal-line">
+                  <span style={{ color: '#8b949e' }}>[INFO]</span>
+                  <span className="demo-terminal-output">Creating session...</span>
+                </div>
+                <div className="demo-terminal-line">
+                  <span style={{ color: 'var(--accent-green)' }}>[SUCCESS]</span>
+                  <span className="demo-terminal-output">Session activated, SessionId: ns=1;i=42</span>
+                </div>
+                <div className="demo-terminal-line" style={{ marginTop: '8px' }}>
+                  <span className="demo-terminal-prompt">$</span>
+                  <span style={{ color: 'var(--accent-cyan)' }}>read ns=1;s=IPS_PMP_001.FlowRate</span>
+                </div>
+                <div className="demo-terminal-line">
+                  <span style={{ color: 'var(--accent-purple)' }}>[READ]</span>
+                  <span className="demo-terminal-output">NodeId: ns=1;s=IPS_PMP_001.FlowRate</span>
+                </div>
+                <div className="demo-terminal-line">
+                  <span style={{ color: 'var(--accent-green)' }}>[RESPONSE]</span>
+                  <span className="demo-terminal-output">
+                    Value: <span style={{ color: 'var(--accent-cyan)', fontWeight: 600 }}>{(Object.values(pumpData)[0]?.flow_rate || 2340.5).toFixed(2)}</span> |
+                    Status: <span style={{ color: 'var(--accent-green)', fontWeight: 600 }}>Good</span> |
+                    Time: {currentTime || '00:00:00'}
+                  </span>
+                </div>
+                <div className="demo-terminal-line" style={{ marginTop: '8px' }}>
+                  <span className="demo-terminal-prompt">$</span>
+                  <span style={{ color: 'var(--accent-orange)' }}>subscribe ns=1;s=IPS_PMP_001.* --interval=1000ms</span>
+                </div>
+                <div className="demo-terminal-line">
+                  <span style={{ color: 'var(--accent-green)' }}>[SUBSCRIBED]</span>
+                  <span className="demo-terminal-output">MonitoredItem created for 27 variables, PublishingInterval: 1000ms</span>
+                </div>
+                <div className="demo-terminal-line">
+                  <span style={{ color: '#8b949e' }}>[NOTIFICATION]</span>
+                  <span className="demo-terminal-output">
+                    RPM: <span style={{ color: 'var(--accent-orange)' }}>{(Object.values(pumpData)[0]?.rpm || 1145).toFixed(0)}</span> |
+                    Power: <span style={{ color: 'var(--accent-green)' }}>{(Object.values(pumpData)[0]?.power_consumption || 124.8).toFixed(1)} kW</span> |
+                    PF: <span style={{ color: 'var(--accent-purple)' }}>{(Object.values(pumpData)[0]?.power_factor || 0.85).toFixed(2)}</span>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Architecture Visualization */}
+          <div className="diagram-container" style={{ padding: '1rem' }}>
+            <div className="diagram-title">Live Data Flow Architecture</div>
+            <svg viewBox="0 0 900 140" style={{ width: '100%', height: '140px' }}>
+              {/* This Dashboard */}
+              <g transform="translate(50, 50)">
+                <rect width="100" height="50" rx="8" fill={theme === 'business' ? '#f0f9ff' : 'rgba(0,212,255,0.15)'} stroke="var(--accent-cyan)" strokeWidth="2" className="animate-glow" />
+                <text x="50" y="25" fill="var(--accent-cyan)" fontSize="10" textAnchor="middle" fontWeight="700">This Dashboard</text>
+                <text x="50" y="40" fill={theme === 'business' ? '#0284c7' : '#67e8f9'} fontSize="8" textAnchor="middle">React + WebSocket</text>
+              </g>
+
+              {/* Arrow to API */}
+              <g>
+                <line x1="155" y1="75" x2="250" y2="75" stroke="var(--accent-cyan)" strokeWidth="2" markerEnd="url(#arrowRight)" />
+                <text x="202" y="68" fill="var(--text-muted)" fontSize="8" textAnchor="middle">HTTP/WS</text>
+                <circle r="4" fill="var(--accent-cyan)">
+                  <animate attributeName="cx" values="160;245" dur="1.5s" repeatCount="indefinite" />
+                  <animate attributeName="cy" values="75;75" dur="1.5s" repeatCount="indefinite" />
+                </circle>
+              </g>
+
+              {/* FastAPI */}
+              <g transform="translate(255, 40)">
+                <rect width="120" height="70" rx="8" fill={theme === 'business' ? '#fefce8' : 'rgba(245,158,11,0.15)'} stroke="var(--accent-orange)" strokeWidth="2" />
+                <text x="60" y="25" fill="var(--accent-orange)" fontSize="10" textAnchor="middle" fontWeight="700">FastAPI Backend</text>
+                <text x="60" y="40" fill={theme === 'business' ? '#b45309' : '#fde047'} fontSize="8" textAnchor="middle">Python + asyncua</text>
+                <rect x="15" y="48" width="90" height="16" rx="4" fill={theme === 'business' ? '#fef3c7' : 'rgba(245,158,11,0.2)'} />
+                <text x="60" y="60" fill="var(--accent-orange)" fontSize="7" textAnchor="middle">OPC UA Client Lib</text>
+              </g>
+
+              {/* Arrow to Server */}
+              <g>
+                <line x1="380" y1="75" x2="490" y2="75" stroke="var(--accent-purple)" strokeWidth="2" markerEnd="url(#arrowRight)" />
+                <text x="435" y="68" fill="var(--text-muted)" fontSize="8" textAnchor="middle">UA TCP :4840</text>
+                <rect x="410" y="82" width="50" height="16" rx="3" fill="var(--accent-purple)" opacity="0.2" stroke="var(--accent-purple)" strokeDasharray="3 2" />
+                <text x="435" y="93" fill="var(--accent-purple)" fontSize="7" textAnchor="middle">Encrypted</text>
+                <circle r="4" fill="var(--accent-purple)">
+                  <animate attributeName="cx" values="385;485" dur="1.5s" begin="0.3s" repeatCount="indefinite" />
+                  <animate attributeName="cy" values="75;75" dur="1.5s" begin="0.3s" repeatCount="indefinite" />
+                </circle>
+              </g>
+
+              {/* OPC UA Server */}
+              <g transform="translate(495, 30)">
+                <rect width="140" height="90" rx="8" fill={theme === 'business' ? '#f0fdf4' : 'rgba(16,185,129,0.15)'} stroke="var(--accent-green)" strokeWidth="2" />
+                <text x="70" y="22" fill="var(--accent-green)" fontSize="10" textAnchor="middle" fontWeight="700">OPC UA Server</text>
+                <text x="70" y="36" fill={theme === 'business' ? '#059669' : '#6ee7b7'} fontSize="8" textAnchor="middle">Python asyncua</text>
+                <rect x="10" y="44" width="55" height="38" rx="4" fill={theme === 'business' ? '#dcfce7' : 'rgba(16,185,129,0.2)'} />
+                <text x="37" y="58" fill="var(--accent-green)" fontSize="7" textAnchor="middle" fontWeight="600">Address</text>
+                <text x="37" y="70" fill="var(--accent-green)" fontSize="7" textAnchor="middle" fontWeight="600">Space</text>
+                <rect x="75" y="44" width="55" height="38" rx="4" fill={theme === 'business' ? '#fef3c7' : 'rgba(245,158,11,0.2)'} />
+                <text x="102" y="58" fill="var(--accent-orange)" fontSize="7" textAnchor="middle" fontWeight="600">Simulation</text>
+                <text x="102" y="70" fill="var(--accent-orange)" fontSize="7" textAnchor="middle" fontWeight="600">Engine</text>
+              </g>
+
+              {/* Arrow to Pumps */}
+              <g>
+                <line x1="640" y1="75" x2="720" y2="75" stroke="var(--accent-green)" strokeWidth="2" markerEnd="url(#arrowRight)" />
+                <text x="680" y="68" fill="var(--text-muted)" fontSize="8" textAnchor="middle">Simulated</text>
+              </g>
+
+              {/* Physical Pumps */}
+              <g transform="translate(725, 35)">
+                <rect width="120" height="80" rx="8" fill={theme === 'business' ? '#ede9fe' : 'rgba(139,92,246,0.15)'} stroke="var(--accent-purple)" strokeWidth="2" />
+                <text x="60" y="22" fill="var(--accent-purple)" fontSize="10" textAnchor="middle" fontWeight="700">Virtual Pumps</text>
+                <g transform="translate(10, 32)">
+                  <rect width="30" height="25" rx="4" fill={theme === 'business' ? '#f5f3ff' : 'var(--bg-dark)'} stroke="var(--accent-green)" strokeWidth="1.5" />
+                  <text x="15" y="18" fill="var(--accent-green)" fontSize="8" textAnchor="middle" fontWeight="600">P1</text>
+                </g>
+                <g transform="translate(45, 32)">
+                  <rect width="30" height="25" rx="4" fill={theme === 'business' ? '#f5f3ff' : 'var(--bg-dark)'} stroke="var(--accent-cyan)" strokeWidth="1.5" />
+                  <text x="15" y="18" fill="var(--accent-cyan)" fontSize="8" textAnchor="middle" fontWeight="600">P2</text>
+                </g>
+                <g transform="translate(80, 32)">
+                  <rect width="30" height="25" rx="4" fill={theme === 'business' ? '#f5f3ff' : 'var(--bg-dark)'} stroke="var(--accent-orange)" strokeWidth="1.5" />
+                  <text x="15" y="18" fill="var(--accent-orange)" fontSize="8" textAnchor="middle" fontWeight="600">P3</text>
+                </g>
+                <text x="60" y="72" fill={theme === 'business' ? '#7c3aed' : '#c4b5fd'} fontSize="7" textAnchor="middle">Realistic Physics Engine</text>
+              </g>
+            </svg>
+          </div>
+        </section>
+
+        {/* Slide 21:Takeaways */}
+        <section className="slide" id="slide-21" style={{ paddingTop: '60px' }}>
+          <div className="section-header" style={{ marginBottom: '1rem' }}>
+            <div className="section-number">SUMMARY • KEY TAKEAWAYS</div>
+            <h2 className="section-title">What You Should Remember</h2>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.2rem', marginBottom: '1.5rem' }}>
+            {[
+              {
+                icon: <Database size={32} />,
+                title: 'Address Space is a Graph',
+                points: ['Not flat registers or tags', 'Nodes + References = Semantic context', 'Self-describing with types and engineering units'],
+                color: 'var(--accent-cyan)'
+              },
+              {
+                icon: <Shield size={32} />,
+                title: 'Security is Layered',
+                points: ['SecureChannel: encrypts the pipe', 'Session: authenticates the user', 'Both required for defense in depth'],
+                color: 'var(--accent-purple)'
+              },
+              {
+                icon: <ArrowLeftRight size={32} />,
+                title: 'Two Communication Models',
+                points: ['Client-Server: interactive, bidirectional', 'PubSub: scalable, unidirectional', 'Choose based on use case'],
+                color: 'var(--accent-orange)'
+              },
+              {
+                icon: <Layers size={32} />,
+                title: 'Type System is Powerful',
+                points: ['Define once, instantiate many', 'ObjectTypes carry full schemas', 'Companion specs extend with domain knowledge'],
+                color: 'var(--accent-green)'
+              },
+              {
+                icon: <Activity size={32} />,
+                title: 'Quality is First-Class',
+                points: ['Every value has StatusCode + Timestamp', 'Bad quality propagates clearly', 'No silent failures'],
+                color: 'var(--accent-pink)'
+              },
+              {
+                icon: <Globe size={32} />,
+                title: 'Platform Agnostic',
+                points: ['Works across OS, languages, networks', 'From embedded to cloud', 'Vendor-neutral interoperability'],
+                color: 'var(--accent-cyan)'
+              }
+            ].map((item, i) => (
+              <div key={i} className="content-card animate-fade-in" style={{
+                padding: '1.2rem',
+                borderColor: item.color,
+                animationDelay: `${i * 0.1}s`,
+                transition: 'all 0.3s ease'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', marginBottom: '0.8rem' }}>
+                  <div style={{ color: item.color }}>{item.icon}</div>
+                  <h3 style={{ margin: 0, fontSize: '1rem', color: item.color, fontWeight: 700 }}>{item.title}</h3>
+                </div>
+                <ul style={{ margin: 0, paddingLeft: '1.2rem', fontSize: '0.85rem', lineHeight: 1.6 }}>
+                  {item.points.map((point, j) => (
+                    <li key={j} style={{ color: theme === 'business' ? '#475569' : 'var(--text-secondary)', marginBottom: '0.3rem' }}>{point}</li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+
+          {/* Quick Reference Card */}
+          <div className="diagram-container" style={{ padding: '1.2rem' }}>
+            <div className="diagram-title" style={{ marginBottom: '1rem' }}>Quick Reference: When to Use What</div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem' }}>
+              {[
+                { scenario: 'Control a pump', solution: 'Client-Server + Write', protocol: 'TCP :4840', color: 'var(--accent-cyan)' },
+                { scenario: 'Dashboard monitoring', solution: 'Client-Server + Subscribe', protocol: 'WebSocket', color: 'var(--accent-purple)' },
+                { scenario: 'Cloud analytics', solution: 'PubSub + MQTT', protocol: 'MQTT :8883', color: 'var(--accent-orange)' },
+                { scenario: 'Historical trends', solution: 'HistoryRead + Aggregates', protocol: 'TCP :4840', color: 'var(--accent-green)' },
+              ].map((item, i) => (
+                <div key={i} style={{
+                  background: theme === 'business' ? '#f8fafc' : 'var(--bg-dark)',
+                  padding: '1rem',
+                  borderRadius: '8px',
+                  border: `1px solid ${item.color}`,
+                  borderLeft: `4px solid ${item.color}`
+                }}>
+                  <div style={{ fontSize: '0.85rem', fontWeight: 700, color: item.color, marginBottom: '0.4rem' }}>{item.scenario}</div>
+                  <div style={{ fontSize: '0.8rem', color: theme === 'business' ? '#334155' : 'var(--text-primary)', marginBottom: '0.4rem' }}>{item.solution}</div>
+                  <div style={{ fontSize: '0.7rem', fontFamily: 'JetBrains Mono', color: 'var(--text-muted)', background: 'var(--bg-elevated)', padding: '0.2rem 0.4rem', borderRadius: '4px', display: 'inline-block' }}>{item.protocol}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div style={{ marginTop: '1.5rem', textAlign: 'center' }}>
+            <button className="btn-action" onClick={() => goToSlide(22)}>
+              Final Thoughts →
+            </button>
+          </div>
+        </section>
+
+        {/* Slide 22: Final Thoughts */}
+        <section className="slide title-slide" id="slide-22">
           <div className="quote" style={{ fontSize: '1.3rem', border: 'none', background: 'none' }}>
-            <strong style={{ fontSize: '1.5rem' }}>OPC UA is not about moving numbers.</strong><br /><br />
+            <strong style={{ fontSize: '1.5rem' }}>OPC UA is not about moving data.</strong><br /><br />
             It is about preserving <strong>meaning</strong>, <strong>trust</strong>, and <strong>quality</strong><br />
             across decades of industrial systems.
           </div>
@@ -4943,52 +6161,94 @@ export default function ArchitecturePage() {
         </section>
 
         {/* Floating Live Data Overlay */}
-        <div className="float-dashboard">
-          <div className="float-header">
-            <div className="float-title">
-              Live Server Node: {Object.values(pumpData)[0]?.name || 'Discovery'}
+        {showServerStatus && (
+          <div className="float-dashboard">
+            <div className="float-header">
+              <div className="float-title">
+                Live Server Node: {Object.values(pumpData)[0]?.name || 'Discovery'}
+              </div>
+              <div className="live-badge" style={{ transform: 'scale(0.8)' }}>
+                {isConnected ? 'ON' : 'OFF'}
+              </div>
             </div>
-            <div className="live-badge" style={{ transform: 'scale(0.8)' }}>
-              {isConnected ? 'ON' : 'OFF'}
+            {Object.values(pumpData).length > 0 ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
+                  <span style={{ color: 'var(--text-muted)' }}>Flow Rate:</span>
+                  <span style={{ color: 'var(--accent-cyan)', fontFamily: 'monospace' }}>
+                    {Object.values(pumpData)[0]?.flow_rate.toFixed(1)} m³/h
+                  </span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
+                  <span style={{ color: 'var(--text-muted)' }}>Power:</span>
+                  <span style={{ color: 'var(--accent-green)', fontFamily: 'monospace' }}>
+                    {Object.values(pumpData)[0]?.power_consumption.toFixed(2)} kW
+                  </span>
+                </div>
+                <div style={{ height: '4px', background: 'var(--bg-elevated)', borderRadius: '2px', marginTop: '0.2rem', overflow: 'hidden' }}>
+                  <div style={{
+                    height: '100%',
+                    width: `${Math.min(100, (Object.values(pumpData)[0]?.flow_rate || 0) / 2)}%`,
+                    background: 'var(--accent-cyan)',
+                    transition: 'width 0.5s ease-out'
+                  }} />
+                </div>
+              </div>
+            ) : (
+              <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Searching for live assets...</p>
+            )}
+            <button
+              onClick={() => {
+                const searchParams = new URLSearchParams();
+                searchParams.set('open', 'true');
+                window.open('/monitoring?' + searchParams.toString(), '_blank');
+              }}
+              style={{ background: 'none', border: '1px solid var(--border-color)', color: 'var(--accent-cyan)', fontSize: '0.65rem', padding: '0.3rem', borderRadius: '4px', marginTop: '0.4rem', cursor: 'pointer' }}
+            >
+              View in Full Monitor
+            </button>
+          </div>
+        )}
+
+        {/* Keyboard Hints Overlay */}
+        {showKeyboardHints && (
+          <div className="keyboard-hints">
+            <div style={{ fontSize: '0.75rem', fontWeight: 600, marginBottom: '0.5rem', color: 'var(--text-primary)' }}>Keyboard Shortcuts</div>
+            <div className="keyboard-hint-row">
+              <span className="kbd">→</span>
+              <span className="kbd">Space</span>
+              <span style={{ color: 'var(--text-muted)' }}>Next slide</span>
+            </div>
+            <div className="keyboard-hint-row">
+              <span className="kbd">←</span>
+              <span style={{ color: 'var(--text-muted)' }}>Previous slide</span>
+            </div>
+            <div className="keyboard-hint-row">
+              <span className="kbd">Home</span>
+              <span style={{ color: 'var(--text-muted)' }}>First slide</span>
+            </div>
+            <div className="keyboard-hint-row">
+              <span className="kbd">End</span>
+              <span style={{ color: 'var(--text-muted)' }}>Last slide</span>
+            </div>
+            <div className="keyboard-hint-row">
+              <span className="kbd">T</span>
+              <span style={{ color: 'var(--text-muted)' }}>Toggle theme</span>
+            </div>
+            <div className="keyboard-hint-row">
+              <span className="kbd">K</span>
+              <span style={{ color: 'var(--text-muted)' }}>Toggle hints</span>
+            </div>
+            <div className="keyboard-hint-row">
+              <span className="kbd">S</span>
+              <span style={{ color: 'var(--text-muted)' }}>Toggle server status</span>
+            </div>
+            <div className="keyboard-hint-row">
+              <span className="kbd">D</span>
+              <span style={{ color: 'var(--text-muted)' }}>Go to dashboard</span>
             </div>
           </div>
-          {Object.values(pumpData).length > 0 ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
-                <span style={{ color: 'var(--text-muted)' }}>Flow Rate:</span>
-                <span style={{ color: 'var(--accent-cyan)', fontFamily: 'monospace' }}>
-                  {Object.values(pumpData)[0]?.flow_rate.toFixed(1)} m³/h
-                </span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
-                <span style={{ color: 'var(--text-muted)' }}>Power:</span>
-                <span style={{ color: 'var(--accent-green)', fontFamily: 'monospace' }}>
-                  {Object.values(pumpData)[0]?.power_consumption.toFixed(2)} kW
-                </span>
-              </div>
-              <div style={{ height: '4px', background: 'var(--bg-elevated)', borderRadius: '2px', marginTop: '0.2rem', overflow: 'hidden' }}>
-                <div style={{
-                  height: '100%',
-                  width: `${Math.min(100, (Object.values(pumpData)[0]?.flow_rate || 0) / 2)}%`,
-                  background: 'var(--accent-cyan)',
-                  transition: 'width 0.5s ease-out'
-                }} />
-              </div>
-            </div>
-          ) : (
-            <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Searching for live assets...</p>
-          )}
-          <button
-            onClick={() => {
-              const searchParams = new URLSearchParams();
-              searchParams.set('open', 'true');
-              window.open('/monitoring?' + searchParams.toString(), '_blank');
-            }}
-            style={{ background: 'none', border: '1px solid var(--border-color)', color: 'var(--accent-cyan)', fontSize: '0.65rem', padding: '0.3rem', borderRadius: '4px', marginTop: '0.4rem', cursor: 'pointer' }}
-          >
-            View in Full Monitor
-          </button>
-        </div>
+        )}
       </div>
     </>
   );
