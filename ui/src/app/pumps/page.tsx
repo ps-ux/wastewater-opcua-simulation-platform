@@ -23,6 +23,7 @@ import {
   Thermometer,
   FolderTree,
   Info,
+  Factory,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -358,8 +359,13 @@ function PumpControlCard({ pump, browsePath, displayName, onStart, onStop, isLoa
             Stop
           </Button>
           <Link href={`/pumps/${pump.id}/3d`} className="contents">
-            <Button variant="outline" className="px-3" title="View 3D Digital Twin">
+            <Button variant="outline" className="px-3" title="View Pump Digital Twin">
               <Box className="h-4 w-4" />
+            </Button>
+          </Link>
+          <Link href="/pumps/station-3d" className="contents">
+            <Button variant="outline" className="px-3" title="View Station Digital Twin">
+              <Factory className="h-4 w-4" />
             </Button>
           </Link>
         </div>

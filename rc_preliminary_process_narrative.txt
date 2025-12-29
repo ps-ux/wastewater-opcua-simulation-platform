@@ -1,0 +1,33 @@
+​​The objective of preliminary treatment is the removal of coarse solids and other large materials often found in raw wastewater.  Removal of these materials is necessary to enhance the operation and maintenance of subsequent treatment units.
+
+Influent Pump Station
+
+At the Rock Creek Advanced Wastewater Treatment Facility, the Influent Pump Station (IPS) lifts and measures the amount of raw wastewater from the 72" collection system interceptor so it can flow to downstream unit processes.  The IPS consists of a divided wet well, labeled North and South.  There are four pumps drawing from the North Wet Well and three pumps drawing from the South Wet Well.
+The firm capacity of the IPS is approximately 182 MGD with the total pumping capacity approximately 216 MGD. Firm capacity is defined as the capacity with the largest pump out of service.
+There are a total of seven influent pumps at the IPS.  Five of the pumps are identical in design and function.  They are located in spots 1, 2, 3, 6, and 7.  All are heavy-duty, vertical open line shaft, dry pit, single-suction, non-clog, centrifugal pumps. These pumps are matched with medium voltage, adjustable frequency drives for continuous 24-hour duty at any speed within the specified range. These five pumps are 900 HP and rated at 34.5 MGD.  The two smaller pumps, also centrifugal pumps, are 400 HP and rated at 22 MGD each.
+
+Two separate force mains receive the discharge from the IPS. They are both 54 inch diameter lines going to the Headworks Building.  Each line has a magnetic flow meter to record the influent flow through the IPS.  These two force mains can be operated separately or in common.
+
+Influent Pump Station – Odor Control
+The odor control facilities mitigate the effects of odors associated with the IPS on the surrounding community. Odors are present in areas where raw sewage is exposed to the atmosphere and in particular where flow conditions are turbulent promoting the release of hydrogen sulfide and other odor causing constituents.
+
+Foul air is pulled from the wetwells by a fan that sends the odorous air to the Phoenix Odor Control Unit. Nuisance odors from the two wet wells and inlet box are eliminated by keeping these spaces under a negative pressure. Fresh air inlets are provided at the top of the wet wells and inlet box for allowing proper airflow. Each inlet is provided with backdraft dampers to maintain a negative pressure in the space and prevent odor leakage within the system is temporarily taken off-line for maintenance.
+
+Headworks – Bar Screens
+The Headworks Bar Screens removes materials such as rags, rocks, sand, glass, garbage, sticks, plastic and other debris from the raw wastewater prior to additional treatment. Removal of these materials is necessary to protect downstream plant equipment from plugging, clogging, abrasion and damage. The Headworks is provided with mechanically cleaned bar screens and screenings washer/compactors to accomplish this preliminary treatment. 
+
+Wastewater from the two 54 inch force mains, Forest Grove/Hillsboro and remote pump stations come together in a 72 inch header in the Headworks Building and is then split into the on-line influent screenings channels. There are a total of six influent screenings channels available, of which 4 have screens and 2 are bypasses.
+
+Headworks – Grit
+Wastewater usually contains a relatively large amount of inorganic solids such as sand, cinders, and gravel which are collectively called grit.  Grit causes damage to downstream equipment by abrasion and plugging.  At Rock Creek, grit is removed from the primary sludge via Grit Vortex where it is cleaned, dewatered and placed in the dumpsters for disposal at the landfill.
+
+Headworks – Sludge Screens
+
+Wastewater contains a large amount of coarse, fibrous, solid material; such as hair, plastic, and debris not removed by the bar screens or grit vortex. Such material can disturb the downstream operation of processes and clogging pumps, by forming ropes, tresses, or grease balls. Fibrous and plastic materials are removed from primary sludge by sludge screens, then placed in dumpsters for disposal at the landfill.​
+
+Headworks – Odor Control
+The Headworks has a makeup air system and odor control system. The odor control system removes odorous/foul air from the Headworks building and Primary Clarifiers. The odorous/foul air is treated through two single stag packed tower scrubbers​ using Sodium Hypochlorite​ for ORP/Oxidation Reduction Potential and Sodium Hydroxide for pH control. The chemicals are dosed using chemical metering pumps. The treated air is than exhausted to the atmosphere.
+
+
+Headworks - Septage Receiving
+The Rock Creek Facility serves the community with a Septage Receiving Facility for septic tank pumping's and chemical toilets.  As part of the Nitrification Upgrade Project, a Septage Receiving Station was constructed near the old headworks building. The haulers discharge directly into the drain going to the in-plant waste line and then on to the influent pump station.

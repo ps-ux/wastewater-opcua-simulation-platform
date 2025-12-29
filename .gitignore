@@ -28,7 +28,6 @@ ENV/
 
 # Logs and outputs
 *.log
-*.txt
 !requirements.txt
 
 # IDEs

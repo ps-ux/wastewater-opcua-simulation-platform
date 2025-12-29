@@ -1,0 +1,94 @@
+As with most unit processes, the Influent Pump Station (IPS) is intended to be operated in SCADA Auto.  The exception is during sustained extreme high flows when operators may change the control mode to SCADA MANUAL. There are three different control modes for this pump station, Standard or level control, High Efficiency mode that raises the wet well level to reduce power comsumption, and EQ Mode which is similar to High Efficiency but the level raises and lowers each day to flush out the influent line.  EQ Mode is the preferred mode unless the anticipated peak hour flow is more than 60 MGD.  EQ Mode has proven to be very benficial for chemical delivery stablization, Bio P stability and nitrification stability.
+
+The Standard Mode control point for the wet well is an elevation of 103.00 Feet and was chosen in order to maintain one foot of head space at the top of the pipe to ​prevent surcharging of the line and to allow air to be drawn from the collection system to prevent odors escaping just upstream of the IPS. 
+
+Current operations limits pumps 6 & 7 to 90% of their maximum speed. However, running the pumps at their maximum possible speed of 100% has been examined in order to determine how much more capacity could be obtained. From the hydraulic analysis, the two pumps in the south wet well running at 100% speed would be operating past 120% of the best efficiency point, the maximum preferred operating region recommended by Hydraulic Institute Standards. Operating in this region of the pump curve is not recommended, as it can result in vibration and cavitation problems. Therefore, the two raw sewage pumps (RSPs) in the south wetwell should continue to be limited to approximately 90% of their maximum speed. The hydraulic analysis showed that the three pumps in the north wetwell can operate near 100% speed within Hydraulic Institute Standards, because the higher friction loss due to the higher flow from three pumps keeps the pumps from running off of their pumping curves. Therefore, the three pumps in the north wetwell can be operated at full speed under peak flow conditions. More detailed information on the Influent Pump Station pumping control can be found in the Control Loop Description.
+
+In the Rock Creek Facility drainage system, there are several remote pump stations that can pump directly to the 72 inch header located in the Headworks Building or to the IPS wet well. These remote pump stations are: Dawson Creek Pump Station, Aloha 3 Pump Station, and the River Road Pump Station.  Additionally, the transfer lines from the Hillsboro and Forest Grove Facilities also have the options of pumping to the IPS wet well, but normally pump into the 72 inch header.
+
+In the rare event that the IPS is without power for any length of time, sewage will overflow the collection system directly into Rock Creek which is located downhill and West of the IPS building. 
+
+To control a given RS Pump in SCADA, both the pump and corresponding Hydraulic Cone Valve must be in SCADA Mode. The following conditions must be met in order to function in the SCADA AUTO mode of operation:
+
+The Input Contactor at the VFD must be closed.
+The Control Status Selector Switch at the VFD must be in REMOTE.
+The Control Selector Switch at the Discharge Valve Solenoid Control Panel must be in REMOTE.
+The E-STOP Switch at the Pump must in the pulled out position.
+To operate the IPS in SCADA AUTO mode, open the Raw Sewage Pump Control pop-up by clicking the control pop up icon. This will allow the operator to select between SCADA MANUAL and SCADA AUTO operation. The control screen also allows the operator to select which wet well level transmitter will be used to control the pump station and select the pump LEAD-LAG sequence assignments.
+
+If the “Level Control Transmitter Select” has been placed in the MANUAL mode by clicking MANUAL then the operator may select which transmitter to control with by clicking either NORTH or SOUTH. If the AUTO mode is selected, the PLC will automatically select the level sensor located in the same wet well as the Lead Pump.
+
+The LEAD-LAG Sequence is assigned to individual pumps by selecting a pump sequence order; LEAD / LAG 1 / LAG 2 / LAG 3 / LAG 4 / LAG 5 / LAG 6. The pump sequence is changed by entering the desired pump number in the “Sequence Select New” Column and then clicking the ENTER SEQUENCE button. If the assignment is accepted, the new assignment will be updated in the “Current” assignment column. If the new sequence order is not accepted an error will be displayed indicating “INVALID SELECTION” beneath the ENTER SEQUENCE button and no changes will be made to the current pump assignments.
+
+The operation of the Cone Valve is interlocked with the operation of the pump and does not require the operator to open or close the valve when starting or stopping a RS pump, as the program does it automatically. The PLC will start a Pump against a closed Cone Valve. When the Pump Output is within 2% of the programmed minimum discharge speed for the pump, the PLC will open the Cone Valve.
+
+In the SCADA AUTO mode, the PLC controls the pump speed and the number of pumps running based on wet well level. When operating in SCADA AUTO, all running pumps operate between 60.0 % and 90.0% output based on the wet well level. The PLC will increase or decrease the pump speed output 1% for every 0.1 foot of wet well elevation change. As the wet well level increases above 104.00 feet (90% pump speed) the next pump will be called to start. When the newly started pump is running and the cone valve is open, the PLC will start ramping up the pump in increments of ½% or 1% pump speed until the newly started pump speed matches the pump speed determined by the wet well level. The rate of this ramp-up is determined by the sequence status of the pump being ramped up as follows:
+
+ 
+
+Lead Pump
+
+1% pump speed / 5 seconds
+
+ 
+
+Lag Pump 1
+
+0.5% pump speed / 2 minutes
+
+ 
+
+Lag Pump 2, 3, 4, 5, 6
+
+0.5% pump speed / 1 minute
+
+
+Note: A pump speed over 90% will cavitate the pump due to the small pump intakes. Thus the maximum speed is set at 90%.
+
+If the wet well level is above 104.0 feet at the completion of the ramp, the next pump in the sequence will be started and the process repeated.
+
+In the event of the wet well increasing above 111.0 feet while the Lag 1 Pump is ramping to match the controller output speed, the pump speed ramp will be bypassed. This will bring the ramping Lag 1 pump to full speed and start the next pump in the sequence. This feature will only bypass the Lag 1 Pump ramp and will not defeat the ramp for any other starting pump.
+
+As the wet well level decreases, the PLC shuts down individual pumps based on a given elevation for each pump sequence status as follows:
+
+ 	103.00 feet	Stop Lag 6 Pump
+ 	102.75 feet	Stop Lag 5 Pump
+ 
+
+102.50 feet
+
+Stop Lag 4 Pump
+
+ 
+
+102.25 feet
+
+Stop Lag 3 Pump
+
+ 
+
+102.00 feet
+
+Stop Lag 2 Pump
+
+ 
+
+101.75 feet
+
+Stop Lag 1 Pump
+
+ 
+
+99.75 feet
+
+Stop Lead Pump (All Pumps)
+
+In the case that the LEAD and LAG 1 pump are running and the flow falls below 15 MGD for more than 120 seconds the LAG 1 pump will be stopped.
+
+When the North wet well Low Level Shutdown Status is ENABLED and the wet well level sensor is reading at or below 99.75 feet elevation, the PLC will stop RS Pumps 1, 2, 3 and 4. When the South wet well Low Level Shutdown Status is ENABLED and the wet well level sensor is reading at or below 99.75 feet elevation, the PLC will stop RS Pumps 5, 6 and 7. The pumps in either wet well cannot be restarted until the level in that wet well is above 100.00 feet or the Shutdown Status is changed to DISABLED.
+
+The RS Pump's controller screen also contains a Shutdown Button that allows the operator to stop the highest running pump while remaining in SCADA AUTO without any additional action required by the operator.
+
+The Raw Sewage Pump Station control mode can be changed between SCADA MANUAL and SCADA AUTO without any additional action required by the operator. However, it is important to be aware of the wet well level when switching between SCADA MANUAL to SCADA AUTO as additional pumps may be stopped or started and the speed output signal to the pumps may change drastically as well. 
+
+MAKE SURE THE WETWELL IS BELOW AN ELEVATION OF 104.0 FT BEFORE SWITCHING FROM SCADA MANUAL BACK TO SCADA AUTO or else all pumps will be activated upon the switch to achieve SCADA AUTO's operational goal of a wetwell that is at 103.0 ft. 
