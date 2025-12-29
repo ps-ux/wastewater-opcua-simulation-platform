@@ -12,6 +12,7 @@ from typing import Dict, List, Any, Optional
 from .pump import PumpSimulation
 from .chamber import ChamberSimulation
 from .modes import ModeParameters, SimulationMode, FailureType
+from .ips_controller import IPSController
 
 _logger = logging.getLogger('simulation.engine')
 
@@ -23,6 +24,7 @@ class SimulationEngine:
         self.mode_params = mode_params or ModeParameters()
         self.pumps: Dict[str, PumpSimulation] = {}
         self.chambers: Dict[str, ChamberSimulation] = {}
+        self.ips_controller = IPSController() # Rock Creek Control Logic
         self.is_running = False
         self.last_tick_time: Optional[datetime] = None
         self.pubsub_manager = None
@@ -46,11 +48,13 @@ class SimulationEngine:
     def add_pump(self, pump: PumpSimulation) -> None:
         """Add a pump simulation."""
         self.pumps[pump.asset_id] = pump
+        self.ips_controller.register_asset(pump)
         _logger.debug(f"Added pump simulation: {pump.name}")
 
     def add_chamber(self, chamber: ChamberSimulation) -> None:
         """Add a chamber simulation."""
         self.chambers[chamber.asset_id] = chamber
+        self.ips_controller.register_asset(chamber)
         _logger.debug(f"Added chamber simulation: {chamber.name}")
 
     def get_pump(self, asset_id: str) -> Optional[PumpSimulation]:
@@ -146,6 +150,12 @@ class SimulationEngine:
                 await chamber.tick(dt)
             except Exception as e:
                 _logger.warning(f"Error ticking chamber {chamber.name}: {e}")
+
+        # Tick IPS Controller
+        try:
+             self.ips_controller.tick(dt)
+        except Exception as e:
+             _logger.warning(f"Error ticking IPS Controller: {e}")
 
         # Broadcast pump states via WebSocket
         if self._ws_broadcast_callback:

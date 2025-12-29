@@ -45,9 +45,9 @@ class DatabaseManager:
             _logger.info("Importing default types from types.yaml...")
             self._import_types(types_path)
 
-        if self.session.query(AssetInstance).count() == 0:
-            _logger.info("Importing default assets from assets.json...")
-            self._import_assets(assets_path)
+        # Always sync assets from assets.json to ensure config updates are applied
+        _logger.info("Syncing assets from assets.json...")
+        self._import_assets(assets_path)
 
         # Ensure server state singleton exists
         if self.session.query(ServerState).count() == 0:
@@ -106,30 +106,54 @@ class DatabaseManager:
                 if 'id' not in asset:
                     continue
 
-                instance = AssetInstance(
-                    asset_id=asset['id'],
-                    name=asset['name'],
-                    display_name=asset.get('displayName', asset['name']),
-                    description=asset.get('description', ''),
-                    type_name=asset['type'],
-                    parent_id=asset.get('parent'),
-                    hierarchy_level=asset.get('hierarchyLevel', ''),
-                    properties_json=asset.get('properties'),
-                    design_specs_json=asset.get('designSpecs'),
-                    is_simulated=asset.get('simulate', False),
-                    is_default=True,
-                    is_enabled=True
-                )
-                self.session.add(instance)
+                # Check if asset exists
+                existing_asset = self.session.query(AssetInstance).filter_by(asset_id=asset['id']).first()
 
-                # Create template for pump types
+                if existing_asset:
+                    # Update existing asset
+                    existing_asset.name = asset['name']
+                    existing_asset.display_name = asset.get('displayName', asset['name'])
+                    existing_asset.description = asset.get('description', '')
+                    existing_asset.type_name = asset['type']
+                    existing_asset.parent_id = asset.get('parent')
+                    existing_asset.hierarchy_level = asset.get('hierarchyLevel', '')
+                    existing_asset.properties_json = asset.get('properties')
+                    existing_asset.design_specs_json = asset.get('designSpecs')
+                    existing_asset.is_simulated = asset.get('simulate', False)
+                    # Don't override is_enabled if already set by user, unless force reset needed?
+                    # For now keep user setting
+                else:
+                    # Create new asset
+                    instance = AssetInstance(
+                        asset_id=asset['id'],
+                        name=asset['name'],
+                        display_name=asset.get('displayName', asset['name']),
+                        description=asset.get('description', ''),
+                        type_name=asset['type'],
+                        parent_id=asset.get('parent'),
+                        hierarchy_level=asset.get('hierarchyLevel', ''),
+                        properties_json=asset.get('properties'),
+                        design_specs_json=asset.get('designSpecs'),
+                        is_simulated=asset.get('simulate', False),
+                        is_default=True,
+                        is_enabled=True
+                    )
+                    self.session.add(instance)
+
+                # Create/Update template for pump types
                 if asset['type'] in ('PumpType', 'InfluentPumpType') and asset.get('designSpecs'):
-                    existing = self.session.query(AssetTemplate).filter_by(
-                        name=f"Template_{asset['name']}"
-                    ).first()
-                    if not existing:
+                    template_name = f"Template_{asset['name']}"
+                    existing_template = self.session.query(AssetTemplate).filter_by(name=template_name).first()
+                    
+                    if existing_template:
+                         # Update template
+                        existing_template.display_name = f"{asset.get('displayName', asset['name'])} Template"
+                        existing_template.description = f"Template based on {asset['name']}"
+                        existing_template.template_json = asset
+                        existing_template.design_specs_json = asset.get('designSpecs')
+                    else:
                         template = AssetTemplate(
-                            name=f"Template_{asset['name']}",
+                            name=template_name,
                             display_name=f"{asset.get('displayName', asset['name'])} Template",
                             description=f"Template based on {asset['name']}",
                             type_name=asset['type'],
@@ -141,7 +165,7 @@ class DatabaseManager:
                         self.session.add(template)
 
             self.session.commit()
-            _logger.info(f"Imported {len(assets)} asset instances")
+            _logger.info(f"Imported/Updated {len(assets)} asset instances")
 
         except Exception as e:
             _logger.error(f"Failed to import assets: {e}")

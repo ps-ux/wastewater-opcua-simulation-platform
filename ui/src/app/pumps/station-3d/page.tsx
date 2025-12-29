@@ -3,6 +3,7 @@
 import * as React from 'react';
 import { useEffect } from 'react';
 import { usePumpStore } from '@/stores/pump-store';
+import { usePumpWebSocket } from '@/hooks/use-pump-websocket';
 import { IPS3DViewer } from '@/components/pumps/ips-3d-viewer';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
@@ -25,23 +26,89 @@ export default function Station3DPage() {
         ...(pumpData[pump.id] || {})
     }));
 
+    const { isConnected } = usePumpWebSocket();
+
+    // Compute station aggregates
+    const activePumps = fullPumpData.filter(p => p.is_running).length;
+    const totalPumps = fullPumpData.length;
+    const totalFlow = fullPumpData.reduce((acc, p) => acc + (p.flow_rate || 0), 0);
+    const totalPower = fullPumpData.reduce((acc, p) => acc + (p.power_consumption || 0), 0);
+
+    const formattedTotalFlow = totalFlow.toLocaleString(undefined, { maximumFractionDigits: 0 });
+    const formattedTotalPower = totalPower.toLocaleString(undefined, { maximumFractionDigits: 0 });
+
     return (
-        <div className="flex h-screen w-full flex-col bg-slate-950">
-            {/* Header Overlay */}
-            <div className="absolute top-0 left-0 z-50 w-full p-6 pointer-events-none">
-                <div className="flex items-center justify-between pointer-events-auto">
-                    <Link href="/pumps">
-                        <Button variant="outline" className="bg-slate-900/50 backdrop-blur-md border-slate-700 hover:bg-slate-800 text-white">
-                            <ArrowLeft className="mr-2 h-4 w-4" />
-                            Back to Dashboard
-                        </Button>
+        <div className="min-h-screen bg-[#020617] text-slate-100 p-8 pt-6 space-y-8 flex flex-col items-center">
+
+            {/* 1. TOP NAV & GLOBAL CONTROLS */}
+            <div className="w-full max-w-[1500px] flex items-center justify-between">
+                <div className="flex items-center gap-6">
+                    <Link href="/pumps" className="p-2 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-slate-400">
+                        <ArrowLeft size={20} />
                     </Link>
+                    <div>
+                        <div className="mb-2">
+                            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">Live Facility Twin</span>
+                        </div>
+                        <h1 className="text-4xl font-black tracking-tighter uppercase italic flex items-center gap-3">
+                            Rock Creek <span className="text-cyan-500">_</span> IPS
+                        </h1>
+                    </div>
+                </div>
+
+                <div className="flex gap-4">
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-[10px] font-bold text-cyan-400 uppercase tracking-widest">
+                        <div className="h-1.5 w-1.5 rounded-full bg-cyan-500 animate-pulse" />
+                        {isConnected ? 'OPC UA Streaming' : 'Reconnecting...'}
+                    </div>
                 </div>
             </div>
 
-            {/* 3D Viewport */}
-            <div className="flex-1">
+            {/* 2. MAIN VISUALIZATION STACK */}
+            <div className="w-full max-w-[1500px] h-[750px] relative rounded-[2.5rem] overflow-hidden border border-white/5 group">
                 <IPS3DViewer pumps={fullPumpData} />
+
+                {/* OVERLAY UI */}
+                <div className="absolute top-8 left-8 p-6 rounded-2xl bg-black/60 border border-white/10 backdrop-blur-xl max-w-sm">
+                    <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Station Telemetry</h3>
+
+                    <div className="space-y-4">
+                        <div className="flex justify-between items-center">
+                            <span className="text-sm font-medium text-slate-300">Total Flow</span>
+                            <span className="text-xl font-mono font-bold text-cyan-400">
+                                {formattedTotalFlow} <span className="text-xs text-slate-500">m³/h</span>
+                            </span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                            <span className="text-sm font-medium text-slate-300">Active Pumps</span>
+                            <span className="text-xl font-mono font-bold text-white">
+                                {activePumps} <span className="text-xs text-slate-500">/ {totalPumps}</span>
+                            </span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                            <span className="text-sm font-medium text-slate-300">Total Power</span>
+                            <span className="text-xl font-mono font-bold text-amber-400">
+                                {formattedTotalPower} <span className="text-xs text-slate-500">kW</span>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div className="mt-6 pt-6 border-t border-white/10 grid grid-cols-2 gap-4">
+                        <div className="bg-slate-800/50 p-3 rounded-lg text-center">
+                            <span className="text-[10px] text-slate-500 uppercase block mb-1">North Elev</span>
+                            <span className="text-lg font-mono font-bold text-rose-400">113.8 <span className="text-[10px]">ft</span></span>
+                        </div>
+                        <div className="bg-slate-800/50 p-3 rounded-lg text-center">
+                            <span className="text-[10px] text-slate-500 uppercase block mb-1">South Elev</span>
+                            <span className="text-lg font-mono font-bold text-rose-400">113.8 <span className="text-[10px]">ft</span></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {/* FOOTER */}
+            <div className="w-full max-w-[1500px] flex justify-between items-center text-[10px] font-bold text-slate-600 tracking-[0.2em] uppercase pt-4">
+                <span>Interactive Facility Model</span>
+                <span>Coordinates: 45.12N, 122.43W</span>
             </div>
         </div>
     );

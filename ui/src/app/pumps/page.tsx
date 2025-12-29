@@ -363,6 +363,11 @@ function PumpControlCard({ pump, browsePath, displayName, onStart, onStop, isLoa
               <Box className="h-4 w-4" />
             </Button>
           </Link>
+          <Link href={`/pumps/${pump.id}`} className="contents">
+            <Button variant="outline" className="px-3" title="Open Pump Control Panel">
+              <Settings className="h-4 w-4" />
+            </Button>
+          </Link>
           <Link href="/pumps/station-3d" className="contents">
             <Button variant="outline" className="px-3" title="View Station Digital Twin">
               <Factory className="h-4 w-4" />
@@ -376,7 +381,7 @@ function PumpControlCard({ pump, browsePath, displayName, onStart, onStop, isLoa
           <span>Starts: {pump.start_count}</span>
         </div>
       </CardContent>
-    </Card>
+    </Card >
   );
 }
 

@@ -1,36 +1,24 @@
 {
   "$schema": "assets-schema.json",
-  "$comment": "Asset instances for OPC-UA server. Types are defined in types.yaml.",
-
+  "$comment": "Asset instances for OPC-UA server. Updated for Rock Creek IPS Realism + Full Plant.",
   "metadata": {
-    "version": "2.0",
-    "description": "Wastewater treatment facility asset hierarchy and pump station assets",
-    "lastModified": "2024-01-15",
+    "version": "3.2",
+    "description": "Rock Creek AWWTF - Full Plant with Realistic IPS",
+    "lastModified": "2025-12-28",
     "patterns": [
       "Pattern 1: Full Plant Hierarchy (Plant → Process → System → Asset)",
       "Pattern 2: Standalone Pump Station (PumpStation → Asset)"
     ]
   },
-
   "assets": [
-
-    {
-      "$comment": "============================================================",
-      "$comment2": "PATTERN 1: FULL PLANT HIERARCHY",
-      "$comment3": "Rock Creek Advanced Wastewater Treatment Facility",
-      "$comment4": "============================================================"
-    },
-
     {
       "id": "RC",
       "name": "RC_RockCreek",
       "displayName": "RC - Rock Creek AWWTF",
-      "description": "Rock Creek Advanced Wastewater Treatment Facility",
       "type": "Folder",
       "hierarchyLevel": "Plant",
       "parent": "ObjectsFolder"
     },
-
     {
       "$comment": "--- PROCESS: Preliminary Treatment ---"
     },
@@ -38,162 +26,215 @@
       "id": "P0041",
       "name": "P0041_Preliminary",
       "displayName": "P0041 - Preliminary Treatment",
-      "description": "Preliminary treatment including screening and influent pumping",
       "type": "Folder",
       "hierarchyLevel": "Process",
       "parent": "RC"
     },
-
     {
-      "$comment": "--- SYSTEM: Influent Pump Station ---"
+      "$comment": "--- SYSTEM: Influent Pump Station (NEW CONFIG 7 PUMPS) ---"
     },
     {
       "id": "S00630",
       "name": "S00630_InfluentPumping",
       "displayName": "S00630 - Influent Pump Station",
-      "description": "Main influent pumping system - 10-30 MGD capacity",
       "type": "Folder",
       "hierarchyLevel": "System",
       "parent": "P0041"
     },
-
+    {
+      "id": "IPS_WW_North",
+      "name": "IPS_WW_North",
+      "displayName": "North Wet Well",
+      "type": "ChamberType",
+      "hierarchyLevel": "Asset",
+      "parent": "S00630",
+      "simulate": true,
+      "properties": {
+        "AssetId": "IPS-WW-N",
+        "Location": "North Structure"
+      }
+    },
     {
       "id": "IPS_PMP_001",
       "name": "IPS_PMP_001",
-      "displayName": "Influent Pump 1",
-      "description": "Primary influent pump - 10-30 MGD capacity (Main simulation target)",
+      "displayName": "Pump 1 (Large)",
       "type": "InfluentPumpType",
       "hierarchyLevel": "Asset",
       "parent": "S00630",
       "simulate": true,
       "properties": {
         "AssetId": "IPS-PMP-001",
-        "AssetName": "Influent Pump 1",
-        "Location": "Influent Pump Station - Bay 1",
-        "Manufacturer": "Flygt",
-        "Model": "CP3300.900",
-        "SerialNumber": "FLY-2019-78432",
-        "InstallationDate": "2019-06-15T00:00:00Z"
+        "Model": "Large - 34.5 MGD"
       },
       "designSpecs": {
-        "DesignFlow": 2500.0,
-        "DesignHead": 15.0,
-        "DesignPower": 150.0,
-        "MaxRPM": 1180,
-        "MinRPM": 600,
-        "FullLoadAmps": 225.0,
-        "RatedVoltage": 480,
-        "ImpellerDiameter": 450.0,
-        "NPSHRequired": 4.5,
-        "ManufacturerBEP_Efficiency": 84.0,
-        "MotorEfficiency": 95.4
-      },
-      "alarms": [
-        "HighVibrationAlarm",
-        "HighBearingTempAlarm",
-        "OverloadAlarm",
-        "CavitationAlarm"
-      ]
+        "DesignFlow": 5440.0,
+        "DesignHead": 12.0,
+        "DesignPower": 670.0,
+        "MaxRPM": 900,
+        "MinRPM": 450,
+        "FullLoadAmps": 850.0,
+        "RatedVoltage": 4160,
+        "ImpellerDiameter": 800.0,
+        "MotorEfficiency": 96.0
+      }
     },
-
     {
       "id": "IPS_PMP_002",
       "name": "IPS_PMP_002",
-      "displayName": "Influent Pump 2",
-      "description": "Backup influent pump - 10-30 MGD capacity",
+      "displayName": "Pump 2 (Large)",
       "type": "InfluentPumpType",
       "hierarchyLevel": "Asset",
       "parent": "S00630",
       "simulate": true,
       "properties": {
         "AssetId": "IPS-PMP-002",
-        "AssetName": "Influent Pump 2",
-        "Location": "Influent Pump Station - Bay 2",
-        "Manufacturer": "Flygt",
-        "Model": "CP3300.900",
-        "SerialNumber": "FLY-2019-78433",
-        "InstallationDate": "2019-06-15T00:00:00Z"
+        "Model": "Large - 34.5 MGD"
       },
       "designSpecs": {
-        "DesignFlow": 2500.0,
-        "DesignHead": 15.0,
-        "DesignPower": 150.0,
-        "MaxRPM": 1180,
-        "MinRPM": 600,
-        "FullLoadAmps": 225.0,
-        "RatedVoltage": 480,
-        "ImpellerDiameter": 450.0,
-        "NPSHRequired": 4.5,
-        "ManufacturerBEP_Efficiency": 84.0,
-        "MotorEfficiency": 95.4
-      },
-      "alarms": [
-        "HighVibrationAlarm",
-        "HighBearingTempAlarm",
-        "OverloadAlarm",
-        "CavitationAlarm"
-      ]
+        "DesignFlow": 5440.0,
+        "DesignHead": 12.0,
+        "DesignPower": 670.0,
+        "MaxRPM": 900,
+        "MinRPM": 450,
+        "FullLoadAmps": 850.0,
+        "RatedVoltage": 4160,
+        "ImpellerDiameter": 800.0,
+        "MotorEfficiency": 96.0
+      }
     },
-
     {
       "id": "IPS_PMP_003",
       "name": "IPS_PMP_003",
-      "displayName": "Influent Pump 3",
-      "description": "Standby influent pump - 10-30 MGD capacity",
+      "displayName": "Pump 3 (Large)",
       "type": "InfluentPumpType",
       "hierarchyLevel": "Asset",
       "parent": "S00630",
       "simulate": true,
       "properties": {
         "AssetId": "IPS-PMP-003",
-        "AssetName": "Influent Pump 3",
-        "Location": "Influent Pump Station - Bay 3",
-        "Manufacturer": "Flygt",
-        "Model": "CP3300.900",
-        "SerialNumber": "FLY-2019-78434",
-        "InstallationDate": "2019-06-15T00:00:00Z"
+        "Model": "Large - 34.5 MGD"
       },
       "designSpecs": {
-        "DesignFlow": 2500.0,
-        "DesignHead": 15.0,
-        "DesignPower": 150.0,
-        "MaxRPM": 1180,
-        "MinRPM": 600,
-        "FullLoadAmps": 225.0,
-        "RatedVoltage": 480,
-        "ImpellerDiameter": 450.0,
-        "NPSHRequired": 4.5,
-        "ManufacturerBEP_Efficiency": 84.0,
-        "MotorEfficiency": 95.4
-      },
-      "alarms": [
-        "HighVibrationAlarm",
-        "HighBearingTempAlarm",
-        "OverloadAlarm",
-        "CavitationAlarm"
-      ]
+        "DesignFlow": 5440.0,
+        "DesignHead": 12.0,
+        "DesignPower": 670.0,
+        "MaxRPM": 900,
+        "MinRPM": 450,
+        "FullLoadAmps": 850.0,
+        "RatedVoltage": 4160,
+        "ImpellerDiameter": 800.0,
+        "MotorEfficiency": 96.0
+      }
     },
-
     {
-      "id": "IPS_WW_001",
-      "name": "IPS_WW_001",
-      "displayName": "Influent Wet Well",
-      "description": "Influent pump station wet well",
+      "id": "IPS_PMP_004",
+      "name": "IPS_PMP_004",
+      "displayName": "Pump 4 (Small)",
+      "type": "InfluentPumpType",
+      "hierarchyLevel": "Asset",
+      "parent": "S00630",
+      "simulate": true,
+      "properties": {
+        "AssetId": "IPS-PMP-004",
+        "Model": "Small - 22 MGD"
+      },
+      "designSpecs": {
+        "DesignFlow": 3470.0,
+        "DesignHead": 12.0,
+        "DesignPower": 300.0,
+        "MaxRPM": 1200,
+        "MinRPM": 600,
+        "FullLoadAmps": 400.0,
+        "RatedVoltage": 4160,
+        "ImpellerDiameter": 600.0,
+        "MotorEfficiency": 95.0
+      }
+    },
+    {
+      "id": "IPS_WW_South",
+      "name": "IPS_WW_South",
+      "displayName": "South Wet Well",
       "type": "ChamberType",
       "hierarchyLevel": "Asset",
       "parent": "S00630",
       "simulate": true,
       "properties": {
-        "AssetId": "IPS-WW-001",
-        "AssetName": "Influent Wet Well",
-        "Location": "Influent Pump Station"
-      },
-      "alarms": [
-        "HighLevelAlarm_WetWell",
-        "LowLevelAlarm_WetWell"
-      ]
+        "AssetId": "IPS-WW-S",
+        "Location": "South Structure"
+      }
     },
-
+    {
+      "id": "IPS_PMP_005",
+      "name": "IPS_PMP_005",
+      "displayName": "Pump 5 (Small)",
+      "type": "InfluentPumpType",
+      "hierarchyLevel": "Asset",
+      "parent": "S00630",
+      "simulate": true,
+      "properties": {
+        "AssetId": "IPS-PMP-005",
+        "Model": "Small - 22 MGD"
+      },
+      "designSpecs": {
+        "DesignFlow": 3470.0,
+        "DesignHead": 12.0,
+        "DesignPower": 300.0,
+        "MaxRPM": 1200,
+        "MinRPM": 600,
+        "FullLoadAmps": 400.0,
+        "RatedVoltage": 4160,
+        "ImpellerDiameter": 600.0,
+        "MotorEfficiency": 95.0
+      }
+    },
+    {
+      "id": "IPS_PMP_006",
+      "name": "IPS_PMP_006",
+      "displayName": "Pump 6 (Large)",
+      "type": "InfluentPumpType",
+      "hierarchyLevel": "Asset",
+      "parent": "S00630",
+      "simulate": true,
+      "properties": {
+        "AssetId": "IPS-PMP-006",
+        "Model": "Large - 34.5 MGD"
+      },
+      "designSpecs": {
+        "DesignFlow": 5440.0,
+        "DesignHead": 12.0,
+        "DesignPower": 670.0,
+        "MaxRPM": 900,
+        "MinRPM": 450,
+        "FullLoadAmps": 850.0,
+        "RatedVoltage": 4160,
+        "ImpellerDiameter": 800.0,
+        "MotorEfficiency": 96.0
+      }
+    },
+    {
+      "id": "IPS_PMP_007",
+      "name": "IPS_PMP_007",
+      "displayName": "Pump 7 (Large)",
+      "type": "InfluentPumpType",
+      "hierarchyLevel": "Asset",
+      "parent": "S00630",
+      "simulate": true,
+      "properties": {
+        "AssetId": "IPS-PMP-007",
+        "Model": "Large - 34.5 MGD"
+      },
+      "designSpecs": {
+        "DesignFlow": 5440.0,
+        "DesignHead": 12.0,
+        "DesignPower": 670.0,
+        "MaxRPM": 900,
+        "MinRPM": 450,
+        "FullLoadAmps": 850.0,
+        "RatedVoltage": 4160,
+        "ImpellerDiameter": 800.0,
+        "MotorEfficiency": 96.0
+      }
+    },
     {
       "$comment": "--- SYSTEM: Screening ---"
     },
@@ -201,26 +242,18 @@
       "id": "S00631",
       "name": "S00631_Screening",
       "displayName": "S00631 - Screening System",
-      "description": "Mechanical bar screens and screenings handling",
       "type": "Folder",
       "hierarchyLevel": "System",
       "parent": "P0041"
     },
-
     {
       "id": "SCR_CHN_001",
       "name": "SCR_CHN_001",
       "displayName": "Screening Channel",
-      "description": "Mechanical bar screen channel",
       "type": "ChamberType",
       "hierarchyLevel": "Asset",
-      "parent": "S00631",
-      "properties": {
-        "AssetId": "SCR-CHN-001",
-        "AssetName": "Screening Channel"
-      }
+      "parent": "S00631"
     },
-
     {
       "$comment": "--- SYSTEM: Conveyance ---"
     },
@@ -228,26 +261,18 @@
       "id": "S00629",
       "name": "S00629_Conveyance",
       "displayName": "S00629 - Conveyance System",
-      "description": "Gravity conveyance to headworks",
       "type": "Folder",
       "hierarchyLevel": "System",
       "parent": "P0041"
     },
-
     {
       "id": "CNV_CHN_001",
       "name": "CNV_CHN_001",
       "displayName": "Conveyance Channel",
-      "description": "Gravity conveyance channel",
       "type": "ChamberType",
       "hierarchyLevel": "Asset",
-      "parent": "S00629",
-      "properties": {
-        "AssetId": "CNV-CHN-001",
-        "AssetName": "Conveyance Channel"
-      }
+      "parent": "S00629"
     },
-
     {
       "$comment": "--- PROCESS: Primary Treatment ---"
     },
@@ -255,12 +280,10 @@
       "id": "P0042",
       "name": "P0042_Primary",
       "displayName": "P0042 - Primary Treatment",
-      "description": "Primary treatment including clarification and sludge handling",
       "type": "Folder",
       "hierarchyLevel": "Process",
       "parent": "RC"
     },
-
     {
       "$comment": "--- SYSTEM: Grit Removal ---"
     },
@@ -268,26 +291,18 @@
       "id": "S00632",
       "name": "S00632_Degritting",
       "displayName": "S00632 - Grit Removal System",
-      "description": "Grit removal and handling",
       "type": "Folder",
       "hierarchyLevel": "System",
       "parent": "P0042"
     },
-
     {
       "id": "GRT_TNK_001",
       "name": "GRT_TNK_001",
       "displayName": "Grit Chamber 1",
-      "description": "Aerated grit chamber",
       "type": "ChamberType",
       "hierarchyLevel": "Asset",
-      "parent": "S00632",
-      "properties": {
-        "AssetId": "GRT-TNK-001",
-        "AssetName": "Grit Chamber 1"
-      }
+      "parent": "S00632"
     },
-
     {
       "$comment": "--- SYSTEM: Primary Sludge Pumping ---"
     },
@@ -295,72 +310,42 @@
       "id": "S00634",
       "name": "S00634_SludgePumping",
       "displayName": "S00634 - Primary Sludge Pumping",
-      "description": "Primary sludge transfer system",
       "type": "Folder",
       "hierarchyLevel": "System",
       "parent": "P0042"
     },
-
     {
       "id": "PSP_PMP_001",
       "name": "PSP_PMP_001",
       "displayName": "Primary Sludge Pump 1",
-      "description": "Primary sludge transfer pump",
       "type": "PumpType",
       "hierarchyLevel": "Asset",
       "parent": "S00634",
       "simulate": true,
       "properties": {
-        "AssetId": "PSP-PMP-001",
-        "AssetName": "Primary Sludge Pump 1",
-        "Manufacturer": "Moyno",
-        "Model": "2000 G1"
+        "Manufacturer": "Moyno"
       },
       "designSpecs": {
         "DesignFlow": 150.0,
-        "DesignHead": 25.0,
-        "DesignPower": 22.0,
-        "MaxRPM": 400,
-        "MinRPM": 100,
-        "FullLoadAmps": 32.0,
-        "RatedVoltage": 480,
-        "ImpellerDiameter": 200.0,
-        "NPSHRequired": 2.0,
-        "ManufacturerBEP_Efficiency": 65.0,
-        "MotorEfficiency": 91.0
+        "DesignHead": 25.0
       }
     },
-
     {
       "id": "PSP_PMP_002",
       "name": "PSP_PMP_002",
       "displayName": "Primary Sludge Pump 2",
-      "description": "Primary sludge transfer pump (standby)",
       "type": "PumpType",
       "hierarchyLevel": "Asset",
       "parent": "S00634",
       "simulate": true,
       "properties": {
-        "AssetId": "PSP-PMP-002",
-        "AssetName": "Primary Sludge Pump 2",
-        "Manufacturer": "Moyno",
-        "Model": "2000 G1"
+        "Manufacturer": "Moyno"
       },
       "designSpecs": {
         "DesignFlow": 150.0,
-        "DesignHead": 25.0,
-        "DesignPower": 22.0,
-        "MaxRPM": 400,
-        "MinRPM": 100,
-        "FullLoadAmps": 32.0,
-        "RatedVoltage": 480,
-        "ImpellerDiameter": 200.0,
-        "NPSHRequired": 2.0,
-        "ManufacturerBEP_Efficiency": 65.0,
-        "MotorEfficiency": 91.0
+        "DesignHead": 25.0
       }
     },
-
     {
       "$comment": "--- PROCESS: Secondary Treatment ---"
     },
@@ -368,12 +353,10 @@
       "id": "P0043",
       "name": "P0043_Secondary",
       "displayName": "P0043 - Secondary Treatment",
-      "description": "Biological treatment and secondary clarification",
       "type": "Folder",
       "hierarchyLevel": "Process",
       "parent": "RC"
     },
-
     {
       "$comment": "--- SYSTEM: Aeration ---"
     },
@@ -381,42 +364,23 @@
       "id": "S00640",
       "name": "S00640_Aeration",
       "displayName": "S00640 - Aeration System",
-      "description": "Activated sludge aeration basins",
       "type": "Folder",
       "hierarchyLevel": "System",
       "parent": "P0043"
     },
-
     {
       "id": "AER_BLW_001",
       "name": "AER_BLW_001",
       "displayName": "Aeration Blower 1",
-      "description": "Centrifugal blower for aeration",
       "type": "PumpType",
       "hierarchyLevel": "Asset",
       "parent": "S00640",
       "simulate": true,
-      "properties": {
-        "AssetId": "AER-BLW-001",
-        "AssetName": "Aeration Blower 1",
-        "Manufacturer": "Hoffman",
-        "Model": "65108B"
-      },
       "designSpecs": {
         "DesignFlow": 5000.0,
-        "DesignHead": 6.0,
-        "DesignPower": 150.0,
-        "MaxRPM": 3550,
-        "MinRPM": 1775,
-        "FullLoadAmps": 180.0,
-        "RatedVoltage": 480,
-        "ImpellerDiameter": 300.0,
-        "NPSHRequired": 0.0,
-        "ManufacturerBEP_Efficiency": 75.0,
-        "MotorEfficiency": 95.0
+        "DesignHead": 6.0
       }
     },
-
     {
       "$comment": "--- SYSTEM: RAS Pumping ---"
     },
@@ -424,279 +388,144 @@
       "id": "S00645",
       "name": "S00645_RASPumping",
       "displayName": "S00645 - RAS Pumping",
-      "description": "Return Activated Sludge pumping",
       "type": "Folder",
       "hierarchyLevel": "System",
       "parent": "P0043"
     },
-
     {
       "id": "RAS_PMP_001",
       "name": "RAS_PMP_001",
       "displayName": "RAS Pump 1",
-      "description": "Return activated sludge pump",
       "type": "PumpType",
       "hierarchyLevel": "Asset",
       "parent": "S00645",
       "simulate": true,
-      "properties": {
-        "AssetId": "RAS-PMP-001",
-        "AssetName": "RAS Pump 1",
-        "Manufacturer": "Flygt",
-        "Model": "CP3201"
-      },
       "designSpecs": {
         "DesignFlow": 1500.0,
-        "DesignHead": 8.0,
-        "DesignPower": 55.0,
-        "MaxRPM": 1180,
-        "MinRPM": 590,
-        "FullLoadAmps": 75.0,
-        "RatedVoltage": 480,
-        "ImpellerDiameter": 350.0,
-        "NPSHRequired": 3.5,
-        "ManufacturerBEP_Efficiency": 78.0,
-        "MotorEfficiency": 94.0
+        "DesignHead": 8.0
       }
     },
-
     {
-      "$comment": "============================================================",
-      "$comment2": "PATTERN 2: STANDALONE PUMP STATIONS",
-      "$comment3": "Remote lift stations with flat hierarchy",
-      "$comment4": "============================================================"
-    },
-
-    {
-      "$comment": "--- Riverside Pump Station ---"
+      "$comment": "--- RIVERSIDE PUMP STATION (Pattern 2) ---"
     },
     {
       "id": "RPS",
       "name": "Riverside_PS",
       "displayName": "Riverside Pump Station",
-      "description": "Remote wastewater lift station - Riverside neighborhood",
       "type": "Folder",
       "hierarchyLevel": "PumpStation",
-      "parent": "ObjectsFolder",
-      "stationProperties": {
-        "StationId": "RPS-001",
-        "StationAddress": "1250 Riverside Drive",
-        "ServiceArea": "Riverside Neighborhood - 2,500 connections",
-        "DesignCapacity": 2.5,
-        "CommissionDate": "2015-03-20T00:00:00Z"
-      }
+      "parent": "ObjectsFolder"
     },
-
     {
       "id": "RPS_PMP_001",
       "name": "RPS_PMP_001",
       "displayName": "Pump 1 (Lead)",
-      "description": "Lead pump - duty/standby configuration",
       "type": "InfluentPumpType",
       "hierarchyLevel": "Asset",
       "parent": "RPS",
       "simulate": true,
-      "properties": {
-        "AssetId": "RPS-PMP-001",
-        "AssetName": "Riverside PS Pump 1",
-        "Location": "Riverside Pump Station - Wet Well",
-        "Manufacturer": "Flygt",
-        "Model": "NP3127.185",
-        "SerialNumber": "FLY-2015-45231",
-        "InstallationDate": "2015-03-20T00:00:00Z"
-      },
       "designSpecs": {
-        "DesignFlow": 800.0,
+        "DesignFlow": 550.0,
         "DesignHead": 12.0,
         "DesignPower": 37.0,
         "MaxRPM": 1750,
         "MinRPM": 875,
-        "FullLoadAmps": 52.0,
-        "RatedVoltage": 480,
-        "ImpellerDiameter": 267.0,
-        "NPSHRequired": 3.0,
-        "ManufacturerBEP_Efficiency": 78.0,
-        "MotorEfficiency": 93.0
-      },
-      "alarms": [
-        "HighVibrationAlarm",
-        "HighBearingTempAlarm",
-        "OverloadAlarm"
-      ]
+        "FullLoadAmps": 52.0
+      }
     },
-
     {
       "id": "RPS_PMP_002",
       "name": "RPS_PMP_002",
       "displayName": "Pump 2 (Lag)",
-      "description": "Lag pump - duty/standby configuration",
       "type": "InfluentPumpType",
       "hierarchyLevel": "Asset",
       "parent": "RPS",
       "simulate": true,
-      "properties": {
-        "AssetId": "RPS-PMP-002",
-        "AssetName": "Riverside PS Pump 2",
-        "Location": "Riverside Pump Station - Wet Well",
-        "Manufacturer": "Flygt",
-        "Model": "NP3127.185",
-        "SerialNumber": "FLY-2015-45232",
-        "InstallationDate": "2015-03-20T00:00:00Z"
-      },
       "designSpecs": {
-        "DesignFlow": 800.0,
+        "DesignFlow": 550.0,
         "DesignHead": 12.0,
         "DesignPower": 37.0,
         "MaxRPM": 1750,
         "MinRPM": 875,
-        "FullLoadAmps": 52.0,
-        "RatedVoltage": 480,
-        "ImpellerDiameter": 267.0,
-        "NPSHRequired": 3.0,
-        "ManufacturerBEP_Efficiency": 78.0,
-        "MotorEfficiency": 93.0
-      },
-      "alarms": [
-        "HighVibrationAlarm",
-        "HighBearingTempAlarm",
-        "OverloadAlarm"
-      ]
+        "FullLoadAmps": 52.0
+      }
     },
-
     {
       "id": "RPS_WW_001",
       "name": "RPS_WW_001",
       "displayName": "Wet Well",
-      "description": "Pump station wet well with level control",
       "type": "ChamberType",
       "hierarchyLevel": "Asset",
       "parent": "RPS",
-      "simulate": true,
-      "properties": {
-        "AssetId": "RPS-WW-001",
-        "AssetName": "Riverside Wet Well",
-        "Location": "Riverside Pump Station"
-      },
-      "alarms": [
-        "HighLevelAlarm_WetWell",
-        "LowLevelAlarm_WetWell"
-      ]
+      "simulate": true
     },
-
     {
-      "$comment": "--- Oakdale Pump Station ---"
+      "$comment": "--- OAKDALE PUMP STATION ---"
     },
     {
       "id": "OPS",
       "name": "Oakdale_PS",
       "displayName": "Oakdale Pump Station",
-      "description": "Small remote lift station - Oakdale area",
       "type": "Folder",
       "hierarchyLevel": "PumpStation",
-      "parent": "ObjectsFolder",
-      "stationProperties": {
-        "StationId": "OPS-001",
-        "DesignCapacity": 0.5
-      }
+      "parent": "ObjectsFolder"
     },
-
     {
       "id": "OPS_PMP_001",
       "name": "OPS_PMP_001",
       "displayName": "Pump 1",
-      "description": "Duplex station - Pump 1",
       "type": "InfluentPumpType",
       "hierarchyLevel": "Asset",
       "parent": "OPS",
       "simulate": true,
-      "properties": {
-        "AssetId": "OPS-PMP-001",
-        "AssetName": "Oakdale PS Pump 1",
-        "Manufacturer": "Flygt",
-        "Model": "NP3102"
-      },
       "designSpecs": {
-        "DesignFlow": 300.0,
+        "DesignFlow": 230.0,
         "DesignHead": 10.0,
         "DesignPower": 15.0,
         "MaxRPM": 1750,
         "MinRPM": 875,
-        "FullLoadAmps": 22.0,
-        "RatedVoltage": 480,
-        "ImpellerDiameter": 180.0,
-        "NPSHRequired": 2.5,
-        "ManufacturerBEP_Efficiency": 72.0,
-        "MotorEfficiency": 91.0
+        "FullLoadAmps": 22.0
       }
     },
-
     {
       "id": "OPS_PMP_002",
       "name": "OPS_PMP_002",
       "displayName": "Pump 2",
-      "description": "Duplex station - Pump 2",
       "type": "InfluentPumpType",
       "hierarchyLevel": "Asset",
       "parent": "OPS",
       "simulate": true,
-      "properties": {
-        "AssetId": "OPS-PMP-002",
-        "AssetName": "Oakdale PS Pump 2",
-        "Manufacturer": "Flygt",
-        "Model": "NP3102"
-      },
       "designSpecs": {
-        "DesignFlow": 300.0,
+        "DesignFlow": 230.0,
         "DesignHead": 10.0,
         "DesignPower": 15.0,
         "MaxRPM": 1750,
         "MinRPM": 875,
-        "FullLoadAmps": 22.0,
-        "RatedVoltage": 480,
-        "ImpellerDiameter": 180.0,
-        "NPSHRequired": 2.5,
-        "ManufacturerBEP_Efficiency": 72.0,
-        "MotorEfficiency": 91.0
+        "FullLoadAmps": 22.0
       }
     },
-
     {
       "id": "OPS_WW_001",
       "name": "OPS_WW_001",
       "displayName": "Wet Well",
-      "description": "Oakdale station wet well",
       "type": "ChamberType",
       "hierarchyLevel": "Asset",
       "parent": "OPS",
-      "simulate": true,
-      "properties": {
-        "AssetId": "OPS-WW-001",
-        "AssetName": "Oakdale Wet Well"
-      },
-      "alarms": [
-        "HighLevelAlarm_WetWell",
-        "LowLevelAlarm_WetWell"
-      ]
+      "simulate": true
     },
-
     {
-      "$comment": "============================================================",
-      "$comment2": "SIMULATION CONFIGURATION",
-      "$comment3": "Global singleton for simulation control",
-      "$comment4": "============================================================"
+      "$comment": "--- GLOBAL CONFIG ---"
     },
     {
       "id": "SimConfig",
       "name": "SimulationConfig",
       "displayName": "Simulation Configuration",
-      "description": "Global simulation configuration and control for all pump stations",
       "type": "SimulationConfigType",
       "parent": "ObjectsFolder"
     }
   ],
-
   "summary": {
-    "totalAssets": 28,
+    "totalAssets": 33,
     "hierarchy": {
       "plants": 1,
       "processes": 3,
@@ -704,12 +533,12 @@
       "pumpStations": 2
     },
     "assetsByType": {
-      "InfluentPumpType": 7,
+      "InfluentPumpType": 11,
       "PumpType": 4,
-      "ChamberType": 7,
+      "ChamberType": 8,
       "SimulationConfigType": 1,
       "Folder": 9
     },
-    "simulatedAssets": 15
+    "simulatedAssets": 20
   }
 }

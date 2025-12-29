@@ -24,11 +24,13 @@ interface IPS3DViewerProps {
 function StationPump({
     position,
     pump,
-    label
+    label,
+    scale = 1.0
 }: {
     position: [number, number, number];
     pump?: PumpData;
-    label: string
+    label: string,
+    scale?: number
 }) {
     const isRunning = pump?.is_running || false;
     const rpm = pump?.rpm || 0;
@@ -42,7 +44,7 @@ function StationPump({
     });
 
     return (
-        <group position={position}>
+        <group position={position} scale={[scale, scale, scale]}>
             {/* Motor */}
             <mesh position={[0, 1.5, 0]}>
                 <cylinderGeometry args={[0.3, 0.3, 1.2, 32]} />
@@ -89,7 +91,7 @@ function WetWellVolume({
     position,
     width,
     depth,
-    level, // 0-100% or similar scale
+    level, // 0-100% or similar scale relative to depth 
     color = "#0ea5e9"
 }: {
     position: [number, number, number];
@@ -99,11 +101,13 @@ function WetWellVolume({
     color?: string;
 }) {
     const meshRef = useRef<THREE.Mesh>(null);
-    // Assuming level is roughly in feet/meters. Let's map it to our scene scale.
-    // Base of well at y=-5, Top at y=0. Max level ~10ft? 
-    // Let's say level 0 = y=-4.5, level 10 = y=-0.5
 
-    const targetY = -4.5 + (Math.min(Math.max(level, 0), 15) / 15) * 4;
+    // Level comes in as meters? or feet from physics. 
+    // Physics sets wet_well_level as depth in meters (0-10 approx).
+    // Visual scene floor is -5 (y). Full is 0 (y).
+    // Let's map 0-10m to -4.5 to 0.
+    const clampedLevel = Math.max(0, Math.min(10, level));
+    const targetY = -4.5 + (clampedLevel / 10.0) * 4.5;
 
     useFrame((state, delta) => {
         if (meshRef.current) {
@@ -130,25 +134,23 @@ function WetWellVolume({
  * Main Station Scene
  */
 function StationScene({ pumps }: { pumps: PumpData[] }) {
-    // Group pumps by location
-    // Pumps 1-4: North Wet Well
-    // Pumps 5-7: South Wet Well
-    // IDs are usually strings. Let's assume they contain "1", "2" etc or we map by index if sorted.
-    // For safety, let's try to map by ID parsing or just index if they come in order.
+    // Group pumps by ID
+    const getPump = (idSuffix: string) => pumps.find(p => p.id === `IPS_PMP_${idSuffix}`);
 
-    const sortedPumps = useMemo(() => {
-        return [...pumps].sort((a, b) => a.id.localeCompare(b.id));
-    }, [pumps]);
+    // North Pumps: 001, 002, 003 (Large), 004 (Small)
+    const p1 = getPump('001');
+    const p2 = getPump('002');
+    const p3 = getPump('003');
+    const p4 = getPump('004');
 
-    // North Wet Well Pumps (Indices 0-3 / IDs ending 1-4)
-    const northPumps = sortedPumps.filter(p => ['1', '2', '3', '4'].some(id => p.id.includes(id)) || parseInt(p.id.replace(/\D/g, '')) <= 4).slice(0, 4);
+    // South Pumps: 005 (Small), 006, 007 (Large)
+    const p5 = getPump('005');
+    const p6 = getPump('006');
+    const p7 = getPump('007');
 
-    // South Wet Well Pumps (Indices 4-6 / IDs ending 5-7)
-    const southPumps = sortedPumps.filter(p => ['5', '6', '7'].some(id => p.id.includes(id)) || parseInt(p.id.replace(/\D/g, '')) >= 5).slice(0, 3);
-
-    // Calculate Average Levels (mocking if not available)
-    const northLevel = northPumps.reduce((acc, p) => acc + (p.wet_well_level || 0), 0) / (northPumps.length || 1) || 5;
-    const southLevel = southPumps.reduce((acc, p) => acc + (p.wet_well_level || 0), 0) / (southPumps.length || 1) || 5;
+    // Get Levels (Use P1 for North, P5 for South as representative)
+    const northLevel = p1?.wet_well_level || 2.0;
+    const southLevel = p5?.wet_well_level || 2.0;
 
     return (
         <group>
@@ -176,13 +178,10 @@ function StationScene({ pumps }: { pumps: PumpData[] }) {
 
                 {/* Pumps 1-4 */}
                 <group position={[0, 0, 1]}>
-                    {/* Arrange in a line or grid inside the well area */}
-                    {/* Let's do a 2x2 or line. Narrative says "4 pumps drawing from North". */}
-
-                    <StationPump position={[-3, 0, 0]} pump={northPumps[0]} label="PUMP 1" />
-                    <StationPump position={[-1, 0, 0]} pump={northPumps[1]} label="PUMP 2" />
-                    <StationPump position={[1, 0, 0]} pump={northPumps[2]} label="PUMP 3" />
-                    <StationPump position={[3, 0, 0]} pump={northPumps[3]} label="PUMP 4" />
+                    <StationPump position={[-3, 0, 0]} pump={p1} label="P1 (L)" scale={1.2} />
+                    <StationPump position={[-1, 0, 0]} pump={p2} label="P2 (L)" scale={1.2} />
+                    <StationPump position={[1, 0, 0]} pump={p3} label="P3 (L)" scale={1.2} />
+                    <StationPump position={[3, 0, 0]} pump={p4} label="P4 (S)" scale={0.9} />
                 </group>
             </group>
 
@@ -203,9 +202,9 @@ function StationScene({ pumps }: { pumps: PumpData[] }) {
 
                 {/* Pumps 5-7 */}
                 <group position={[0, 0, 1]}>
-                    <StationPump position={[-2, 0, 0]} pump={southPumps[0]} label="PUMP 5" />
-                    <StationPump position={[0, 0, 0]} pump={southPumps[1]} label="PUMP 6" />
-                    <StationPump position={[2, 0, 0]} pump={southPumps[2]} label="PUMP 7" />
+                    <StationPump position={[-2, 0, 0]} pump={p5} label="P5 (S)" scale={0.9} />
+                    <StationPump position={[0, 0, 0]} pump={p6} label="P6 (L)" scale={1.2} />
+                    <StationPump position={[2, 0, 0]} pump={p7} label="P7 (L)" scale={1.2} />
                 </group>
             </group>
 
@@ -238,9 +237,25 @@ function StationScene({ pumps }: { pumps: PumpData[] }) {
 
 export function IPS3DViewer({ pumps }: IPS3DViewerProps) {
     // Pre-calculate aggregate stats for HUD
+    // Use raw values, assume m3/h for display if that's what physics outputs
+    // Or convert if needed. Let's show simulated flow.
     const totalFlow = pumps.reduce((acc, p) => acc + p.flow_rate, 0);
     const runningCount = pumps.filter(p => p.is_running).length;
     const activePower = pumps.reduce((acc, p) => acc + p.power_consumption, 0);
+
+    // Get levels for HUD
+    const nPump = pumps.find(p => p.id.endsWith('001'));
+    const sPump = pumps.find(p => p.id.endsWith('005'));
+
+    // Physics sends level as meters (0-10 range relative to floor)
+    // Design intent speaks in Elevation (88 to 122). 
+    // Let's display Elevation in HUD for realism. 
+    // Elevation = 88.0 + (level_meters / 0.3048)
+    const nLevelM = nPump?.wet_well_level || 0;
+    const sLevelM = sPump?.wet_well_level || 0;
+
+    const nElev = 88.0 + (nLevelM / 0.3048);
+    const sElev = 88.0 + (sLevelM / 0.3048);
 
     return (
         <div className="relative h-screen w-full overflow-hidden bg-slate-950">
@@ -275,14 +290,14 @@ export function IPS3DViewer({ pumps }: IPS3DViewerProps) {
                     <div className="w-3 h-3 rounded-full bg-blue-500 animate-pulse" />
                     IPS DIGITAL TWIN
                 </h1>
-                <p className="text-slate-400 text-xs uppercase tracking-wider mb-6">Influent Pump Station Overview</p>
+                <p className="text-slate-400 text-xs uppercase tracking-wider mb-6">Rock Creek Influent Pump Station</p>
 
                 <div className="space-y-4">
                     <div className="flex justify-between items-end border-b border-slate-800 pb-2">
                         <span className="text-slate-500 text-sm">Total Flow</span>
                         <div className="text-right">
-                            <span className="text-2xl font-mono text-cyan-400 font-bold">{totalFlow.toFixed(1)}</span>
-                            <span className="text-xs text-slate-500 ml-1">MGD</span>
+                            <span className="text-2xl font-mono text-cyan-400 font-bold">{(totalFlow).toFixed(0)}</span>
+                            <span className="text-xs text-slate-500 ml-1">m³/h</span>
                         </div>
                     </div>
 
@@ -297,21 +312,25 @@ export function IPS3DViewer({ pumps }: IPS3DViewerProps) {
                     <div className="flex justify-between items-end">
                         <span className="text-slate-500 text-sm">Total Power</span>
                         <div className="text-right">
-                            <span className="text-xl font-mono text-yellow-400 font-bold">{activePower.toFixed(1)}</span>
+                            <span className="text-xl font-mono text-yellow-400 font-bold">{activePower.toFixed(0)}</span>
                             <span className="text-xs text-slate-500 ml-1">kW</span>
                         </div>
                     </div>
                 </div>
 
                 <div className="mt-6 pt-4 border-t border-slate-800">
-                    <div className="flex gap-2">
-                        <div className="flex-1 py-2 px-3 bg-slate-800 rounded text-center">
-                            <div className="text-[10px] text-slate-500 uppercase">North Level</div>
-                            <div className="text-lg font-mono text-white">4.8 <span className="text-[10px] text-slate-600">ft</span></div>
+                    <div className="grid grid-cols-2 gap-2">
+                        <div className="py-2 px-3 bg-slate-800 rounded text-center">
+                            <div className="text-[10px] text-slate-500 uppercase">North Elev</div>
+                            <div className={`text-lg font-mono font-bold ${nElev > 104 ? 'text-red-400 animate-pulse' : 'text-white'}`}>
+                                {nElev.toFixed(1)} <span className="text-[10px] text-slate-600 font-normal">ft</span>
+                            </div>
                         </div>
-                        <div className="flex-1 py-2 px-3 bg-slate-800 rounded text-center">
-                            <div className="text-[10px] text-slate-500 uppercase">South Level</div>
-                            <div className="text-lg font-mono text-white">5.2 <span className="text-[10px] text-slate-600">ft</span></div>
+                        <div className="py-2 px-3 bg-slate-800 rounded text-center">
+                            <div className="text-[10px] text-slate-500 uppercase">South Elev</div>
+                            <div className={`text-lg font-mono font-bold ${sElev > 104 ? 'text-red-400 animate-pulse' : 'text-white'}`}>
+                                {sElev.toFixed(1)} <span className="text-[10px] text-slate-600 font-normal">ft</span>
+                            </div>
                         </div>
                     </div>
                 </div>
