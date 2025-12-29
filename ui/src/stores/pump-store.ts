@@ -22,6 +22,7 @@ interface PumpStore {
   resetFault: (pumpId: string) => Promise<void>;
   startAllPumps: () => Promise<void>;
   stopAllPumps: () => Promise<void>;
+  startAllIPSPumps: () => Promise<void>;
   clearError: () => void;
 }
 
@@ -153,6 +154,31 @@ export const usePumpStore = create<PumpStore>((set, get) => ({
     } catch (error) {
       set({
         error: error instanceof Error ? error.message : 'Failed to stop all pumps',
+        isLoading: false
+      });
+    }
+  },
+
+  startAllIPSPumps: async () => {
+    set({ isLoading: true, error: null });
+    try {
+      const { pumps } = get();
+      // Filter for IPS pumps (IDs starting with "IPS_PMP_")
+      const ipsPumps = pumps.filter(pump => pump.id.startsWith('IPS_PMP_'));
+      
+      // Start each IPS pump sequentially
+      for (const pump of ipsPumps) {
+        // Skip if already running or faulted
+        const pumpData = get().pumpData[pump.id];
+        if (pumpData && (pumpData.is_running || pumpData.is_faulted)) {
+          continue;
+        }
+        await pumpsApi.start(pump.id);
+      }
+      set({ isLoading: false });
+    } catch (error) {
+      set({
+        error: error instanceof Error ? error.message : 'Failed to start IPS pumps',
         isLoading: false
       });
     }

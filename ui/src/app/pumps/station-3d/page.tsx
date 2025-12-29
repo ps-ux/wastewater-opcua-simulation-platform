@@ -1,16 +1,17 @@
 'use client';
 
 import * as React from 'react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { usePumpStore } from '@/stores/pump-store';
 import { usePumpWebSocket } from '@/hooks/use-pump-websocket';
 import { IPS3DViewer } from '@/components/pumps/ips-3d-viewer';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Cpu } from 'lucide-react';
 import Link from 'next/link';
 
 export default function Station3DPage() {
-    const { pumps, pumpData, fetchPumps, isLoading } = usePumpStore();
+    const [ipsPumpsStarted, setIpsPumpsStarted] = useState(false);
+    const { pumps, pumpData, fetchPumps, startAllIPSPumps, isLoading } = usePumpStore();
 
     useEffect(() => {
         fetchPumps();
@@ -37,6 +38,11 @@ export default function Station3DPage() {
     const formattedTotalFlow = totalFlow.toLocaleString(undefined, { maximumFractionDigits: 0 });
     const formattedTotalPower = totalPower.toLocaleString(undefined, { maximumFractionDigits: 0 });
 
+    const handleStartIPS = async () => {
+        await startAllIPSPumps();
+        setIpsPumpsStarted(true);
+    };
+
     return (
         <div className="min-h-screen bg-[#020617] text-slate-100 p-8 pt-6 space-y-8 flex flex-col items-center">
 
@@ -57,6 +63,14 @@ export default function Station3DPage() {
                 </div>
 
                 <div className="flex gap-4">
+                    <Button 
+                        onClick={handleStartIPS} 
+                        disabled={ipsPumpsStarted || isLoading}
+                        className="bg-cyan-600 hover:bg-cyan-700 text-white border-cyan-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        <Cpu className="mr-2 h-4 w-4" />
+                        IPS Controller
+                    </Button>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-[10px] font-bold text-cyan-400 uppercase tracking-widest">
                         <div className="h-1.5 w-1.5 rounded-full bg-cyan-500 animate-pulse" />
                         {isConnected ? 'OPC UA Streaming' : 'Reconnecting...'}

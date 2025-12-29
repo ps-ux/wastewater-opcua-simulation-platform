@@ -125,18 +125,20 @@ class IPSController:
             return
 
         # 2. Staging Logic
+        # DISABLED: Automatic pump starting - pumps now start only on user action
         # If level is high, start next pump
-        if avg_level > self.start_lag_level:
-            if not self._is_ramping(): # Don't start another if one is still ramping up
-                next_pump = self._get_next_available_pump()
-                if next_pump:
-                    self._start_pump(next_pump)
+        # if avg_level > self.start_lag_level:
+        #     if not self._is_ramping(): # Don't start another if one is still ramping up
+        #         next_pump = self._get_next_available_pump()
+        #         if next_pump:
+        #             self._start_pump(next_pump)
         
         # If level is low (but above shutdown), stop last pump
-        elif avg_level < self.stop_pump_level:
-             if self.running_pumps and not self._is_ramping():
-                 last_pump = self.running_pumps[-1]
-                 self._stop_pump(last_pump)
+        # DISABLED: Automatic pump stopping - pumps now stop only on user action
+        # elif avg_level < self.stop_pump_level:
+        #      if self.running_pumps and not self._is_ramping():
+        #          last_pump = self.running_pumps[-1]
+        #          self._stop_pump(last_pump)
 
         # 3. PID / Speed Control
         # Simple Proportional Control for now

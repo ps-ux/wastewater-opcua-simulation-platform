@@ -24,6 +24,7 @@ import {
   FolderTree,
   Info,
   Factory,
+  Cpu,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -39,8 +40,9 @@ type FilterType = 'all' | 'running' | 'stopped' | 'faulted';
 export default function PumpsPage() {
   const [filter, setFilter] = useState<FilterType>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [ipsPumpsStarted, setIpsPumpsStarted] = useState(false);
 
-  const { pumps, pumpData, fetchPumps, startPump, stopPump, startAllPumps, stopAllPumps, isLoading } = usePumpStore();
+  const { pumps, pumpData, fetchPumps, startPump, stopPump, startAllPumps, stopAllPumps, startAllIPSPumps, isLoading } = usePumpStore();
   const { isConnected } = usePumpWebSocket();
 
   useEffect(() => {
@@ -82,6 +84,13 @@ export default function PumpsPage() {
 
   const handleStopAll = async () => {
     await stopAllPumps();
+    // Reset the IPS pumps started state when stopping all
+    setIpsPumpsStarted(false);
+  };
+
+  const handleStartIPS = async () => {
+    await startAllIPSPumps();
+    setIpsPumpsStarted(true);
   };
 
   return (
@@ -97,9 +106,23 @@ export default function PumpsPage() {
             <Square className="mr-2 h-4 w-4" />
             Stop All
           </Button>
-          <Button size="sm" onClick={handleStartAll} disabled={stats.stopped === 0}>
+          <Button 
+            size="sm" 
+            onClick={handleStartIPS} 
+            disabled={ipsPumpsStarted || isLoading}
+          >
             <Play className="mr-2 h-4 w-4" />
-            Start All
+            Start All IPS Pumps
+          </Button>
+          <Button 
+            size="sm" 
+            onClick={handleStartIPS} 
+            variant="secondary"
+            className="bg-cyan-600 hover:bg-cyan-700 text-white"
+            disabled={ipsPumpsStarted || isLoading}
+          >
+            <Cpu className="mr-2 h-4 w-4" />
+            IPS Controller
           </Button>
         </div>
       </div>
